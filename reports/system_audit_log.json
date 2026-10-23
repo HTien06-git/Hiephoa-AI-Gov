@@ -1,5 +1,89 @@
 [
   {
+    "id": "audit_1792775882150_w0zir",
+    "timestamp": "2026-10-23T17:18:02.150Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 209
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792774295365_yg1in",
+    "timestamp": "2026-10-23T16:51:35.365Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792774265566_1wssr",
+    "timestamp": "2026-10-23T16:51:05.566Z",
+    "action": "API_REQUEST",
+    "module": "admin",
+    "details": {
+      "method": "POST",
+      "path": "/api/admin/officers",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792774265557_riwe5",
+    "timestamp": "2026-10-23T16:51:05.557Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792774202367_t8xm1",
+    "timestamp": "2026-10-23T16:50:02.367Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 6
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792774139715_ljwos",
+    "timestamp": "2026-10-23T16:48:59.715Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "HEAD",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 257
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
     "id": "audit_1792774071521_z5ark",
     "timestamp": "2026-10-23T16:47:51.521Z",
     "action": "SERVER_STARTUP",

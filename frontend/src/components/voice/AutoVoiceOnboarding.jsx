@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Volume2, Sparkles, X, Headphones, Bot, Landmark, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Volume2, VolumeX, Sparkles, X, Headphones, Bot } from 'lucide-react';
 
-export default function AutoVoiceOnboarding({ speak, stop, isAudioEnabled }) {
+export default function AutoVoiceOnboarding({ speak, stop, isSpeaking, isAudioEnabled }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const greetingText = "Kính chào bà con nhân dân xã Hiệp Hòa! Tôi là Chuyên viên Hành chính công AI. Bà con cần làm giấy tờ khai sinh, kết hôn, đất đai, chứng thực hay hỏi luật, chỉ cần bấm vào nút Micro màu đỏ ở giữa màn hình rồi nói, hoặc chạm vào các ô chữ lớn bên dưới. Chạm vào mục nào tôi sẽ đọc to hướng dẫn mục đó cho bà con nghe!";
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isAudioEnabled && isOpen) {
-        speak(greetingText);
-      }
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   if (!isOpen) return null;
+
+  const handleToggleVoice = () => {
+    if (isSpeaking) {
+      stop();
+    } else {
+      speak(greetingText);
+    }
+  };
 
   return (
     <div className="bg-gradient-to-r from-red-50 via-amber-50 to-orange-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-md relative my-5 overflow-hidden">
@@ -42,7 +40,7 @@ export default function AutoVoiceOnboarding({ speak, stop, isAudioEnabled }) {
           />
         </div>
 
-        <div>
+        <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs uppercase font-extrabold tracking-wider px-2.5 py-0.5 rounded-full bg-red-100 text-[#991B1B] border border-red-200 flex items-center gap-1 shadow-2xs">
               <Bot className="w-3.5 h-3.5 text-[#991B1B]" />
@@ -61,11 +59,24 @@ export default function AutoVoiceOnboarding({ speak, stop, isAudioEnabled }) {
           <div className="mt-3.5 flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={() => speak(greetingText)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#991B1B] hover:bg-red-800 text-white text-sm sm:text-base font-bold shadow-md transition-all active:scale-95"
+              onClick={handleToggleVoice}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm sm:text-base font-bold shadow-md transition-all active:scale-95 ${
+                isSpeaking
+                  ? 'bg-amber-600 hover:bg-amber-700 ring-4 ring-amber-300 animate-pulse'
+                  : 'bg-[#991B1B] hover:bg-red-800 ring-2 ring-red-200'
+              }`}
             >
-              <Volume2 className="w-4 h-4 text-amber-300" />
-              <span>Nghe lại lời chào</span>
+              {isSpeaking ? (
+                <>
+                  <VolumeX className="w-5 h-5 text-amber-200 animate-spin" />
+                  <span>Đang đọc lời chào... (Bấm để Dừng)</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-5 h-5 text-amber-300 animate-bounce" />
+                  <span>Bấm vào đây để Nghe AI Chào Mừng</span>
+                </>
+              )}
             </button>
             <span className="text-xs text-slate-500 italic flex items-center gap-1">
               <Headphones className="w-3.5 h-3.5 text-slate-400" />

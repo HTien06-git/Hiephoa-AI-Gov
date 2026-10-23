@@ -45,15 +45,14 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
     if (!queryText || !queryText.trim()) return;
 
     setIsQueryLoading(true);
-    speak('Dạ, tôi đã nhận được câu hỏi của bà con, xin chờ tôi tra cứu luật và thủ tục trong giây lát ạ!');
+    // Dừng âm thanh cũ nếu đang phát dở
+    stop();
 
     try {
       const response = await apiClient.chatQuery(queryText);
       if (response && response.data) {
+        // RagChatDrawer sẽ tự động đọc to và đầy đủ nội dung tư vấn khi mở
         setChatResult(response.data);
-        if (response.data.voice_text) {
-          speak(response.data.voice_text);
-        }
       }
     } catch (err) {
       console.error('Query submit error:', err);
@@ -65,6 +64,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
   // When a procedure is clicked from the list
   const handleSelectProcedure = (proc) => {
     setSelectedProcedure(proc);
+    // RagChatDrawer sẽ tự động đọc to và đầy đủ nội dung hướng dẫn + checklist khi mở
     setChatResult({
       answer: `### Hướng dẫn: ${proc.title}\n\n${proc.voice_answer}\n\n**Căn cứ pháp lý:** *${proc.legal_basis}*`,
       voice_text: proc.voice_answer,
@@ -76,7 +76,6 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         { title: "Cổng DVC Quốc Gia", url: proc.dvc_url || "https://dichvucong.gov.vn/" }
       ]
     });
-    speak(proc.voice_answer);
   };
 
   return (
@@ -102,6 +101,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
           <AutoVoiceOnboarding
             speak={speak}
             stop={stop}
+            isSpeaking={isSpeaking}
             isAudioEnabled={isAudioEnabled}
           />
 
@@ -118,10 +118,12 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
             procedures={procedures}
             onSelectProcedure={handleSelectProcedure}
             onOpenAutoForm={(proc, mode) => {
+              stop();
               setChatResult(null);
               handleOpenAutoForm(proc, mode);
             }}
             onOpenPreCheck={(proc) => {
+              stop();
               setChatResult(null);
               setPreCheckProc(proc);
             }}
@@ -138,14 +140,22 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
       {chatResult && (
         <RagChatDrawer
           chatResult={chatResult}
-          onClose={() => setChatResult(null)}
+          onClose={() => {
+            stop();
+            setChatResult(null);
+          }}
           speakText={speak}
           stopSpeaking={stop}
+          isSpeaking={isSpeaking}
           onOpenAutoForm={(proc, mode) => {
+            stop();
             setChatResult(null);
             handleOpenAutoForm(proc, mode);
           }}
-          onOpenPreCheck={(proc) => setPreCheckProc(proc)}
+          onOpenPreCheck={(proc) => {
+            stop();
+            setPreCheckProc(proc);
+          }}
         />
       )}
 

@@ -6,6 +6,28 @@ Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và c�
 
 ---
 
+## [2026-10-24 00:30] - Khắc Phục Triệt Để Sự Cố Âm Thanh (TTS 3 Tầng) & Thêm Tính Năng Tạo Tài Khoản Cán Bộ (Version 4.1)
+- **Loại tác vụ**: Giải quyết triệt để lỗi âm thanh AI lúc lên lúc không, Loại bỏ Race Condition cuộc gọi kép, Cấu hình Engine Giọng đọc 3 tầng (Client Google TTS + Backend Proxy + Web Speech), Bổ sung Quản lý và Tạo tài khoản cán bộ mới (Audio Stability & Officer Management V4.1)
+- **Tác vụ thực hiện**:
+  1. **Khắc phục triệt để lỗi âm thanh "lúc lên lúc không, AI không nghe tiếng đọc"**:
+     - **Triệt tiêu Race Condition**: Gỡ bỏ lệnh gọi `speak()` trùng lặp ở `CitizenHomePage.jsx`. `RagChatDrawer.jsx` là thành phần duy nhất chịu trách nhiệm kích hoạt đọc toàn văn hướng dẫn + checklist sau khi giao diện đã ổn định, loại bỏ hoàn toàn việc 2 lệnh gọi hủy nhau sau 50ms gây treo AudioContext.
+     - **Xử lý dứt điểm lỗi CORS**: Loại bỏ thuộc tính `crossOrigin = 'anonymous'` trong `useSpeechSynthesis.js` (Google TTS không cung cấp header CORS, việc ép CORS khiến trình duyệt Chrome từ chối phát âm thanh).
+     - **Tuân thủ Browser Autoplay Policy**: Gỡ bỏ lệnh tự động phát âm thanh sau 800ms khi vừa tải trang ở `AutoVoiceOnboarding.jsx` (tránh bị trình duyệt ném `NotAllowedError` làm khóa audio). Thay bằng nút bấm tương tác nổi bật với hiệu ứng chuyển trạng thái trực quan: `🔊 Bấm vào đây để Nghe AI Chào Mừng` $\rightarrow$ `🔊 Đang đọc lời chào... (Bấm để Dừng)`.
+     - **Kiến trúc Engine Giọng đọc 3 Tầng (3-Tier Resilient TTS)**:
+       - *Tầng 1 (Client-side Google TTS)*: Phát trực tiếp âm thanh từ IP máy khách với timeout an toàn 3.5s.
+       - *Tầng 2 (Backend Proxy `/api/tts`)*: Nếu tầng 1 chậm hoặc bị mạng chặn, tự động chuyển luồng sang serverless endpoint `/api/tts?text=...` với chế độ ép IPv4 (`family: 4`) và đầy đủ CORS headers.
+       - *Tầng 3 (Web Speech API)*: Dự phòng offline hoặc khi thiết bị có sẵn voice tiếng Việt bản địa (hỗ trợ toàn bộ điện thoại di động iOS/Android và Windows có Microsoft An/Hoài Mỹ/Nam Minh).
+     - **Quản lý phiên phát bằng Session ID**: Mỗi lần kích hoạt `speak()` sinh một mã phiên độc nhất, triệt tiêu 100% tình trạng âm thanh cũ phát đè hoặc ngắt ngang âm thanh mới.
+  2. **Bổ sung Phân hệ Tạo Tài khoản Cán bộ & Quản lý Cán bộ (Admin)**:
+     - Thêm 2 endpoint `/api/admin/officers` (GET danh sách cán bộ và POST tạo cán bộ mới).
+     - Nâng cấp `AdminDeviceManager.jsx` với 2 SubTabs: Quản lý thiết bị bảo mật & Quản lý danh sách cán bộ.
+     - Thêm Modal form tạo tài khoản cán bộ mới (Username, Mật khẩu, Họ và tên, Quyền hạn ADMIN hoặc OFFICER) lưu trữ an toàn trong cơ sở dữ liệu bảo mật.
+  3. **Kiểm thử tự động**:
+     - Đã chạy kiểm thử tự động Browser Subagent xác nhận âm thanh phát mượt mà, không còn bất kỳ lỗi console hay CORS rejection nào.
+- **Báo cáo chi tiết**: Xem [2026-10-24_0030_fix_audio_tts_stability_v4_1.md](./2026-10-24_0030_fix_audio_tts_stability_v4_1.md)
+
+---
+
 ## [2026-10-23 22:15] - Nâng Cấp Bảo Mật Admin (Khóa Thiết Bị Sai 5 Lần), Bảng Điều Khiển Admin & Cấu Hình Full-Stack Vercel (Version 4.0)
 - **Loại tác vụ**: Nâng cấp bảo mật Admin & Cán bộ, Nhận diện phần cứng thiết bị (Canvas Fingerprinting), Khóa cứng 5 lần sai, Bảng điều khiển Quản trị mở khóa, Cấu hình Vercel Serverless (Security Lockout, Admin Dashboard & Vercel Ready V4.0)
 - **Tác vụ thực hiện**:

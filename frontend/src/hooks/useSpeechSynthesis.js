@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
- * Tách văn bản dài thành các câu ngắn (< 130 ký tự) để giọng đọc tự nhiên và phát audio trơn tru
+ * Tách văn bản dài thành các câu ngắn (< 110 ký tự) để phát thanh mượt mà, không bị ngắt quãng
  */
 function chunkTextForTTS(text) {
   if (!text) return [];
@@ -20,12 +20,11 @@ function chunkTextForTTS(text) {
     const s = raw.trim();
     if (!s) continue;
 
-    // Nếu câu dài hơn 120 ký tự, chia tiếp theo dấu phẩy
-    if (s.length > 120) {
+    if (s.length > 100) {
       const subParts = s.split(/(?<=[,])\s+/);
       let temp = '';
       for (const p of subParts) {
-        if ((temp + ' ' + p).trim().length > 110) {
+        if ((temp + ' ' + p).trim().length > 90) {
           if (temp.trim()) chunks.push(temp.trim());
           temp = p;
         } else {
@@ -41,13 +40,8 @@ function chunkTextForTTS(text) {
   return chunks.length > 0 ? chunks : [cleaned];
 }
 
-// Giữ tham chiếu toàn cục chống Chrome Garbage Collection
-if (typeof window !== 'undefined') {
-  window.__activeSpeechUtterances = window.__activeSpeechUtterances || [];
-}
-
-// Phát tiếng chuông nhẹ mở kênh âm thanh trình duyệt
-function playChime(frequency = 587.33, duration = 0.15) {
+// Mở khóa AudioContext và phát tiếng chuông thông báo
+function playChime(frequency = 587.33, duration = 0.12) {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
@@ -60,7 +54,7 @@ function playChime(frequency = 587.33, duration = 0.15) {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(frequency, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + duration);
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -82,37 +76,44 @@ export function useSpeechSynthesis() {
     }
   });
 
-  const isCancelledRef = useRef(false);
+  const sessionIdRef = useRef(0);
   const chunksQueueRef = useRef([]);
   const currentIndexRef = useRef(0);
-  const currentAudioElementRef = useRef(null);
+  const currentAudioRef = useRef(null);
+  const safetyTimeoutRef = useRef(null);
+  const isAudioUnlockedRef = useRef(false);
 
-  // Mở khóa AudioContext ngay khi người dùng chạm hoặc click lần đầu vào trang
+  // Mở khóa âm thanh triệt để ngay lần chạm/nhấp chuột đầu tiên của người dùng
   useEffect(() => {
-    const handleFirstUserInteraction = () => {
+    const unlockAudio = () => {
+      isAudioUnlockedRef.current = true;
       try {
         if ('speechSynthesis' in window) {
           window.speechSynthesis.resume();
         }
         playChime(440, 0.05);
       } catch (e) {}
-      window.removeEventListener('click', handleFirstUserInteraction);
-      window.removeEventListener('keydown', handleFirstUserInteraction);
-      window.removeEventListener('touchstart', handleFirstUserInteraction);
+
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
     };
 
-    window.addEventListener('click', handleFirstUserInteraction, { once: true });
-    window.addEventListener('keydown', handleFirstUserInteraction, { once: true });
-    window.addEventListener('touchstart', handleFirstUserInteraction, { once: true });
+    window.addEventListener('click', unlockAudio, { passive: true });
+    window.addEventListener('pointerdown', unlockAudio, { passive: true });
+    window.addEventListener('keydown', unlockAudio, { passive: true });
+    window.addEventListener('touchstart', unlockAudio, { passive: true });
 
     return () => {
-      window.removeEventListener('click', handleFirstUserInteraction);
-      window.removeEventListener('keydown', handleFirstUserInteraction);
-      window.removeEventListener('touchstart', handleFirstUserInteraction);
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
     };
   }, []);
 
-  // Save audio preference
+  // Lưu trạng thái loa vào localStorage
   useEffect(() => {
     try {
       localStorage.setItem('hiep_hoa_audio_enabled', String(isAudioEnabled));
@@ -124,27 +125,31 @@ export function useSpeechSynthesis() {
   }, [isAudioEnabled]);
 
   const stop = useCallback(() => {
-    isCancelledRef.current = true;
+    // Tăng sessionId để hủy bỏ toàn bộ async callback đang chạy dở
+    sessionIdRef.current += 1;
     chunksQueueRef.current = [];
+    currentIndexRef.current = 0;
 
-    // Dừng HTML5 Audio nếu đang phát
-    if (currentAudioElementRef.current) {
+    if (safetyTimeoutRef.current) {
+      clearTimeout(safetyTimeoutRef.current);
+      safetyTimeoutRef.current = null;
+    }
+
+    // Dừng Audio element nếu đang phát
+    if (currentAudioRef.current) {
       try {
-        currentAudioElementRef.current.pause();
-        currentAudioElementRef.current.currentTime = 0;
-        currentAudioElementRef.current = null;
+        currentAudioRef.current.pause();
+        currentAudioRef.current.removeAttribute('src');
+        currentAudioRef.current.load();
+        currentAudioRef.current = null;
       } catch (e) {}
     }
 
-    // Dừng Web Speech API nếu đang phát
+    // Dừng Web Speech API
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
       } catch (e) {}
-    }
-
-    if (typeof window !== 'undefined' && window.__activeSpeechUtterances) {
-      window.__activeSpeechUtterances = [];
     }
 
     setIsSpeaking(false);
@@ -152,9 +157,157 @@ export function useSpeechSynthesis() {
     setTotalSentences(0);
   }, []);
 
-  // Đọc tuần tự từng câu bằng Dual-Engine (HTML5 Cloud Audio + Web Speech API Fallback)
-  const playNextChunk = useCallback((onEndCallback) => {
-    if (isCancelledRef.current) {
+  // Tầng 3: Web Speech API (Dự phòng cho máy có Voice Tiếng Việt hoặc Offline)
+  const playChunkWithWebSpeech = (textChunk, currentSession, onChunkEnd) => {
+    if (sessionIdRef.current !== currentSession) return;
+
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      onChunkEnd();
+      return;
+    }
+
+    try {
+      window.speechSynthesis.cancel();
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    } catch (e) {}
+
+    const utterance = new SpeechSynthesisUtterance(textChunk);
+    utterance.lang = 'vi-VN';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    try {
+      const voices = window.speechSynthesis.getVoices() || [];
+      const vnVoice = voices.find(v => 
+        (v.lang && (v.lang.startsWith('vi') || v.lang.includes('VN'))) ||
+        (v.name && (v.name.includes('Vietnamese') || v.name.includes('Việt') || v.name.includes('An') || v.name.includes('HoaiMy')))
+      );
+      if (vnVoice) {
+        utterance.voice = vnVoice;
+      }
+    } catch (e) {}
+
+    // Giữ tham chiếu trên window để tránh Chromium Garbage Collector huỷ utterance giữa chừng
+    window._govCurrentUtterance = utterance;
+
+    let hasEnded = false;
+    const finish = () => {
+      if (hasEnded) return;
+      hasEnded = true;
+      window._govCurrentUtterance = null;
+      if (sessionIdRef.current === currentSession) {
+        onChunkEnd();
+      }
+    };
+
+    utterance.onend = finish;
+    utterance.onerror = finish;
+
+    try {
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      finish();
+    }
+  };
+
+  // Tầng 2: Backend Proxy `/api/tts`
+  const playChunkWithBackendProxy = (textChunk, currentSession, onChunkEnd) => {
+    if (sessionIdRef.current !== currentSession) return;
+
+    const encoded = encodeURIComponent(textChunk);
+    const proxyUrl = `/api/tts?text=${encoded}`;
+
+    const audio = new Audio();
+    currentAudioRef.current = audio;
+
+    let hasEnded = false;
+    const finish = (fallback = false) => {
+      if (hasEnded) return;
+      hasEnded = true;
+      if (safetyTimeoutRef.current) {
+        clearTimeout(safetyTimeoutRef.current);
+        safetyTimeoutRef.current = null;
+      }
+      currentAudioRef.current = null;
+
+      if (sessionIdRef.current === currentSession) {
+        if (fallback) {
+          playChunkWithWebSpeech(textChunk, currentSession, onChunkEnd);
+        } else {
+          onChunkEnd();
+        }
+      }
+    };
+
+    safetyTimeoutRef.current = setTimeout(() => {
+      finish(true);
+    }, 4000);
+
+    audio.onended = () => finish(false);
+    audio.onerror = () => finish(true);
+
+    audio.src = proxyUrl;
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => finish(true));
+    }
+  };
+
+  // Tầng 1: Client-Side Google TTS (Phát trực tiếp từ IP máy khách, KHÔNG dùng crossOrigin để tránh lỗi CORS)
+  const playChunkWithAudio = (textChunk, currentSession, onChunkEnd) => {
+    if (sessionIdRef.current !== currentSession) return;
+
+    try {
+      const encoded = encodeURIComponent(textChunk);
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encoded}&tl=vi&client=tw-ob`;
+
+      const audio = new Audio();
+      // TUYỆT ĐỐI KHÔNG SET crossOrigin = 'anonymous' VÌ GOOGLE SẼ CHẶN CORS
+      currentAudioRef.current = audio;
+
+      let hasEnded = false;
+      const finish = (fallback = false) => {
+        if (hasEnded) return;
+        hasEnded = true;
+        if (safetyTimeoutRef.current) {
+          clearTimeout(safetyTimeoutRef.current);
+          safetyTimeoutRef.current = null;
+        }
+        currentAudioRef.current = null;
+
+        if (sessionIdRef.current === currentSession) {
+          if (fallback) {
+            // Chuyển sang Tầng 2: Backend Proxy
+            playChunkWithBackendProxy(textChunk, currentSession, onChunkEnd);
+          } else {
+            onChunkEnd();
+          }
+        }
+      };
+
+      // Giới hạn thời gian tải 3.5 giây, nếu mạng chậm lập tức chuyển tầng dự phòng
+      safetyTimeoutRef.current = setTimeout(() => {
+        finish(true);
+      }, 3500);
+
+      audio.onended = () => finish(false);
+      audio.onerror = () => finish(true);
+
+      audio.src = url;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => finish(true));
+      }
+    } catch (err) {
+      playChunkWithBackendProxy(textChunk, currentSession, onChunkEnd);
+    }
+  };
+
+  // Đọc tuần tự từng câu trong hàng đợi
+  const playNextChunk = useCallback((currentSession, onEndCallback) => {
+    if (sessionIdRef.current !== currentSession) {
       setIsSpeaking(false);
       return;
     }
@@ -173,104 +326,29 @@ export function useSpeechSynthesis() {
     const textChunk = queue[index];
     setCurrentSentenceIndex(index + 1);
 
-    // Kế hoạch 1: Sử dụng HTML5 Audio qua API /api/tts (Giọng đọc tiếng Việt chuẩn, không bao giờ ngắt)
-    const playWithWebSpeech = () => {
-      if (isCancelledRef.current || !('speechSynthesis' in window)) {
-        setIsSpeaking(false);
-        return;
-      }
-
-      try {
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
-        }
-      } catch (e) {}
-
-      const utterance = new SpeechSynthesisUtterance(textChunk);
-      utterance.lang = 'vi-VN';
-      utterance.rate = 0.95;
-      utterance.pitch = 1.02;
-
-      // Tìm voice tiếng Việt nếu có
-      try {
-        const voices = window.speechSynthesis.getVoices() || [];
-        const vnVoice = voices.find(v => v.lang && (v.lang.startsWith('vi') || v.lang.includes('VN')));
-        if (vnVoice) utterance.voice = vnVoice;
-      } catch (e) {}
-
-      if (window.__activeSpeechUtterances) {
-        window.__activeSpeechUtterances.push(utterance);
-      }
-
-      utterance.onend = () => {
-        if (window.__activeSpeechUtterances) {
-          const i = window.__activeSpeechUtterances.indexOf(utterance);
-          if (i > -1) window.__activeSpeechUtterances.splice(i, 1);
-        }
-        if (!isCancelledRef.current) {
-          currentIndexRef.current += 1;
-          setTimeout(() => playNextChunk(onEndCallback), 60);
-        }
-      };
-
-      utterance.onerror = () => {
-        if (window.__activeSpeechUtterances) {
-          const i = window.__activeSpeechUtterances.indexOf(utterance);
-          if (i > -1) window.__activeSpeechUtterances.splice(i, 1);
-        }
-        if (!isCancelledRef.current) {
-          currentIndexRef.current += 1;
-          setTimeout(() => playNextChunk(onEndCallback), 60);
-        }
-      };
-
-      try {
-        window.speechSynthesis.speak(utterance);
-      } catch (err) {
-        console.warn('SpeechSynthesis fallback error:', err);
+    const onChunkSuccess = () => {
+      if (sessionIdRef.current === currentSession) {
+        currentIndexRef.current += 1;
+        setTimeout(() => playNextChunk(currentSession, onEndCallback), 50);
       }
     };
 
-    // Thử phát bằng HTML5 Audio Endpoint trước
-    try {
-      const audioUrl = `/api/tts?text=${encodeURIComponent(textChunk)}`;
-      const audio = new Audio(audioUrl);
-      currentAudioElementRef.current = audio;
-
-      audio.onended = () => {
-        currentAudioElementRef.current = null;
-        if (!isCancelledRef.current) {
-          currentIndexRef.current += 1;
-          setTimeout(() => playNextChunk(onEndCallback), 60);
-        }
-      };
-
-      audio.onerror = () => {
-        currentAudioElementRef.current = null;
-        // Nếu audio endpoint gặp lỗi mạng: chuyển sang Web Speech API
-        playWithWebSpeech();
-      };
-
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          // Trình duyệt chặn autoplay hoặc lỗi codec: fallback sang Web Speech API
-          playWithWebSpeech();
-        });
-      }
-    } catch (err) {
-      playWithWebSpeech();
-    }
+    // Bắt đầu chu trình 3 tầng siêu ổn định:
+    // Tầng 1 (Client Google TTS) -> Tầng 2 (Backend Proxy) -> Tầng 3 (Web Speech API)
+    playChunkWithAudio(textChunk, currentSession, onChunkSuccess);
   }, []);
 
   const speak = useCallback((text, onEndCallback) => {
-    if (!isAudioEnabled || !text) {
+    if (!isAudioEnabled || !text || !text.trim()) {
       if (onEndCallback) onEndCallback();
       return;
     }
 
-    // Dừng câu cũ
+    // Dừng dứt khoát câu phát trước đó
     stop();
+
+    // Tạo phiên phát mới để cô lập mọi luồng phát cũ
+    const currentSession = sessionIdRef.current;
 
     // Phát tiếng chuông nhẹ
     playChime();
@@ -278,34 +356,19 @@ export function useSpeechSynthesis() {
     const chunks = chunkTextForTTS(text);
     if (chunks.length === 0) return;
 
-    // Chờ 80ms rồi bắt đầu phát chuỗi câu
+    // Chờ 80ms dọn sạch trạng thái cũ rồi phát phiên mới
     setTimeout(() => {
-      isCancelledRef.current = false;
+      if (sessionIdRef.current !== currentSession) return;
+
       chunksQueueRef.current = chunks;
       currentIndexRef.current = 0;
       setTotalSentences(chunks.length);
       setCurrentSentenceIndex(1);
       setIsSpeaking(true);
 
-      playNextChunk(onEndCallback);
+      playNextChunk(currentSession, onEndCallback);
     }, 80);
   }, [isAudioEnabled, stop, playNextChunk]);
-
-  // Keep-alive loop chống ngắt âm thanh
-  useEffect(() => {
-    if (!isSpeaking) return;
-
-    const interval = setInterval(() => {
-      try {
-        if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
-        }
-      } catch (e) {}
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, [isSpeaking]);
 
   const toggleAudio = useCallback(() => {
     setIsAudioEnabled(prev => {
@@ -313,8 +376,8 @@ export function useSpeechSynthesis() {
       if (next) {
         playChime(659.25, 0.2);
         setTimeout(() => {
-          speak('Hệ thống âm thanh hành chính công đã được bật.');
-        }, 150);
+          speak('Hệ thống âm thanh hành chính công đã sẵn sàng phục vụ.');
+        }, 120);
       } else {
         playChime(392.00, 0.15);
         stop();

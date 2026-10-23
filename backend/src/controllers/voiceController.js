@@ -79,6 +79,13 @@ Quy tắc:
  */
 function handleTextToSpeech(req, res) {
   try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
     const text = req.query.text || '';
     if (!text || !text.trim()) {
       return res.status(400).send('Thiếu tham số text');
@@ -96,22 +103,38 @@ function handleTextToSpeech(req, res) {
     const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encoded}&tl=vi&client=tw-ob`;
 
     const request = https.get(ttsUrl, {
+      family: 4, // Ép IPv4 để chống delay IPv6 trên Windows/Vercel
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://translate.google.com/'
       }
     }, (ttsRes) => {
+      if (ttsRes.statusCode !== 200) {
+        return res.status(ttsRes.statusCode || 500).send('TTS Provider Error');
+      }
       res.setHeader('Content-Type', 'audio/mpeg');
       res.setHeader('Cache-Control', 'public, max-age=86400');
       ttsRes.pipe(res);
     });
 
+    request.setTimeout(4500, () => {
+      request.destroy();
+      if (!res.headersSent) {
+        res.status(504).send('TTS Timeout');
+      }
+    });
+
     request.on('error', (err) => {
       console.warn('[voiceController] TTS stream error:', err.message);
-      res.status(502).send('TTS Error');
+      if (!res.headersSent) {
+        res.status(502).send('TTS Error');
+      }
     });
   } catch (err) {
     console.error('[voiceController] TTS error:', err);
-    res.status(500).send('Server Error');
+    if (!res.headersSent) {
+      res.status(500).send('Server Error');
+    }
   }
 }
 

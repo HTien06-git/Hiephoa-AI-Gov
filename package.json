@@ -1,12 +1,23 @@
 {
-  "name": "du-an-hoi-thi-hiep-hoa-ai-gov",
+  "name": "hiep-hoa-ai-gov",
   "version": "1.0.0",
+  "private": true,
   "description": "HIỆP HÒA AI-GOV - Chuyên viên Hành chính công AI Đa phương thức phục vụ nhân dân xã Hiệp Hòa, tỉnh Tây Ninh",
   "scripts": {
     "start": "node backend/src/server.js",
+    "build": "cd frontend && npm install && npm run build",
     "server": "npm --prefix backend run dev",
     "client": "npm --prefix frontend run dev",
-    "build": "npm --prefix frontend run build",
     "dev": "npm --prefix backend start"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "cors": "^2.8.5",
+    "docxtemplater": "^3.50.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^1.4.5-lts.1",
+    "pizzip": "^3.1.8"
   }
 }

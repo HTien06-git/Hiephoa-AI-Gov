@@ -44,12 +44,11 @@ Nhằm đáp ứng tiêu chuẩn an toàn thông tin cấp độ 3 và bảo v�
   - Kiểm tra `isVercel = Boolean(process.env.VERCEL)`.
   - Môi trường Local: Lưu tệp tại `backend/src/data/security_db.json`.
   - Môi trường Vercel: Tự động ghi vào `/tmp/security_db.json` kết hợp bộ nhớ RAM `globalThis.__HIEPHOA_SECURITY_STORE__`.
-- **Cầu nối Serverless `/api/index.js` tại thư mục gốc (`root`)**:
-  - Nạp Express App từ `backend/src/server.js` và xuất hàm Serverless cho Vercel.
-- **Tệp cấu hình `vercel.json` ở root**:
-  - Build command: `cd backend && npm install && cd ../frontend && npm install && npm run build`
-  - Output directory: `frontend/dist`
-  - Routing: Toàn bộ `/api/*` điều hướng về `/api/index.js`, các route còn lại điều hướng về Single Page Application `/index.html`.
+- **Cấu hình Dependencies & Build Command tương thích Vercel Monorepo**:
+  - Khai báo đầy đủ dependencies của Backend ngay tại `package.json` ở root (`express`, `cors`, `jsonwebtoken`, `multer`, `pizzip`, `docxtemplater`, `@google/generative-ai`), kèm `package-lock.json` chuẩn để Vercel tự động cài đặt module cho Serverless Function `/api/index.js` ngay bước Install Dependencies.
+  - Tệp `vercel.json` bổ sung thuộc tính `includeFiles: "backend/**"` đảm bảo toàn bộ tệp biểu mẫu `.docx` và cơ sở tri thức pháp luật được đóng gói trọn vẹn trong Serverless Function.
+  - Build command chuẩn: `cd frontend && npm install && npm run build` tạo thư mục `frontend/dist`.
+
 
 ### 4. Hạng mục 4: Kiểm Thử Nghiệp Vụ & Xác Minh Chất Lượng
 - Script tự động `test_lockout.js` chạy qua 8 kịch bản thực tế:

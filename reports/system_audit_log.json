@@ -1,5 +1,131 @@
 [
   {
+    "id": "audit_1792768898761_lqiuj",
+    "timestamp": "2026-10-23T15:21:38.761Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/verify",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768898733_hzj6k",
+    "timestamp": "2026-10-23T15:21:38.733Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768896181_lpy4b",
+    "timestamp": "2026-10-23T15:21:36.181Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/device-status",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768890596_nhxg6",
+    "timestamp": "2026-10-23T15:21:30.596Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/verify",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768890566_n24mz",
+    "timestamp": "2026-10-23T15:21:30.566Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768888643_bnelq",
+    "timestamp": "2026-10-23T15:21:28.643Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/device-status",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768882258_83h0e",
+    "timestamp": "2026-10-23T15:21:22.258Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/verify",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768882232_7raw8",
+    "timestamp": "2026-10-23T15:21:22.232Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768878623_osjlp",
+    "timestamp": "2026-10-23T15:21:18.623Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/device-status",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
     "id": "audit_1792768494703_fqsv0",
     "timestamp": "2026-10-23T15:14:54.703Z",
     "action": "API_REQUEST",

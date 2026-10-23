@@ -1,0 +1,152 @@
+# NHẬT KÝ THAY ĐỔI DỰ ÁN (PROJECT CHANGELOG)
+Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phương thức)**
+Đơn vị: Trung tâm Phục vụ Hành chính công UBND xã Hiệp Hòa, tỉnh Tây Ninh
+
+Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
+
+---
+
+## [2026-10-23 22:15] - Nâng Cấp Bảo Mật Admin (Khóa Thiết Bị Sai 5 Lần), Bảng Điều Khiển Admin & Cấu Hình Full-Stack Vercel (Version 4.0)
+- **Loại tác vụ**: Nâng cấp bảo mật Admin & Cán bộ, Nhận diện phần cứng thiết bị (Canvas Fingerprinting), Khóa cứng 5 lần sai, Bảng điều khiển Quản trị mở khóa, Cấu hình Vercel Serverless (Security Lockout, Admin Dashboard & Vercel Ready V4.0)
+- **Tác vụ thực hiện**:
+  1. **Khóa cứng thiết bị sau 5 lần nhập sai**:
+     - Thuật toán `deviceFingerprint.js` kết hợp Canvas, UserAgent, Screen Resolution, Platform, Timezone để sinh mã định danh duy nhất (`deviceId`) và tên thiết bị (`deviceName`), lưu đồng bộ `localStorage`, `sessionStorage` và `Cookie 365 ngày`.
+     - Phân hệ đăng nhập Cán bộ Một cửa & Quản trị viên (`OfficerLoginModal.jsx`) với họa tiết Trống Đồng Đông Sơn, kiểm tra `deviceId` qua API `GET /api/auth/device-status`.
+     - Nhập sai lần 1-4: Cảnh báo số lần còn lại trước khi khóa. Nhập sai lần thứ 5: Khóa cứng tức thì (HTTP 403 Forbidden). Kể từ lần thứ 6 trở đi, ngay cả khi nhập đúng mật khẩu, hệ thống vẫn từ chối đăng nhập và hiển thị màn hình khóa cứng màu đỏ toàn màn hình.
+  2. **Bảng Điều Khiển Quản Trị Viên (Admin) & Mở Khóa Thiết Bị**:
+     - Tài khoản Admin mặc định: `admin` / `HiepHoa@2026` (Quyền `ADMIN`). Tài khoản Cán bộ: `canbo1` / `MotCua@2026` (Quyền `OFFICER`).
+     - Khi Admin đăng nhập, mở Tab 4 "Quản Trị Bảo Mật & Mở Khóa Thiết Bị (Admin)" trong `OfficerScanPage.jsx`.
+     - Tích hợp 4 Card thống kê, danh sách thiết bị chi tiết với huy hiệu trạng thái (5/5 ĐÃ KHÓA CỨNG, 1-4/5 CẢNH BÁO, 0/5 HỢP LỆ).
+     - Nút "Reset lượt đăng nhập về 0/5 (Mở khóa)" từng thiết bị, Nút "Reset tất cả thiết bị", Nút "Tạo thiết bị khóa mẫu (Demo BGK)" và Nút "Đăng xuất" bảo mật.
+  3. **Cấu hình Full-Stack Vercel Serverless (`vercel.json` & `/api/index.js`)**:
+     - Tạo cầu nối `/api/index.js` tại thư mục gốc trỏ vào Express App của `backend/src/server.js`.
+     - Cấu hình `vercel.json` tự động build cả backend và frontend, routing `/api/*` tới Serverless Function và các route còn lại tới SPA `/index.html`.
+     - Cơ chế chống lỗi Read-Only Filesystem (`EROFS`): Tự động chuyển vùng ghi file sang `/tmp/security_db.json` kết hợp bộ nhớ RAM `globalThis.__HIEPHOA_SECURITY_STORE__` khi chạy trên Vercel.
+  4. **Kiểm thử tự động & Xác minh**:
+     - Chạy kịch bản `test_lockout.js`: Xác minh 100% logic khóa 5 lần, chặn lần 6, Admin reset mở khóa và đăng nhập thành công.
+     - Production build frontend Vite: 100% thành công không lỗi.
+- **Báo cáo chi tiết**: Xem [2026-10-23_2215_vercel_deploy_admin_lockout_v4.md](./2026-10-23_2215_vercel_deploy_admin_lockout_v4.md)
+
+---
+
+## [2026-10-23 21:25] - Khắc Phục Lỗi Giao Diện Cán Bộ, Xuất Word, Chuẩn Hóa Ngày Sinh, Khoảng Ký Tên & Tư Vấn Pháp Luật Ma Túy (Version 3.2)
+
+- **Loại tác vụ**: Sửa lỗi giao diện cán bộ, Sửa xuất file Word, Chuẩn hóa định dạng ngày sinh DD/MM/YYYY, Mở rộng khoảng ký tên A4, Nâng cấp Tư vấn pháp luật Hình sự & Đổi font chữ Inter (Critical Bug Fixes & Legal Knowledge Expansion V3.2)
+- **Tác vụ thực hiện**:
+  1. **Lỗi 1 (Vỡ giao diện cán bộ xã, chữ chạy dọc)**: Cố định kích thước logo `w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px]` và gán `flex-1 min-w-0` cho tiêu đề trong `OfficerScanPage.jsx`, khắc phục hoàn toàn hiện tượng logo bung to đè layout.
+  2. **Lỗi 2 (Không tải được hồ sơ về máy)**: Sửa tên template thành `mau_04_don_de_nghi_chung_thuc.docx`, nạp đầy đủ dữ liệu trường chi tiết cho 4 hồ sơ mẫu và tích hợp thông báo toast khi xuất Word.
+  3. **Lỗi 3 (Chuẩn hóa ngày sinh dạng 00/00/0000)**: Tích hợp hàm `formatToSlashDate` tự động chuyển đổi mọi định dạng ngày (chữ, gạch ngang, chấm) thành chuẩn `DD/MM/YYYY` (ví dụ `29/02/2006`) trên cả form nhập, Voice Wizard và bản xem trước A4.
+  4. **Lỗi 4 (Khoảng ký tên hẹp)**: Tăng khoảng cách ký tên từ `h-10` lên `h-16 sm:h-20` (64-80px), giúp tên `TRẦN ĐÌNH BẢO LÂM` xích xuống dưới chừa chỗ ký tay rộng rãi, in ấn không bị đè chữ.
+  5. **Lỗi 5 (Tư vấn pháp luật mua bán chất cấm & các giả định)**: Mở rộng nhận diện ý định `LEGAL_CONSULTATION`, xây dựng chuyên đề sâu về Tội mua bán chất cấm/ma túy (Điều 251 BLHS 2015, Nghị định 144/2021) và Đất giấy tay (Luật Đất đai 2024), trích dẫn nguồn trực tiếp từ Thư Viện Pháp Luật.
+  6. **Lỗi 6 (Đổi font chữ)**: Cập nhật bộ đôi phông chữ quốc tế **`Inter`** và **`Plus Jakarta Sans`** vào `index.html` và `index.css`, chữ viết đều đặn, sắc nét và chuyên nghiệp.
+- **Báo cáo chi tiết**: Xem [2026-10-23_2125_fix_officer_layout_word_dates_law_font_v3_2.md](./2026-10-23_2125_fix_officer_layout_word_dates_law_font_v3_2.md)
+
+---
+
+## [2026-10-23 20:35] - Khắc Phục Triệt Để 09 Lỗi In Ấn, Xuất Word, Voice Wizard, Phông Chữ & Giao Diện Cán Bộ (Version 3.1)
+- **Loại tác vụ**: Sửa lỗi in ấn A4, Khắc phục lỗi Docx Multi Error, Bổ sung Voice Wizard, Thiết kế lại giao diện Cán bộ một cửa, Nâng cấp Phông chữ và Giọng đọc AI (Critical Fixes & Modern Officer Portal V3.1)
+- **Tác vụ thực hiện**:
+  1. **Lỗi 1 (In đơn trắng tinh)**: Sửa `@media print` trong `index.css`, gán `#printable-document` và tích hợp iframe in ấn cách ly độc lập, chỉ in đúng khổ A4 văn bản chuẩn Quốc gia, hoàn toàn không bị in ra 7 trang trắng.
+  2. **Lỗi 2 (Nhảy chữ ký)**: Cân chỉnh padding (`p-6 sm:p-10`) và các khoảng cách dòng `space-y-2.5`, margin chữ ký `mt-6`, đảm bảo toàn bộ nội dung từ Quốc hiệu đến họ tên người ký `TRẦN ĐÌNH BẢO LÂM` nằm gọn gàng bên trong trang giấy A4.
+  3. **Lỗi 3 (Lỗi Multi error tải file Word)**: Cấu hình `delimiters: { start: '{{', end: '}}' }` trong `docxExportService.js` tương thích tuyệt đối với các biến `{{biến}}` trong 5 file `.docx` mẫu, tải file Word mượt mà 100%.
+  4. **Lỗi 4 (Thiếu nút điền đơn và hướng dẫn giọng nói từng bước)**: Thêm **Hero Action Banner** ngay đầu Chat AI, thêm cụm nút tương tác dưới mỗi câu trả lời AI, và tích hợp chế độ **Voice Wizard** đọc từng câu hỏi cho bà con nói câu trả lời.
+  5. **Lỗi 5 & Lỗi 8 (Tư vấn pháp luật & Giải thích luật Việt Nam)**: Mở rộng 17 chủ đề lớn trong `legal_corpus.json`, `legalWebSearchService.js` và cấu trúc SYSTEM_PROMPT 4 bước (Xác định hành vi - Trích dẫn điều luật - Mức phạt/Hậu quả - Lời khuyên công dân).
+  6. **Lỗi 6 (Đổi phông chữ)**: Tích hợp font chữ hành chính Quốc gia `Be Vietnam Pro` (Google Fonts) vào toàn bộ giao diện `index.html` và `index.css`.
+  7. **Lỗi 7 (Thiết kế lại giao diện Cán bộ một cửa)**: Viết mới `OfficerScanPage.jsx` với Top KPI Thống kê tiếp nhận, Quét QR, Sổ theo dõi hồ sơ trong ngày kèm bộ lọc/tìm kiếm, In Giấy tiếp nhận hồ sơ và hẹn trả kết quả khổ A4 chuẩn.
+  8. **Lỗi 9 (Đổi giọng AI)**: Nâng cấp thuật toán ưu tiên `Microsoft HoaiMy/NamMinh Online (Natural)`, `Google tiếng Việt`, rate 0.98, pitch 1.02 giúp giọng đọc truyền cảm, ấm áp, phát âm rõ ràng.
+- **Báo cáo chi tiết**: Xem [2026-10-23_2035_fix_print_word_voice_wizard_officer_v3_1.md](./2026-10-23_2035_fix_print_word_voice_wizard_officer_v3_1.md)
+
+---
+
+## [2026-10-23 19:40] - Khắc Phục Triệt Để 06 Lỗi Nghiêm Trọng (Version 3.0)
+- **Loại tác vụ**: Khắc phục lỗi toàn diện, Tái cấu trúc Form Word A4, Phân loại Ý định AI & Chuẩn hóa Trống Đồng Đông Sơn (Critical Bug Fixes & Cultural Theme V3.0)
+- **Tác vụ thực hiện**:
+  1. **Lỗi 1 & Lỗi 6**: Xóa bỏ hoàn toàn template string ghép chuỗi cứng và việc tự động gán nhầm thủ tục. Thiết lập cơ chế **3-Way Intent Routing** (`GREETING`, `LEGAL_CONSULTATION`, `PROCEDURE_GUIDE`) tại `geminiRagService.js`. Mở rộng kho kiến thức pháp luật đời sống cấp xã (`legal_corpus.json`) kết hợp Google Search Grounding `thuvienphapluat.vn` (xử lý tình huống đánh nhau, tranh chấp ranh đất, ly hôn...).
+  2. **Lỗi 2**: Nâng cấp `useSpeechSynthesis.js` với thuật toán `chunkTextForTTS` tách câu thông minh (< 140 ký tự) chống ngắt sau 10s của Web Speech API. Tự động đọc to lời tư vấn và từng bước Checklist hồ sơ khi mở thủ tục hoặc khi AI trả lời nếu Loa bật.
+  3. **Lỗi 3**: Tái cấu trúc `SmartAutoFormModal.jsx` thành 2 khu vực tách biệt: Cột trái Bảng Nhập Liệu (Quét CCCD, Giọng nói, Demo), Cột phải Live Preview A4 chuẩn 100% Times New Roman, hoàn toàn không có ô input giả nét đứt màu vàng, trường trống hiển thị dấu chấm `...................`, sửa triệt để lỗi font tiếng Việt `yêu cầ`u`.
+  4. **Lỗi 4**: Khắc phục lỗi mất icon trong 05 Nhóm thủ tục (`CategoryGrid.jsx`) bằng các class tĩnh cho Huy hiệu Icon Badge `56px x 56px` (`w-14 h-14 rounded-2xl`) từ `lucide-react`. Cập nhật logo Cổng DVC Quốc gia.
+  5. **Lỗi 5**: Tạo `TrongDongWatermark.jsx` và `DongSonBorder.jsx`: Tích hợp mặt Trống Đồng Đông Sơn lớn 500px xoay nhẹ ở Header, vòng Trống Đồng bao quanh nút Mic trung tâm và đường diềm hoa văn kỷ hà 8px.
+  6. **Kiểm thử**: `npm run build` thành công xuất sắc, Backend API phục vụ ổn định.
+- **Lý do thay đổi**: Đáp ứng yêu cầu khắc phục triệt để 06 lỗi nghiêm trọng của Ban Tổ chức và Người dùng cho phiên bản HIỆP HÒA AI-GOV (Version 3.0).
+- **Báo cáo chi tiết**: Xem [2026-10-23_1930_fix_ai_chat_docx_icons_trongdong_v3.md](./2026-10-23_1930_fix_ai_chat_docx_icons_trongdong_v3.md)
+
+---
+
+## [2026-10-23 15:52] - Khởi tạo Kiến trúc Toàn diện Dự án
+- **Loại tác vụ**: Khởi tạo cấu trúc dự án (Project Initialization & Architecture Setup)
+- **Tác vụ thực hiện**:
+  - Thiết lập phân tách kiến trúc `backend/` (Node.js/Express RAG AI & Gemini Vision) và `frontend/` (React + TailwindCSS + Vite).
+  - Khởi tạo thư mục báo cáo `/reports/` và thiết lập giao thức "Read-Before-Edit Protocol" cùng `ReportLogger`.
+  - Nạp kho 05 biểu mẫu chuẩn `.docx` vào `backend/src/data/templates/` và `frontend/public/templates/`.
+  - Tạo cấu trúc dữ liệu hành chính xã Hiệp Hòa, 08 thủ tục demo thuộc 05 nhóm danh mục, kho tri thức pháp luật cấp xã và kịch bản nhập liệu giọng nói 05 mẫu đơn.
+  - Xây dựng giao diện Web App chuẩn "Elder-Friendly & Voice-First UI" cho nhân dân và phân hệ quét Mã QR Hồ sơ nhanh cho Cán bộ Một cửa.
+- **Lý do**: Triển khai giải pháp theo đúng Bản thuyết minh dự án Hội thi Đổi mới sáng tạo & Chuyển đổi số tỉnh Tây Ninh.
+- **Báo cáo chi tiết**: Xem [2026-10-23_1550_init_project_architecture.md](./2026-10-23_1550_init_project_architecture.md)
+
+---
+
+## [2026-10-23 16:10] - Hoàn thiện Toàn diện 06 Phân hệ Nghiệp vụ HIỆP HÒA AI-GOV
+- **Loại tác vụ**: Phát triển tính năng & Đóng gói giải pháp (Feature Completion & System Integration)
+- **Tác vụ thực hiện**:
+  - Xây dựng hoàn chỉnh máy chủ backend API (RAG AI, Gemini Vision OCR CCCD, AI Document Pre-check, Form template manager).
+  - Tích hợp kho tri thức Luật Việt Nam cấp xã và 08 thủ tục demo bám sát bản thuyết minh.
+  - Xây dựng giao diện React + TailwindCSS chuẩn "Elder-Friendly & Voice-First UI" với thanh Accessibility Bar điều chỉnh cỡ chữ (A / A+ / A++), nút Bật/Tắt Loa phát thanh và Micro Chạm & Nói 2 chiều.
+  - Tích hợp thư viện Docxtemplater + PizZip điền tự động 05 biểu mẫu chuẩn Word/PDF/Ảnh/Print trực tiếp trên trình duyệt Client-side (Zero-Data Retention).
+  - Hoàn thiện phân hệ AI Document Pre-Check kiểm tra hồ sơ chụp tại nhà.
+  - Triển khai phân hệ Mã QR Hồ sơ nhanh và trang Quét QR dành cho Cán bộ Một cửa (`/can-bo-mot-cua`) hiển thị hồ sơ trong dưới 10 giây.
+  - Tích hợp cẩm nang VNeID mức độ 2 có giọng đọc từng bước và deep-link Cổng DVC Tỉnh Tây Ninh/Quốc gia.
+  - Kiểm thử `vite build` và kiểm thử backend thành công 100%.
+- **Danh sách file đã tạo/sửa**:
+  + `backend/src/server.js`, `backend/src/routes/api.js`, `backend/src/config/gemini.js`
+  + `backend/src/services/geminiRagService.js`, `backend/src/services/visionOcrService.js`, `backend/src/services/vectorStore.js`
+  + `backend/src/controllers/*`, `backend/src/middlewares/*`, `backend/src/utils/reportLogger.js`
+  + `backend/src/data/*.json`, `backend/src/data/templates/*.docx`
+  + `frontend/src/pages/CitizenHomePage.jsx`, `frontend/src/pages/OfficerScanPage.jsx`
+  + `frontend/src/components/layout/*`, `frontend/src/components/voice/*`, `frontend/src/components/categories/*`, `frontend/src/components/rag-chat/*`, `frontend/src/components/auto-form/*`, `frontend/src/components/pre-check/*`, `frontend/src/components/qr-handoff/*`, `frontend/src/components/dvc-guide/*`
+  + `frontend/src/hooks/*`, `frontend/src/services/*`
+  + `run_project.bat`, `README.md`
+- **Lý do thay đổi**: Hoàn thiện toàn diện sản phẩm dự thi theo yêu cầu của Bản thuyết minh Hội thi Đổi mới sáng tạo & Chuyển đổi số.
+- **Báo cáo chi tiết**: Xem [2026-10-23_1610_full_system_completion.md](./2026-10-23_1610_full_system_completion.md)
+
+---
+
+## [2026-10-23 16:18] - Khởi động Máy chủ Daemon & Xác thực Truy cập Web App
+- **Loại tác vụ**: Vận hành & Khởi chạy máy chủ (Service Startup & Verification)
+- **Tác vụ thực hiện**:
+  - Khởi chạy Backend API Server (cổng 5000) và Frontend Vite Server (cổng 5173) dưới dạng tiến trình nền daemon.
+  - Kiểm tra kết nối TCP và HTTP trả về `200 OK`.
+  - Sử dụng browser subagent xác thực giao diện Web App hiển thị đầy đủ tiêu ngữ, header, bộ trợ năng và 05 nhóm thủ tục.
+- **Lý do thay đổi**: Xử lý lỗi `ERR_CONNECTION_REFUSED` do người dùng truy cập khi dev server chưa được bật.
+- **Báo cáo chi tiết**: Xem [2026-10-23_1618_launch_daemon_servers.md](./2026-10-23_1618_launch_daemon_servers.md)
+
+---
+
+## [2026-10-23 16:58] - Nâng Cấp Toàn Diện Dự Án HIỆP HÒA AI-GOV (Version 2.0)
+- **Loại tác vụ**: Nâng cấp UI/UX, Sửa lỗi Micro, Tích hợp Thư Viện Pháp Luật & Trò chuyện Đa lượt (Major Version 2.0 Upgrade)
+- **Tác vụ thực hiện**:
+  - **Thiết kế lại Giao diện**: Xóa bỏ hoàn toàn thanh tiêu ngữ trên cùng web; bổ sung component SVG Họa tiết Trống Đồng Đông Sơn (`TrongDongPattern.jsx`) làm nền chìm nghệ thuật màu vàng đồng `#F59E0B` trên Header và Hero section.
+  - **Chống nhảy chữ rớt dòng & Chuẩn hóa kích thước nút 100%**: Dùng font clamp cho tiêu đề chính Header, thiết kế Segmented Control `grid grid-cols-2 min-w-[300px] h-11`, chuẩn hóa các nút trợ năng cỡ chữ `min-w-[105px] h-10` và loa/tổng đài `min-w-[155px] h-10` với `whitespace-nowrap`.
+  - **Sửa triệt để lỗi Micro (Voice Recognition)**: Tự động ngắt loa trước khi mở mic, singleton debounce, hiển thị real-time interim transcript, bổ sung chế độ Dual-Mode tự động fallback sang `MediaRecorder` + Gemini 2.5 Flash Audio STT (`POST /api/voice-stt`).
+  - **Sửa lỗi AI & Tích hợp Thư Viện Pháp Luật (`thuvienphapluat.vn`)**: Loại bỏ chuỗi tĩnh cứng nhắc, trả lời trực tiếp đúng trọng tâm câu hỏi của người dân, trích dẫn điều luật còn hiệu lực kèm link trực tiếp tới `thuvienphapluat.vn` và `dichvucong.gov.vn`.
+  - **Trò chuyện đa lượt liên tục (Multi-turn Contextual Chat)**: Tạo `ContextualChatBox.jsx` đặt ngay dưới bảng Checklist để người dân tiếp tục đặt câu hỏi sâu hơn trong cùng ngữ cảnh thủ tục với thanh sticky input và câu hỏi gợi ý nhanh.
+- **Danh sách file đã tạo/sửa**:
+  + `frontend/src/components/common/TrongDongPattern.jsx` (Mới)
+  + `frontend/src/components/rag-chat/ContextualChatBox.jsx` (Mới)
+  + `backend/src/services/legalWebSearchService.js` (Mới)
+  + `backend/src/controllers/voiceController.js` (Mới)
+  + `backend/src/services/geminiRagService.js` (Nâng cấp)
+  + `backend/src/controllers/ragController.js` (Nâng cấp)
+  + `backend/src/routes/api.js` (Nâng cấp)
+  + `frontend/src/hooks/useSpeechRecognition.js` (Nâng cấp)
+  + `frontend/src/services/apiClient.js` (Nâng cấp)
+  + `frontend/src/components/layout/Header.jsx` (Thiết kế lại)
+  + `frontend/src/components/layout/AccessibilityBar.jsx` (Chuẩn hóa)
+  + `frontend/src/components/voice/VoiceMicButton.jsx` (Thiết kế lại)
+  + `frontend/src/components/categories/CategoryGrid.jsx` (Chuẩn hóa)
+  + `frontend/src/components/rag-chat/RagChatDrawer.jsx` (Nâng cấp)
+  + `frontend/src/pages/CitizenHomePage.jsx` (Nâng cấp)
+- **Lý do thay đổi**: Nâng cấp toàn diện sản phẩm theo yêu cầu chất lượng cao của Hội thi Đổi mới Sáng tạo & Chuyển đổi số.
+- **Báo cáo chi tiết**: Xem [2026-10-23_1645_upgrade_ui_rag_mic_v2.md](./2026-10-23_1645_upgrade_ui_rag_mic_v2.md)
+
+
+

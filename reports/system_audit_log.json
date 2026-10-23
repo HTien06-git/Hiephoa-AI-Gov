@@ -1,0 +1,1194 @@
+[
+  {
+    "id": "audit_1792768494703_fqsv0",
+    "timestamp": "2026-10-23T15:14:54.703Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 2
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768494700_wtwjc",
+    "timestamp": "2026-10-23T15:14:54.700Z",
+    "action": "API_REQUEST",
+    "module": "admin",
+    "details": {
+      "method": "POST",
+      "path": "/api/admin/devices/DEV-TEST-LOCKOUT-999/reset",
+      "statusCode": 200,
+      "durationMs": 2
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768494696_38u5d",
+    "timestamp": "2026-10-23T15:14:54.696Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768494691_fyd2n",
+    "timestamp": "2026-10-23T15:14:54.691Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/device-status",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768494688_it8ym",
+    "timestamp": "2026-10-23T15:14:54.688Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 403,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768494686_k4lxq",
+    "timestamp": "2026-10-23T15:14:54.686Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 403,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768494684_bfh9y",
+    "timestamp": "2026-10-23T15:14:54.684Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 401,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768494682_3b9zd",
+    "timestamp": "2026-10-23T15:14:54.682Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 401,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768494680_5j2di",
+    "timestamp": "2026-10-23T15:14:54.680Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 401,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768494676_50uay",
+    "timestamp": "2026-10-23T15:14:54.676Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 401,
+      "durationMs": 5
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768471759_n46hm",
+    "timestamp": "2026-10-23T15:14:31.759Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768413066_nrpd8",
+    "timestamp": "2026-10-23T15:13:33.066Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768413064_0vhs7",
+    "timestamp": "2026-10-23T15:13:33.064Z",
+    "action": "API_REQUEST",
+    "module": "admin",
+    "details": {
+      "method": "POST",
+      "path": "/api/admin/devices/DEV-TEST-LOCKOUT-999/reset",
+      "statusCode": 200,
+      "durationMs": 2
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768413061_qespi",
+    "timestamp": "2026-10-23T15:13:33.061Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768413056_fut00",
+    "timestamp": "2026-10-23T15:13:33.056Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/device-status",
+      "statusCode": 200,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768413053_bk6sg",
+    "timestamp": "2026-10-23T15:13:33.053Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 403,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768413051_3qogk",
+    "timestamp": "2026-10-23T15:13:33.051Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 403,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768413049_rqyq6",
+    "timestamp": "2026-10-23T15:13:33.049Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 401,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768413047_a9euu",
+    "timestamp": "2026-10-23T15:13:33.047Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 401,
+      "durationMs": 2
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768413044_9tyin",
+    "timestamp": "2026-10-23T15:13:33.044Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 401,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768413040_agrsi",
+    "timestamp": "2026-10-23T15:13:33.040Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "statusCode": 401,
+      "durationMs": 9
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792768166405_a3zwi",
+    "timestamp": "2026-10-23T15:09:26.403Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792768121771_6bva2",
+    "timestamp": "2026-10-23T15:08:41.771Z",
+    "action": "API_REQUEST",
+    "module": "auth",
+    "details": {
+      "method": "GET",
+      "path": "/api/auth/device-status",
+      "statusCode": 404,
+      "durationMs": 9
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792767058865_se6vd",
+    "timestamp": "2026-10-23T14:50:58.865Z",
+    "action": "API_REQUEST",
+    "module": "download-docx",
+    "details": {
+      "method": "GET",
+      "path": "/api/download-docx/rhaq4xhm82emvl37vs5/HIEP_HOA_T_khai_ng_k_khai_sinh_1792767058775.docx",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792767058854_1uihv",
+    "timestamp": "2026-10-23T14:50:58.854Z",
+    "action": "API_REQUEST",
+    "module": "prepare-docx",
+    "details": {
+      "method": "POST",
+      "path": "/api/prepare-docx",
+      "statusCode": 200,
+      "durationMs": 67
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792766991281_iqyuy",
+    "timestamp": "2026-10-23T14:49:51.281Z",
+    "action": "API_REQUEST",
+    "module": "download-docx",
+    "details": {
+      "method": "GET",
+      "path": "/api/download-docx/8p7itpfd84gmvl36fms/Don_dang_ky_khai_sinh_Tran_Dinh_Bao_Lam.docx",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792766991271_0n9fy",
+    "timestamp": "2026-10-23T14:49:51.271Z",
+    "action": "API_REQUEST",
+    "module": "prepare-docx",
+    "details": {
+      "method": "POST",
+      "path": "/api/prepare-docx",
+      "statusCode": 200,
+      "durationMs": 40
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792766974070_xq61p",
+    "timestamp": "2026-10-23T14:49:34.069Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792766567069_jae6o",
+    "timestamp": "2026-10-23T14:42:47.069Z",
+    "action": "API_REQUEST",
+    "module": "export-docx",
+    "details": {
+      "method": "POST",
+      "path": "/api/export-docx",
+      "statusCode": 200,
+      "durationMs": 43
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792766458196_gm9kp",
+    "timestamp": "2026-10-23T14:40:58.195Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792765327016_1duck",
+    "timestamp": "2026-10-23T14:22:07.016Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 14
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792765322510_9xm4h",
+    "timestamp": "2026-10-23T14:22:02.510Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 2
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792765080508_tq8va",
+    "timestamp": "2026-10-23T14:18:00.508Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792765080496_5le3r",
+    "timestamp": "2026-10-23T14:18:00.496Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792765080492_lavz9",
+    "timestamp": "2026-10-23T14:18:00.492Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792765080482_fkeeb",
+    "timestamp": "2026-10-23T14:18:00.482Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 4
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792765020657_jm1ps",
+    "timestamp": "2026-10-23T14:17:00.656Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764926924_m3g7b",
+    "timestamp": "2026-10-23T14:15:26.924Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764926910_qolt0",
+    "timestamp": "2026-10-23T14:15:26.910Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764926900_rgkj5",
+    "timestamp": "2026-10-23T14:15:26.900Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764926889_4q4nt",
+    "timestamp": "2026-10-23T14:15:26.889Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 6
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764911740_gj0ll",
+    "timestamp": "2026-10-23T14:15:11.739Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764809375_4sbwp",
+    "timestamp": "2026-10-23T14:13:29.375Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764796365_cajoo",
+    "timestamp": "2026-10-23T14:13:16.365Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 1
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764774697_fbecj",
+    "timestamp": "2026-10-23T14:12:54.697Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792764763218_r86vy",
+    "timestamp": "2026-10-23T14:12:43.218Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 400,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792764751791_45fai",
+    "timestamp": "2026-10-23T14:12:31.791Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 400,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "FAILED"
+  },
+  {
+    "id": "audit_1792764577298_8djoe",
+    "timestamp": "2026-10-23T14:09:37.297Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792763347502_a5tcl",
+    "timestamp": "2026-10-23T13:49:07.502Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 7
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792762904807_55mgf",
+    "timestamp": "2026-10-23T13:41:44.807Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 19
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792762184891_0wnn5",
+    "timestamp": "2026-10-23T13:29:44.889Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792760188363_zxy5w",
+    "timestamp": "2026-10-23T12:56:28.363Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 10
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792760169801_v67q5",
+    "timestamp": "2026-10-23T12:56:09.801Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 8
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792760094806_n2ivv",
+    "timestamp": "2026-10-23T12:54:54.806Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 2
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792760068922_jlt9l",
+    "timestamp": "2026-10-23T12:54:28.922Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 2
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792759938613_du06p",
+    "timestamp": "2026-10-23T12:52:18.613Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 10
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792759909386_if5fx",
+    "timestamp": "2026-10-23T12:51:49.386Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 11
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792758841003_cwbp6",
+    "timestamp": "2026-10-23T12:34:01.002Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792757805289_jewaj",
+    "timestamp": "2026-10-23T12:16:45.289Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 4
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792757690624_0dpv8",
+    "timestamp": "2026-10-23T12:14:50.624Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 8
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792757639761_714cb",
+    "timestamp": "2026-10-23T12:13:59.761Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 20
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792757532472_sj93u",
+    "timestamp": "2026-10-23T12:12:12.469Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792756418266_dzwlv",
+    "timestamp": "2026-10-23T11:53:38.266Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 6
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792756378367_j7rkc",
+    "timestamp": "2026-10-23T11:52:58.367Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 16
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792755950647_e4kfw",
+    "timestamp": "2026-10-23T11:45:50.646Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792749957950_a02vz",
+    "timestamp": "2026-10-23T10:05:57.950Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 4
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792749905909_iefgo",
+    "timestamp": "2026-10-23T10:05:05.909Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792749898822_yktr4",
+    "timestamp": "2026-10-23T10:04:58.822Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 4
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792749890472_lydkd",
+    "timestamp": "2026-10-23T10:04:50.472Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 4
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792749180664_t6y7l",
+    "timestamp": "2026-10-23T09:53:00.664Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 4
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792749143328_3adfj",
+    "timestamp": "2026-10-23T09:52:23.328Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 25
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792749045883_59no7",
+    "timestamp": "2026-10-23T09:50:45.882Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747882300_475tj",
+    "timestamp": "2026-10-23T09:31:22.300Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 6
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747882217_oeq7a",
+    "timestamp": "2026-10-23T09:31:22.216Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 5
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747862548_c4ze1",
+    "timestamp": "2026-10-23T09:31:02.548Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 13
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747862517_vjcjv",
+    "timestamp": "2026-10-23T09:31:02.517Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 6
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747844147_sti4r",
+    "timestamp": "2026-10-23T09:30:44.147Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 9
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747844042_cns5q",
+    "timestamp": "2026-10-23T09:30:44.042Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 8
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747815111_idacm",
+    "timestamp": "2026-10-23T09:30:15.111Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747815028_bwg8m",
+    "timestamp": "2026-10-23T09:30:15.028Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 5
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747774934_vcvq0",
+    "timestamp": "2026-10-23T09:29:34.934Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 12
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747774904_aj2es",
+    "timestamp": "2026-10-23T09:29:34.903Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 5
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747129704_zy8tf",
+    "timestamp": "2026-10-23T09:18:49.704Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 5
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747091587_s7xgl",
+    "timestamp": "2026-10-23T09:18:11.587Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 4
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747081693_uqzzl",
+    "timestamp": "2026-10-23T09:18:01.693Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 25
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792747081590_wk7eo",
+    "timestamp": "2026-10-23T09:18:01.590Z",
+    "action": "RAG_AI_CONSULT",
+    "module": "chat",
+    "details": {
+      "method": "POST",
+      "path": "/api/chat",
+      "statusCode": 200,
+      "durationMs": 4
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792746929787_g91lm",
+    "timestamp": "2026-10-23T09:15:29.786Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  }
+]

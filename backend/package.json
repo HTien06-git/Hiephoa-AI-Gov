@@ -1,0 +1,20 @@
+{
+  "name": "hiep-hoa-ai-gov-backend",
+  "version": "1.0.0",
+  "description": "Máy chủ API, AI RAG & Xử lý nghiệp vụ Hành chính công Xã Hiệp Hòa, Tỉnh Tây Ninh",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "cors": "^2.8.5",
+    "docxtemplater": "^3.50.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^1.4.5-lts.1",
+    "pizzip": "^3.1.8"
+  }
+}

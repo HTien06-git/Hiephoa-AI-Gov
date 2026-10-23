@@ -1,0 +1,19 @@
+{
+  "province": "Tây Ninh",
+  "commune": "Hiệp Hòa",
+  "full_name": "Ủy ban nhân dân xã Hiệp Hòa, tỉnh Tây Ninh",
+  "reception_center": "Trung tâm Phục vụ Hành chính công xã Hiệp Hòa",
+  "address": "Ấp Văn Hiệp, xã Hiệp Hòa, tỉnh Tây Ninh",
+  "phone": "0276.3888.xxx",
+  "hotline": "1900 9095",
+  "working_hours": "Sáng 7h00 - 11h30, Chiều 13h30 - 17h00 (Thứ 2 đến Thứ 6)",
+  "hamlets": [
+    "Ấp Văn Hiệp",
+    "Ấp Hiệp Thuận",
+    "Ấp Hiệp Hòa Tây",
+    "Ấp Hiệp An",
+    "Ấp Hiệp Trường"
+  ],
+  "auto_voice_greeting": "Kính chào bà con nhân dân xã Hiệp Hòa! Tôi là Chuyên viên Hành chính công AI. Bà con cần làm giấy tờ khai sinh, kết hôn, đất đai, chứng thực hay hỏi luật, chỉ cần bấm vào nút Micro màu đỏ ở giữa màn hình rồi nói, hoặc chạm vào các ô chữ lớn bên dưới. Chạm vào mục nào tôi sẽ đọc to hướng dẫn mục đó cho bà con nghe!",
+  "officer_system_name": "Cổng tiếp nhận Hồ sơ Hành chính công Tức thì - Cán bộ Một cửa Xã Hiệp Hòa"
+}

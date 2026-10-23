@@ -1,0 +1,279 @@
+{
+  "categories": [
+    {
+      "id": "ho_tich_cu_tru",
+      "name": "Hộ tịch – Cư trú",
+      "icon": "Users",
+      "description": "Khai sinh, kết hôn, độc thân, xác nhận cư trú",
+      "color": "from-red-600 to-rose-700",
+      "badge": "Phổ biến nhất"
+    },
+    {
+      "id": "dat_dai_xay_dung",
+      "name": "Đất đai – Xây dựng",
+      "icon": "MapPin",
+      "description": "Biến động đất, sang tên sổ đỏ, cấp đổi giấy chứng nhận",
+      "color": "from-amber-600 to-orange-700",
+      "badge": "Luật mới 2024"
+    },
+    {
+      "id": "chung_thuc",
+      "name": "Chứng thực",
+      "icon": "FileCheck2",
+      "description": "Sao y bản chính, chứng thực chữ ký trong ngày",
+      "color": "from-blue-600 to-indigo-700",
+      "badge": "Lấy liền 15p"
+    },
+    {
+      "id": "chinh_sach_bao_tro",
+      "name": "Chính sách – Bảo trợ",
+      "icon": "HeartHandshake",
+      "description": "Xác nhận hộ nghèo, trợ cấp người cao tuổi, BHYT",
+      "color": "from-emerald-600 to-teal-700",
+      "badge": "Miễn phí"
+    },
+    {
+      "id": "tu_van_luat",
+      "name": "Tư vấn Pháp luật",
+      "icon": "Scale",
+      "description": "Hỏi đáp thừa kế, di chúc, hôn nhân gia đình, tranh chấp",
+      "color": "from-purple-600 to-violet-700",
+      "badge": "Tư vấn 24/7"
+    }
+  ],
+  "procedures": [
+    {
+      "id": "TT_KHAI_SINH",
+      "category_id": "ho_tich_cu_tru",
+      "title": "Đăng ký khai sinh thông thường",
+      "short_desc": "Làm giấy khai sinh cho trẻ mới sinh tại UBND xã Hiệp Hòa",
+      "suggested_question": "Đi làm giấy khai sinh cho em bé mới sinh cần mang theo giấy tờ gì?",
+      "voice_answer": "Thưa bà con, để làm giấy khai sinh cho bé tại UBND xã Hiệp Hòa, bà con chỉ cần chuẩn bị: Bản chính Giấy chứng sinh do bệnh viện hoặc trạm y tế cấp, thẻ Căn cước công dân của cha mẹ và Giấy chứng nhận kết hôn nếu cha mẹ đã đăng ký kết hôn. Thủ tục này được giải quyết ngay trong ngày và hoàn toàn miễn phí!",
+      "checklist": {
+        "procedure_name": "Đăng ký khai sinh",
+        "original_docs_to_compare": [
+          "Thẻ Căn cước công dân hoặc Hộ chiếu của người đi đăng ký khai sinh",
+          "Giấy chứng nhận kết hôn của cha, mẹ (nếu cha mẹ đã đăng ký kết hôn và thông tin chưa đồng bộ trên Cơ sở dữ liệu quốc gia)"
+        ],
+        "submit_docs": [
+          "Tờ khai đăng ký khai sinh theo mẫu chuẩn (mau_01_to_khai_dang_ky_khai_sinh.docx)",
+          "Bản chính Giấy chứng sinh do cơ sở y tế cấp (hoặc văn bản của người làm chứng xác nhận việc sinh nếu không có Giấy chứng sinh)"
+        ],
+        "agency_deadline_fee": {
+          "agency": "UBND xã Hiệp Hòa (Bộ phận Tư pháp - Hộ tịch)",
+          "deadline": "Giải quyết ngay trong ngày làm việc (nếu nộp sau 15h thì trả kết quả vào ngày làm việc tiếp theo)",
+          "fee": "Miễn phí (0 đồng) khi đăng ký đúng thời hạn (trong 60 ngày kể từ ngày sinh)"
+        }
+      },
+      "legal_basis": "Điều 15, Điều 16 Luật Hộ tịch năm 2014; Điều 9 Nghị định 123/2015/NĐ-CP; Thông tư 04/2020/TT-BTP.",
+      "form_template_id": "FORM_KHAI_SINH",
+      "template_file": "mau_01_to_khai_dang_ky_khai_sinh.docx",
+      "dvc_url": "https://dichvucong.gov.vn/p/home/dvc-chi-tiet-thu-tuc-hanh-chinh.html?ma_thu_tuc=1.001193",
+      "dvc_province_url": "https://dichvucong.tayninh.gov.vn/"
+    },
+    {
+      "id": "TT_KET_HON",
+      "category_id": "ho_tich_cu_tru",
+      "title": "Đăng ký kết hôn",
+      "short_desc": "Đăng ký kết hôn giữa hai công dân Việt Nam tại UBND xã Hiệp Hòa",
+      "suggested_question": "Thủ tục đăng ký kết hôn tại xã Hiệp Hòa cần chuẩn bị những giấy tờ nào?",
+      "voice_answer": "Thưa bà con, khi hai bên nam nữ đi đăng ký kết hôn tại UBND xã Hiệp Hòa, hai bạn cùng có mặt, mang theo thẻ Căn cước công dân và Giấy xác nhận tình trạng hôn nhân nếu một bên cư trú ở xã khác và chưa cập nhật dữ liệu điện tử. Lệ phí đăng ký kết hôn hoàn toàn miễn phí, giải quyết ngay trong ngày!",
+      "checklist": {
+        "procedure_name": "Đăng ký kết hôn",
+        "original_docs_to_compare": [
+          "Thẻ Căn cước công dân của cả hai bên nam và nữ",
+          "Giấy tờ chứng minh nơi cư trú (hoặc xuất trình thông tin cư trú trên ứng dụng VNeID mức độ 2)"
+        ],
+        "submit_docs": [
+          "Tờ khai đăng ký kết hôn theo mẫu chuẩn (mau_02_to_khai_dang_ky_ket_hon.docx) có chữ ký của cả hai bên",
+          "Bản chính Giấy xác nhận tình trạng hôn nhân (nếu thông tin tình trạng hôn nhân chưa có trong CSDL quốc gia về dân cư)",
+          "Trích lục ghi chú ly hôn (nếu một bên đã từng ly hôn trước đó)"
+        ],
+        "agency_deadline_fee": {
+          "agency": "UBND xã Hiệp Hòa",
+          "deadline": "Giải quyết ngay trong ngày (tối đa không quá 05 ngày làm việc nếu cần xác minh điều kiện kết hôn)",
+          "fee": "Miễn phí (0 đồng)"
+        }
+      },
+      "legal_basis": "Điều 8 Luật Hôn nhân và Gia đình năm 2014 (Nam từ đủ 20 tuổi, Nữ từ đủ 18 tuổi); Điều 17, Điều 18 Luật Hộ tịch năm 2014; Điều 10 Nghị định 123/2015/NĐ-CP.",
+      "form_template_id": "FORM_KET_HON",
+      "template_file": "mau_02_to_khai_dang_ky_ket_hon.docx",
+      "dvc_url": "https://dichvucong.gov.vn/p/home/dvc-chi-tiet-thu-tuc-hanh-chinh.html?ma_thu_tuc=1.000894",
+      "dvc_province_url": "https://dichvucong.tayninh.gov.vn/"
+    },
+    {
+      "id": "TT_TINH_TRANG_HON_NHAN",
+      "category_id": "ho_tich_cu_tru",
+      "title": "Cấp Giấy xác nhận tình trạng hôn nhân (Giấy độc thân)",
+      "short_desc": "Cấp xác nhận độc thân để kết hôn, vay vốn ngân hàng, mua bán nhà đất",
+      "suggested_question": "Làm giấy xác nhận độc thân để vay vốn, mua bán đất hoặc kết hôn cần gì?",
+      "voice_answer": "Thưa bà con, để xin Giấy xác nhận tình trạng hôn nhân hay còn gọi là giấy độc thân, bà con mang theo thẻ Căn cước công dân. Nếu trước đây bà con đã từng kết hôn rồi ly hôn hoặc vợ chồng đã mất, thì mang thêm Bản án ly hôn hoặc Giấy chứng tử để đối chiếu. Thời gian giải quyết trong vòng 3 ngày làm việc!",
+      "checklist": {
+        "procedure_name": "Cấp Giấy xác nhận tình trạng hôn nhân",
+        "original_docs_to_compare": [
+          "Thẻ Căn cước công dân hoặc tài khoản VNeID định danh điện tử mức độ 2"
+        ],
+        "submit_docs": [
+          "Tờ khai cấp Giấy xác nhận tình trạng hôn nhân theo mẫu chuẩn (mau_03_to_khai_xac_nhan_tinh_trang_hon_nhan.docx)",
+          "Bản sao Bản án/Quyết định ly hôn đã có hiệu lực pháp luật (nếu đã từng ly hôn)",
+          "Bản sao Giấy chứng tử của vợ/chồng (nếu vợ hoặc chồng đã mất)"
+        ],
+        "agency_deadline_fee": {
+          "agency": "UBND xã Hiệp Hòa",
+          "deadline": "Trong thời hạn 03 ngày làm việc kể từ ngày nhận đủ hồ sơ hợp lệ",
+          "fee": "Theo quy định HĐND tỉnh Tây Ninh (Miễn phí đối với người cao tuổi, người có công, hộ nghèo)"
+        }
+      },
+      "legal_basis": "Điều 21, 22, 23 Nghị định 123/2015/NĐ-CP; Điều 12 Thông tư 04/2020/TT-BTP.",
+      "form_template_id": "FORM_TINH_TRANG_HON_NHAN",
+      "template_file": "mau_03_to_khai_xac_nhan_tinh_trang_hon_nhan.docx",
+      "dvc_url": "https://dichvucong.gov.vn/p/home/dvc-chi-tiet-thu-tuc-hanh-chinh.html?ma_thu_tuc=2.000635",
+      "dvc_province_url": "https://dichvucong.tayninh.gov.vn/"
+    },
+    {
+      "id": "TT_XAC_NHAN_CU_TRU",
+      "category_id": "ho_tich_cu_tru",
+      "title": "Xác nhận thông tin về cư trú (Mẫu CT07)",
+      "short_desc": "Xin giấy xác nhận thông tin cư trú từ Công an xã Hiệp Hòa",
+      "suggested_question": "Xin giấy xác nhận thông tin cư trú tại xã Hiệp Hòa làm như thế nào?",
+      "voice_answer": "Thưa bà con, từ khi bỏ sổ hộ khẩu giấy, khi cần xác nhận nơi ở hiện tại, bà con điền Tờ khai xác nhận thông tin cư trú hoặc nộp qua Cổng dịch vụ công, Công an xã Hiệp Hòa sẽ tra cứu trên hệ thống dữ liệu dân cư và cấp giấy xác nhận cho bà con từ 1 đến 3 ngày làm việc, hoàn toàn miễn phí!",
+      "checklist": {
+        "procedure_name": "Xác nhận thông tin về cư trú (Mẫu CT07)",
+        "original_docs_to_compare": [
+          "Thẻ Căn cước công dân hoặc xuất trình thông tin cư trú trên VNeID"
+        ],
+        "submit_docs": [
+          "Tờ khai xác nhận thông tin về cư trú (Mẫu đơn mau_05_don_xin_xac_nhan_cu_tru_ho_ngheo.docx)"
+        ],
+        "agency_deadline_fee": {
+          "agency": "Công an xã Hiệp Hòa",
+          "deadline": "01 đến 03 ngày làm việc",
+          "fee": "Miễn phí (0 đồng)"
+        }
+      },
+      "legal_basis": "Luật Cư trú năm 2020; Điều 17 Thông tư 55/2021/TT-BCA (sửa đổi bởi Thông tư 66/2023/TT-BCA).",
+      "form_template_id": "FORM_CU_TRU_HO_NGHEO",
+      "template_file": "mau_05_don_xin_xac_nhan_cu_tru_ho_ngheo.docx",
+      "dvc_url": "https://dichvucong.bocongan.gov.vn/",
+      "dvc_province_url": "https://dichvucong.tayninh.gov.vn/"
+    },
+    {
+      "id": "TT_DAT_DAI",
+      "category_id": "dat_dai_xay_dung",
+      "title": "Biến động đất đai, Tách thửa & Cấp đổi Sổ đỏ",
+      "short_desc": "Hướng dẫn sang tên, tặng cho, thừa kế, tách thửa đất theo Luật Đất đai 2024",
+      "suggested_question": "Muốn sang tên, tách thửa đất hoặc cấp đổi sổ đỏ ở xã Hiệp Hòa cần chuẩn bị gì?",
+      "voice_answer": "Thưa bà con, đối với việc sang tên, tặng cho, tách thửa hoặc cấp đổi Giấy chứng nhận quyền sử dụng đất theo Luật Đất đai 2024, bà con cần chuẩn bị: Bản gốc Sổ đỏ, thẻ Căn cước công dân của bên giao và bên nhận, Hợp đồng chuyển nhượng hoặc tặng cho đã được công chứng hoặc chứng thực tại xã, cùng tờ khai thuế sử dụng đất.",
+      "checklist": {
+        "procedure_name": "Đăng ký biến động quyền sử dụng đất, cấp đổi Giấy chứng nhận",
+        "original_docs_to_compare": [
+          "Thẻ CCCD của người sử dụng đất và các thành viên hộ gia đình (nếu đất hộ)",
+          "Giấy xác nhận tình trạng hôn nhân hoặc Giấy chứng nhận kết hôn"
+        ],
+        "submit_docs": [
+          "Bản gốc Giấy chứng nhận quyền sử dụng đất (Sổ đỏ / Sổ hồng)",
+          "Hợp đồng chuyển nhượng / tặng cho quyền sử dụng đất có công chứng hoặc chứng thực tại UBND xã Hiệp Hòa",
+          "Đơn đăng ký biến động đất đai theo mẫu",
+          "Tờ khai lệ phí trước bạ và tờ khai thuế thu nhập cá nhân"
+        ],
+        "agency_deadline_fee": {
+          "agency": "Bộ phận Tiếp nhận và Trả kết quả / Chi nhánh Văn phòng Đăng ký đất đai",
+          "deadline": "Không quá 10 ngày làm việc đối với đăng ký biến động, chuyển nhượng",
+          "fee": "Nghĩa vụ tài chính (thuế TNCN, lệ phí trước bạ) theo thông báo của cơ quan Thuế"
+        }
+      },
+      "legal_basis": "Điều 133, Điều 136 Luật Đất đai năm 2024; Nghị định 101/2024/NĐ-CP.",
+      "form_template_id": "FORM_CHUNG_THUC",
+      "template_file": "mau_04_don_de_nghi_chung_thuc.docx",
+      "dvc_url": "https://dichvucong.tayninh.gov.vn/",
+      "dvc_province_url": "https://dichvucong.tayninh.gov.vn/"
+    },
+    {
+      "id": "TT_CHUNG_THUC",
+      "category_id": "chung_thuc",
+      "title": "Chứng thực bản sao từ bản chính (Sao y) & Chứng thực chữ ký",
+      "short_desc": "Sao y giấy tờ, văn bằng, chứng thực chữ ký trên giấy ủy quyền, đơn từ",
+      "suggested_question": "Đi sao y công chứng giấy tờ hoặc chứng thực chữ ký tại xã cần đem theo gì?",
+      "voice_answer": "Thưa bà con, khi đi sao y bản chính tại UBND xã Hiệp Hòa, bà con chỉ cần mang theo Bản chính giấy tờ cần sao y và thẻ Căn cước công dân. Nếu bà con đã photo sẵn thì mang theo bản photo, nếu chưa photo thì bộ phận Một cửa sẽ hỗ trợ. Đối với chứng thực chữ ký trên đơn từ, bà con nhớ ký trực tiếp trước mặt cán bộ tiếp nhận nhé!",
+      "checklist": {
+        "procedure_name": "Chứng thực bản sao từ bản chính / Chứng thực chữ ký",
+        "original_docs_to_compare": [
+          "Thẻ Căn cước công dân hoặc Hộ chiếu còn giá trị sử dụng của người yêu cầu",
+          "Bản chính giấy tờ, văn bản làm cơ sở để chứng thực bản sao"
+        ],
+        "submit_docs": [
+          "Bản photo cần chứng thực (đối với sao y) hoặc Đơn đề nghị chứng thực chữ ký (mau_04_don_de_nghi_chung_thuc.docx - ký trực tiếp trước mặt cán bộ)"
+        ],
+        "agency_deadline_fee": {
+          "agency": "UBND xã Hiệp Hòa",
+          "deadline": "Giải quyết ngay trong ngày (hoặc ngay tại quầy trong 15 đến 30 phút)",
+          "fee": "Sao y: 2.000 đồng/trang (từ trang 3 trở lên 1.000 đồng/trang, tối đa 200.000đ/bản); Chứng thực chữ ký: 10.000 đồng/trường hợp."
+        }
+      },
+      "legal_basis": "Điều 18, 20, 24 Nghị định 23/2015/NĐ-CP; Thông tư 226/2016/TT-BTC.",
+      "form_template_id": "FORM_CHUNG_THUC",
+      "template_file": "mau_04_don_de_nghi_chung_thuc.docx",
+      "dvc_url": "https://dichvucong.gov.vn/p/home/dvc-dich-vu-cong-chung-thuc.html",
+      "dvc_province_url": "https://dichvucong.tayninh.gov.vn/"
+    },
+    {
+      "id": "TT_BAO_TRO_HO_NGHEO",
+      "category_id": "chinh_sach_bao_tro",
+      "title": "Xác nhận Hộ nghèo, Khó khăn & Trợ cấp Người cao tuổi",
+      "short_desc": "Hồ sơ xác nhận hoàn cảnh, miễn giảm học phí, hưởng chế độ bảo trợ xã hội",
+      "suggested_question": "Làm đơn xin xác nhận hộ nghèo, hoàn cảnh khó khăn hoặc trợ cấp người cao tuổi cần gì?",
+      "voice_answer": "Thưa bà con, để xin xác nhận hộ nghèo, cận nghèo, hoàn cảnh khó khăn để miễn giảm học phí cho con cháu hoặc khám chữa bệnh, bà con điền Đơn xin xác nhận tại ứng dụng này, mang theo thẻ Căn cước công dân lên UBND xã Hiệp Hòa. Đối với các cụ từ đủ 80 tuổi trở lên không có lương hưu thì được làm hồ sơ hưởng trợ cấp xã hội hàng tháng và cấp thẻ Bảo hiểm y tế miễn phí!",
+      "checklist": {
+        "procedure_name": "Xác nhận hộ nghèo, cận nghèo / Trợ cấp xã hội hàng tháng Người cao tuổi",
+        "original_docs_to_compare": [
+          "Thẻ Căn cước công dân của người làm đơn hoặc người cao tuổi",
+          "Giấy khai sinh hoặc giấy tờ chứng minh độ tuổi (đối với trợ cấp người cao tuổi)"
+        ],
+        "submit_docs": [
+          "Đơn xin xác nhận cư trú / hoàn cảnh gia đình (mau_05_don_xin_xac_nhan_cu_tru_ho_ngheo.docx)",
+          "Tờ khai thông tin đề nghị trợ giúp xã hội theo mẫu"
+        ],
+        "agency_deadline_fee": {
+          "agency": "UBND xã Hiệp Hòa",
+          "deadline": "Trong ngày đối với xác nhận hộ nghèo đã có trong danh sách quản lý; 05 đến 07 ngày làm việc đối với xét trợ cấp mới",
+          "fee": "Miễn phí (0 đồng)"
+        }
+      },
+      "legal_basis": "Nghị định 20/2021/NĐ-CP; Nghị định 07/2021/NĐ-CP quy định chuẩn nghèo đa chiều.",
+      "form_template_id": "FORM_CU_TRU_HO_NGHEO",
+      "template_file": "mau_05_don_xin_xac_nhan_cu_tru_ho_ngheo.docx",
+      "dvc_url": "https://dichvucong.gov.vn/",
+      "dvc_province_url": "https://dichvucong.tayninh.gov.vn/"
+    },
+    {
+      "id": "TT_TU_VAN_LUAT",
+      "category_id": "tu_van_luat",
+      "title": "Hỏi đáp Pháp luật Dân sự, Thừa kế, Đất đai, Hôn nhân gia đình",
+      "short_desc": "Tư vấn hòa giải, lập di chúc, tặng cho tài sản cho con cái đúng pháp luật",
+      "suggested_question": "Cha mẹ muốn lập di chúc hoặc tặng cho đất cho con cái thì theo luật phải làm sao?",
+      "voice_answer": "Thưa bà con, theo Bộ luật Dân sự năm 2015 và Luật Đất đai năm 2024, khi cha mẹ muốn tặng cho quyền sử dụng đất hoặc lập di chúc để lại tài sản cho con, văn bản tặng cho hoặc di chúc phải được lập thành văn bản có công chứng hoặc chứng thực hợp pháp tại UBND xã Hiệp Hòa. Nếu tặng cho giữa cha mẹ đẻ và con đẻ thì được miễn thuế thu nhập cá nhân và lệ phí trước bạ!",
+      "checklist": {
+        "procedure_name": "Tư vấn pháp luật & Hòa giải cơ sở / Chứng thực di chúc, tặng cho",
+        "original_docs_to_compare": [
+          "Thẻ Căn cước công dân của người lập di chúc, bên tặng cho và bên nhận tặng cho",
+          "Giấy chứng nhận quyền sử dụng đất bản gốc (Sổ đỏ)",
+          "Giấy khai sinh của con để chứng minh quan hệ ruột thịt (được miễn thuế)"
+        ],
+        "submit_docs": [
+          "Phiếu yêu cầu chứng thực hợp đồng / di chúc",
+          "Dự thảo Hợp đồng tặng cho hoặc Bản di chúc (UBND xã có mẫu hỗ trợ bà con)"
+        ],
+        "agency_deadline_fee": {
+          "agency": "UBND xã Hiệp Hòa (Bộ phận Tư pháp - Hộ tịch)",
+          "deadline": "Giải quyết trong 01 đến 02 ngày làm việc",
+          "fee": "Miễn thuế TNCN và lệ phí trước bạ khi tặng cho/thừa kế giữa cha mẹ đẻ và con đẻ"
+        }
+      },
+      "legal_basis": "Điều 624, 630, 635 Bộ luật Dân sự năm 2015; Điều 45 Luật Đất đai năm 2024; Khoản 1, Khoản 4 Điều 4 Luật Thuế TNCN.",
+      "form_template_id": "FORM_CHUNG_THUC",
+      "template_file": "mau_04_don_de_nghi_chung_thuc.docx",
+      "dvc_url": "https://dichvucong.tayninh.gov.vn/",
+      "dvc_province_url": "https://dichvucong.tayninh.gov.vn/"
+    }
+  ]
+}

@@ -29,14 +29,16 @@ const upload = multer({
   }
 });
 
-const { handleVoiceSpeechToText } = require('../controllers/voiceController');
+const { handleVoiceSpeechToText, handleTextToSpeech } = require('../controllers/voiceController');
 const { handleLogin, handleDeviceStatus, handleVerify } = require('../controllers/authController');
 const { verifyToken, requireAdmin } = require('../middlewares/authMiddleware');
 const {
   handleGetAllDevices,
   handleResetDevice,
   handleResetAllDevices,
-  handleCreateDemoLock
+  handleCreateDemoLock,
+  handleGetAllOfficers,
+  handleCreateOfficer
 } = require('../controllers/adminController');
 
 // 0. Authentication & Device Security
@@ -50,11 +52,17 @@ router.post('/admin/devices/:deviceId/reset', verifyToken, requireAdmin, handleR
 router.post('/admin/devices/reset-all', verifyToken, requireAdmin, handleResetAllDevices);
 router.post('/admin/devices/demo-lock', verifyToken, requireAdmin, handleCreateDemoLock);
 
+// 0c. Admin Officer Management
+router.get('/admin/officers', verifyToken, requireAdmin, handleGetAllOfficers);
+router.post('/admin/officers', verifyToken, requireAdmin, handleCreateOfficer);
+
 // 1. RAG AI Chat & Voice
 router.post('/chat', handleChatQuery);
 
-// 1b. Gemini Multimodal Audio Speech-to-Text Fallback
+// 1b. Gemini Multimodal Audio Speech-to-Text & Vietnamese TTS
 router.post('/voice-stt', upload.single('audio'), handleVoiceSpeechToText);
+router.get('/tts', handleTextToSpeech);
+
 
 // 2. OCR CCCD (Single image file or base64)
 router.post('/ocr-cccd', upload.single('image'), handleCccdOcr);

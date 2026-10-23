@@ -7,6 +7,7 @@ function handleGetAllDevices(req, res) {
     return res.json({
       success: true,
       count: list.length,
+      devices: list,
       data: list
     });
   } catch (err) {
@@ -43,7 +44,8 @@ function handleResetAllDevices(req, res) {
     return res.json({
       success: true,
       message: `Đã mở khóa toàn bộ ${count} thiết bị về trạng thái hợp lệ (0/5)!`,
-      resetCount: count
+      resetCount: count,
+      unlockedCount: count
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
@@ -57,6 +59,7 @@ function handleCreateDemoLock(req, res) {
     return res.json({
       success: true,
       message: `Đã tạo thành công thiết bị khóa mẫu ${demoDev.deviceId} (5/5) để biểu diễn mở khóa!`,
+      device: demoDev,
       data: demoDev
     });
   } catch (err) {
@@ -64,9 +67,51 @@ function handleCreateDemoLock(req, res) {
   }
 }
 
+// Lấy danh sách toàn bộ cán bộ & admin
+function handleGetAllOfficers(req, res) {
+  try {
+    const list = securityService.getAllOfficers();
+    return res.json({
+      success: true,
+      officers: list,
+      data: list
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+// Tạo mới tài khoản cán bộ
+function handleCreateOfficer(req, res) {
+  try {
+    const { username, password, name, role } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Tên tài khoản và mật khẩu là bắt buộc.'
+      });
+    }
+
+    const created = securityService.createOfficer(username, password, name, role);
+    return res.json({
+      success: true,
+      message: `Tạo tài khoản cán bộ "${created.username}" thành công!`,
+      officer: created,
+      data: created
+    });
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+}
+
 module.exports = {
   handleGetAllDevices,
   handleResetDevice,
   handleResetAllDevices,
-  handleCreateDemoLock
+  handleCreateDemoLock,
+  handleGetAllOfficers,
+  handleCreateOfficer
 };

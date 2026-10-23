@@ -13,25 +13,28 @@ const DB_FILE = isVercel
 // Khởi tạo bộ nhớ toàn cục phòng trường hợp Serverless tái sử dụng container
 if (!globalThis.__HIEPHOA_SECURITY_STORE__) {
   globalThis.__HIEPHOA_SECURITY_STORE__ = {
-    devices: {}
+    devices: {},
+    officers: {}
   };
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'HiepHao_AI_Gov_Secret_Security_Key_2026';
 
-// Danh sách tài khoản hệ thống (Hỗ trợ cấu hình qua Environment Variables)
-const USERS = {
+// Danh sách tài khoản hệ thống mặc định (Hỗ trợ cấu hình qua Environment Variables)
+const DEFAULT_USERS = {
   admin: {
     username: 'admin',
     password: process.env.ADMIN_PASSWORD || 'HiepHoa@2026',
     role: 'ADMIN',
-    name: 'Quản Trị Viên Hệ Thống'
+    name: 'Quản Trị Viên Hệ Thống (Admin)',
+    createdAt: new Date().toISOString()
   },
   canbo1: {
     username: 'canbo1',
     password: process.env.OFFICER_PASSWORD || 'MotCua@2026',
     role: 'OFFICER',
-    name: 'Trần Văn Hòa (Tư pháp - Hộ tịch)'
+    name: 'Trần Văn Hòa (Tư pháp - Hộ tịch)',
+    createdAt: new Date().toISOString()
   }
 };
 
@@ -43,17 +46,27 @@ class SecurityService {
   // Tải dữ liệu từ file hoặc bộ nhớ cache
   loadStore() {
     try {
+      if (!globalThis.__HIEPHOA_SECURITY_STORE__.officers) {
+        globalThis.__HIEPHOA_SECURITY_STORE__.officers = { ...DEFAULT_USERS };
+      }
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf8');
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed.devices === 'object') {
           globalThis.__HIEPHOA_SECURITY_STORE__.devices = parsed.devices;
         }
+        if (parsed && typeof parsed.officers === 'object') {
+          globalThis.__HIEPHOA_SECURITY_STORE__.officers = {
+            ...DEFAULT_USERS,
+            ...parsed.officers
+          };
+        }
       }
     } catch (err) {
       console.warn('[SecurityService] Load store notice, using memory store:', err.message);
     }
   }
+
 
   // Lưu an toàn vào file (hỗ trợ cả /tmp của Vercel)
   saveStore() {
@@ -200,9 +213,56 @@ class SecurityService {
     });
   }
 
-  // Xác thực tài khoản
+  // Tạo mới tài khoản Cán bộ / Admin
+  createOfficer(username, password, name, role = 'OFFICER') {
+    if (!username || !password) {
+      throw new Error('Tên tài khoản và mật khẩu không được để trống.');
+    }
+    const cleanUser = username.trim().toLowerCase();
+    const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
+
+    if (officers[cleanUser]) {
+      throw new Error(`Tài khoản "${cleanUser}" đã tồn tại trong hệ thống.`);
+    }
+
+    const newOfficer = {
+      username: cleanUser,
+      password: password,
+      name: name ? name.trim() : (role === 'ADMIN' ? 'Quản Trị Viên' : 'Cán Bộ Một Cửa'),
+      role: role === 'ADMIN' ? 'ADMIN' : 'OFFICER',
+      createdAt: new Date().toISOString()
+    };
+
+    officers[cleanUser] = newOfficer;
+    globalThis.__HIEPHOA_SECURITY_STORE__.officers = officers;
+    this.saveStore();
+
+    return {
+      username: newOfficer.username,
+      name: newOfficer.name,
+      role: newOfficer.role,
+      createdAt: newOfficer.createdAt
+    };
+  }
+
+  // Lấy danh sách toàn bộ cán bộ & admin
+  getAllOfficers() {
+    const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
+    return Object.values(officers).map(o => ({
+      username: o.username,
+      name: o.name,
+      role: o.role,
+      createdAt: o.createdAt || new Date().toISOString()
+    }));
+  }
+
+  // Xác thực tài khoản (hỗ trợ cả tài khoản mặc định và tài khoản mới tạo)
   authenticateUser(username, password) {
-    const u = USERS[username];
+    if (!username || !password) return null;
+    const cleanUser = username.trim().toLowerCase();
+    const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
+    const u = officers[cleanUser] || DEFAULT_USERS[cleanUser];
+
     if (!u) return null;
     if (u.password === password) {
       return {
@@ -213,6 +273,7 @@ class SecurityService {
     }
     return null;
   }
+
 
   // Sinh JWT Token
   generateToken(user, deviceId) {

@@ -1,8 +1,8 @@
+const https = require('https');
 const { getGeminiModel } = require('../config/gemini');
 
 /**
- * Controller chuyển đổi giọng nói thành văn bản bằng Gemini 2.5 Flash Multimodal Audio (Voice STT)
- * Dùng làm cơ chế dự phòng siêu ổn định khi Web Speech API trên trình duyệt di động / Zalo gặp lỗi.
+ * Controller chuyển đổi giọng nói thành văn bản bằng Gemini Multimodal Audio (Voice STT)
  */
 async function handleVoiceSpeechToText(req, res) {
   try {
@@ -49,14 +49,14 @@ Quy tắc:
         return res.json({
           success: true,
           transcript: transcribedText,
-          provider: 'Gemini 2.5 Flash Audio STT'
+          provider: 'Gemini 1.5 Flash Audio STT'
         });
       } catch (err) {
         console.warn('[voiceController] Gemini Audio STT lỗi, chuyển sang bộ xử lý thông minh:', err.message);
       }
     }
 
-    // Fallback nếu không có API key: trả về thông báo để người dùng gõ phím hoặc thử lại
+    // Fallback nếu không có API key
     return res.json({
       success: true,
       transcript: 'Làm thủ tục khai sinh cần những giấy tờ gì',
@@ -73,6 +73,49 @@ Quy tắc:
   }
 }
 
+/**
+ * Controller Text-to-Speech (TTS) Tiếng Việt chuẩn Quốc gia
+ * Phát âm thanh giọng nữ tiếng Việt trong trẻo, tự nhiên, chống 100% lỗi câm tiếng của Web Speech API
+ */
+function handleTextToSpeech(req, res) {
+  try {
+    const text = req.query.text || '';
+    if (!text || !text.trim()) {
+      return res.status(400).send('Thiếu tham số text');
+    }
+
+    // Làm sạch và giới hạn độ dài câu
+    const cleanText = text
+      .normalize('NFC')
+      .replace(/[*#_`>\[\]\(\)]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 195);
+
+    const encoded = encodeURIComponent(cleanText);
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encoded}&tl=vi&client=tw-ob`;
+
+    const request = https.get(ttsUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    }, (ttsRes) => {
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      ttsRes.pipe(res);
+    });
+
+    request.on('error', (err) => {
+      console.warn('[voiceController] TTS stream error:', err.message);
+      res.status(502).send('TTS Error');
+    });
+  } catch (err) {
+    console.error('[voiceController] TTS error:', err);
+    res.status(500).send('Server Error');
+  }
+}
+
 module.exports = {
-  handleVoiceSpeechToText
+  handleVoiceSpeechToText,
+  handleTextToSpeech
 };

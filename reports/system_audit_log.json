@@ -1,5 +1,85 @@
 [
   {
+    "id": "audit_1792774071521_z5ark",
+    "timestamp": "2026-10-23T16:47:51.521Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792773743078_dwmyz",
+    "timestamp": "2026-10-23T16:42:23.078Z",
+    "action": "API_REQUEST",
+    "module": "download-docx",
+    "details": {
+      "method": "GET",
+      "path": "/api/download-docx/crs7jwrdb5pmvl775cl/HIEP_HOA_T_khai_ng_k_k_t_h_n_1792773743009.docx",
+      "statusCode": 200,
+      "durationMs": 0
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792773743062_rpryl",
+    "timestamp": "2026-10-23T16:42:23.062Z",
+    "action": "API_REQUEST",
+    "module": "prepare-docx",
+    "details": {
+      "method": "POST",
+      "path": "/api/prepare-docx",
+      "statusCode": 200,
+      "durationMs": 49
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792773679138_3gofj",
+    "timestamp": "2026-10-23T16:41:19.138Z",
+    "action": "API_REQUEST",
+    "module": "download-docx",
+    "details": {
+      "method": "GET",
+      "path": "/api/download-docx/gk6t01lnzigmvl75s0c/HIEP_HOA_T_khai_ng_k_khai_sinh_1792773676702.docx",
+      "statusCode": 200,
+      "durationMs": 2
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792773679120_44w3w",
+    "timestamp": "2026-10-23T16:41:19.120Z",
+    "action": "API_REQUEST",
+    "module": "prepare-docx",
+    "details": {
+      "method": "POST",
+      "path": "/api/prepare-docx",
+      "statusCode": 200,
+      "durationMs": 110
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792773283561_7l8vq",
+    "timestamp": "2026-10-23T16:34:43.560Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
     "id": "audit_1792771435308_c7u5j",
     "timestamp": "2026-10-23T16:03:55.306Z",
     "action": "SERVER_STARTUP",

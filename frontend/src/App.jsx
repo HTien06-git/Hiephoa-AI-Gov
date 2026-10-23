@@ -36,19 +36,23 @@ export default function App() {
         'Authorization': `Bearer ${authToken}`
       }
     })
-      .then(res => res.json())
-      .then(data => {
-        if (data.valid && data.user) {
-          setCurrentUser(data.user);
-        } else {
-          // Token không còn hợp lệ
+      .then(async (res) => {
+        if (res.status === 401) {
+          // Token thực sự đã hết hạn hoặc bị từ chối
           handleLogout();
+          return;
+        }
+        const data = await res.json();
+        if ((data.success || data.valid) && data.user) {
+          setCurrentUser(data.user);
         }
       })
-      .catch(() => {
-        // Lỗi mạng hoặc server offline tạm thời: giữ phiên cục bộ
+      .catch((err) => {
+        console.warn('Xác thực phiên trực tuyến tạm thời gián đoạn:', err);
+        // Lỗi mạng hoặc server offline tạm thời: giữ nguyên phiên làm việc cục bộ
       });
   }, [authToken]);
+
 
   useEffect(() => {
     const handleHashChange = () => {

@@ -136,6 +136,7 @@ async function handleVerify(req, res) {
 
   return res.json({
     success: true,
+    valid: true,
     user: {
       username: decoded.username,
       role: decoded.role,
@@ -143,6 +144,7 @@ async function handleVerify(req, res) {
       deviceId: decoded.deviceId
     }
   });
+
 }
 
 module.exports = {

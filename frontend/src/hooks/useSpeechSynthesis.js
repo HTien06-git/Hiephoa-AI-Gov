@@ -242,7 +242,7 @@ export function useSpeechSynthesis() {
 
     try {
       window.speechSynthesis.speak(utterance);
-      // Hack kích hoạt audio cho Chrome nếu bị pause
+      // Đánh thức nếu Chrome đang pause
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
       }
@@ -252,7 +252,7 @@ export function useSpeechSynthesis() {
   }, [voices]);
 
   const speak = useCallback((text, onEndCallback) => {
-    if (!('speechSynthesis' in window)) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       console.warn('Trình duyệt không hỗ trợ Web Speech Synthesis.');
       return;
     }
@@ -262,43 +262,66 @@ export function useSpeechSynthesis() {
       return;
     }
 
-    // Dừng câu cũ
-    stop();
-
-    // Phát âm thanh chime tinh tế để đánh thức AudioContext trình duyệt
+    // Đánh thức AudioContext và synthesizer
     playChime();
+    try {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    } catch (e) {}
 
-    // Chia văn bản thành các câu ngắn thông minh
+    // Dừng câu cũ an toàn
+    isCancelledRef.current = true;
+    chunksQueueRef.current = [];
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {}
+
+    // Chia văn bản thành các câu ngắn thông minh (< 120 ký tự)
     const chunks = chunkTextForTTS(text);
     if (chunks.length === 0) return;
 
-    isCancelledRef.current = false;
-    chunksQueueRef.current = chunks;
-    currentIndexRef.current = 0;
-    setTotalSentences(chunks.length);
-    setCurrentSentenceIndex(1);
-    setIsSpeaking(true);
-
-    // Kích hoạt resume và phát sau 40ms
+    // Chờ 120ms để Chrome hoàn tất cancel câu cũ trước khi nhận chuỗi mới (chống nuốt âm)
     setTimeout(() => {
+      isCancelledRef.current = false;
+      chunksQueueRef.current = chunks;
+      currentIndexRef.current = 0;
+      setTotalSentences(chunks.length);
+      setCurrentSentenceIndex(1);
+      setIsSpeaking(true);
+
       try {
-        if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      } catch (e) {}
+
+      playNextChunk(onEndCallback);
+    }, 120);
+  }, [isAudioEnabled, playNextChunk]);
+
+  // Keep-alive timer chống Chrome tự ngắt âm thanh sau 14 giây
+  useEffect(() => {
+    if (!isSpeaking) return;
+
+    const interval = setInterval(() => {
+      try {
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+          window.speechSynthesis.pause();
           window.speechSynthesis.resume();
         }
       } catch (e) {}
-      playNextChunk(onEndCallback);
-    }, 40);
-  }, [isAudioEnabled, stop, playNextChunk]);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [isSpeaking]);
 
   const toggleAudio = useCallback(() => {
     setIsAudioEnabled(prev => {
       const next = !prev;
       if (next) {
         playChime(659.25, 0.2); // Âm thanh báo BẬT LOA
-        // Đọc thử câu chào xác nhận
         setTimeout(() => {
           speak('Hệ thống âm thanh hành chính công đã được bật.');
-        }, 100);
+        }, 150);
       } else {
         playChime(392.00, 0.15); // Âm thanh báo TẮT LOA
         stop();
@@ -306,6 +329,7 @@ export function useSpeechSynthesis() {
       return next;
     });
   }, [speak, stop]);
+
 
 
   return {

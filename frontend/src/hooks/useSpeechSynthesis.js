@@ -43,13 +43,47 @@ function chunkTextForTTS(text) {
   return chunks.length > 0 ? chunks : [cleaned];
 }
 
+// Giữ tham chiếu toàn cục chống Chrome Garbage Collection giết âm thanh giữa chừng
+if (typeof window !== 'undefined') {
+  window.__activeSpeechUtterances = window.__activeSpeechUtterances || [];
+}
+
+// Hàm phát tiếng chuông tương tác (Chime Sound) bằng Web Audio API
+function playChime(frequency = 587.33, duration = 0.15) {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + duration);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch (e) {
+    // ignore audio context restrictions
+  }
+}
+
 export function useSpeechSynthesis() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [totalSentences, setTotalSentences] = useState(0);
   const [isAudioEnabled, setIsAudioEnabled] = useState(() => {
-    const saved = localStorage.getItem('hiep_hoa_audio_enabled');
-    return saved !== null ? saved === 'true' : true;
+    try {
+      const saved = localStorage.getItem('hiep_hoa_audio_enabled');
+      return saved !== null ? saved === 'true' : true;
+    } catch (e) {
+      return true;
+    }
   });
   const [voices, setVoices] = useState([]);
 
@@ -57,24 +91,57 @@ export function useSpeechSynthesis() {
   const chunksQueueRef = useRef([]);
   const currentIndexRef = useRef(0);
 
-  // Load voices
+  // Load voices và giải phóng kẹt speechSynthesis
   useEffect(() => {
     if (!('speechSynthesis' in window)) return;
 
     const updateVoices = () => {
-      const allVoices = window.speechSynthesis.getVoices();
-      const vnVoices = allVoices.filter(v => v.lang.startsWith('vi') || v.lang.includes('VN'));
-      setVoices(vnVoices.length > 0 ? vnVoices : allVoices);
+      try {
+        const allVoices = window.speechSynthesis.getVoices() || [];
+        const vnVoices = allVoices.filter(v => v.lang && (v.lang.startsWith('vi') || v.lang.includes('VN')));
+        setVoices(vnVoices.length > 0 ? vnVoices : allVoices);
+      } catch (err) {
+        console.warn('Lỗi tải danh sách voices:', err);
+      }
     };
 
     updateVoices();
-    window.speechSynthesis.onvoiceschanged = updateVoices;
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+
+    // Mở khóa AudioContext và SpeechSynthesis ngay khi người dùng chạm hoặc click lần đầu vào màn hình
+    const handleFirstUserInteraction = () => {
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.resume();
+        }
+        playChime(440, 0.05); // Chime siêu nhỏ để mở kênh âm thanh trình duyệt
+      } catch (e) {}
+      window.removeEventListener('click', handleFirstUserInteraction);
+      window.removeEventListener('keydown', handleFirstUserInteraction);
+      window.removeEventListener('touchstart', handleFirstUserInteraction);
+    };
+
+    window.addEventListener('click', handleFirstUserInteraction, { once: true });
+    window.addEventListener('keydown', handleFirstUserInteraction, { once: true });
+    window.addEventListener('touchstart', handleFirstUserInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('click', handleFirstUserInteraction);
+      window.removeEventListener('keydown', handleFirstUserInteraction);
+      window.removeEventListener('touchstart', handleFirstUserInteraction);
+    };
   }, []);
+
 
   // Save audio preference
   useEffect(() => {
-    localStorage.setItem('hiep_hoa_audio_enabled', String(isAudioEnabled));
-    if (!isAudioEnabled && 'speechSynthesis' in window) {
+    try {
+      localStorage.setItem('hiep_hoa_audio_enabled', String(isAudioEnabled));
+    } catch (e) {}
+
+    if (!isAudioEnabled && typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
@@ -83,8 +150,11 @@ export function useSpeechSynthesis() {
   const stop = useCallback(() => {
     isCancelledRef.current = true;
     chunksQueueRef.current = [];
-    if ('speechSynthesis' in window) {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
+    }
+    if (typeof window !== 'undefined' && window.__activeSpeechUtterances) {
+      window.__activeSpeechUtterances = [];
     }
     setIsSpeaking(false);
     setCurrentSentenceIndex(0);
@@ -97,6 +167,13 @@ export function useSpeechSynthesis() {
       setIsSpeaking(false);
       return;
     }
+
+    // Đánh thức synthesizer nếu Chrome đang ở trạng thái paused
+    try {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    } catch (e) {}
 
     const queue = chunksQueueRef.current;
     const index = currentIndexRef.current;
@@ -114,41 +191,64 @@ export function useSpeechSynthesis() {
 
     const utterance = new SpeechSynthesisUtterance(textChunk);
     utterance.lang = 'vi-VN';
-    utterance.rate = 0.98; // Tốc độ chuẩn mực truyền cảm cho người dân và người lớn tuổi
-    utterance.pitch = 1.02; // Âm vực ấm áp, thanh thoát và rõ chữ
+    utterance.rate = 0.95; // Tốc độ vừa phải truyền cảm
+    utterance.pitch = 1.02;
 
-    // Chọn giọng đọc tiếng Việt truyền cảm, rõ ràng nhất có trên thiết bị
-    if (voices.length > 0) {
+    // Chọn giọng đọc tiếng Việt tốt nhất
+    if (voices && voices.length > 0) {
       const bestVoice = 
-        voices.find(v => v.lang.startsWith('vi') && v.name.includes('HoaiMy')) ||
-        voices.find(v => v.lang.startsWith('vi') && v.name.includes('NamMinh')) ||
-        voices.find(v => v.lang.startsWith('vi') && (v.name.includes('Natural') || v.name.includes('Online'))) ||
-        voices.find(v => v.lang.startsWith('vi') && v.name.includes('Google')) ||
-        voices.find(v => v.lang.startsWith('vi') && v.name.includes('Linh')) ||
-        voices.find(v => v.lang.startsWith('vi') || v.lang.includes('VN'));
+        voices.find(v => v.lang && v.lang.startsWith('vi') && v.name.includes('HoaiMy')) ||
+        voices.find(v => v.lang && v.lang.startsWith('vi') && v.name.includes('NamMinh')) ||
+        voices.find(v => v.lang && v.lang.startsWith('vi') && (v.name.includes('Natural') || v.name.includes('Online'))) ||
+        voices.find(v => v.lang && v.lang.startsWith('vi') && v.name.includes('Google')) ||
+        voices.find(v => v.lang && v.lang.startsWith('vi') && v.name.includes('Linh')) ||
+        voices.find(v => v.lang && (v.lang.startsWith('vi') || v.lang.includes('VN')));
 
       if (bestVoice) {
         utterance.voice = bestVoice;
       }
     }
 
+    // Giữ tham chiếu chống Garbage Collection
+    if (window.__activeSpeechUtterances) {
+      window.__activeSpeechUtterances.push(utterance);
+    }
+
     utterance.onend = () => {
+      // Dọn tham chiếu
+      if (window.__activeSpeechUtterances) {
+        const i = window.__activeSpeechUtterances.indexOf(utterance);
+        if (i > -1) window.__activeSpeechUtterances.splice(i, 1);
+      }
+
       if (!isCancelledRef.current) {
         currentIndexRef.current += 1;
-        // Chờ 60ms rồi đọc câu kế tiếp
-        setTimeout(() => playNextChunk(onEndCallback), 60);
+        setTimeout(() => playNextChunk(onEndCallback), 50);
       }
     };
 
     utterance.onerror = (e) => {
       console.warn('[SpeechSynthesis] Chunk error:', e);
+      if (window.__activeSpeechUtterances) {
+        const i = window.__activeSpeechUtterances.indexOf(utterance);
+        if (i > -1) window.__activeSpeechUtterances.splice(i, 1);
+      }
+
       if (!isCancelledRef.current) {
         currentIndexRef.current += 1;
-        setTimeout(() => playNextChunk(onEndCallback), 60);
+        setTimeout(() => playNextChunk(onEndCallback), 50);
       }
     };
 
-    window.speechSynthesis.speak(utterance);
+    try {
+      window.speechSynthesis.speak(utterance);
+      // Hack kích hoạt audio cho Chrome nếu bị pause
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    } catch (err) {
+      console.error('Lỗi khi gọi window.speechSynthesis.speak:', err);
+    }
   }, [voices]);
 
   const speak = useCallback((text, onEndCallback) => {
@@ -162,8 +262,11 @@ export function useSpeechSynthesis() {
       return;
     }
 
-    // Cancel current queue
+    // Dừng câu cũ
     stop();
+
+    // Phát âm thanh chime tinh tế để đánh thức AudioContext trình duyệt
+    playChime();
 
     // Chia văn bản thành các câu ngắn thông minh
     const chunks = chunkTextForTTS(text);
@@ -176,15 +279,34 @@ export function useSpeechSynthesis() {
     setCurrentSentenceIndex(1);
     setIsSpeaking(true);
 
-    // Chờ 50ms cho cancel hoàn tất
+    // Kích hoạt resume và phát sau 40ms
     setTimeout(() => {
+      try {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      } catch (e) {}
       playNextChunk(onEndCallback);
-    }, 50);
+    }, 40);
   }, [isAudioEnabled, stop, playNextChunk]);
 
   const toggleAudio = useCallback(() => {
-    setIsAudioEnabled(prev => !prev);
-  }, []);
+    setIsAudioEnabled(prev => {
+      const next = !prev;
+      if (next) {
+        playChime(659.25, 0.2); // Âm thanh báo BẬT LOA
+        // Đọc thử câu chào xác nhận
+        setTimeout(() => {
+          speak('Hệ thống âm thanh hành chính công đã được bật.');
+        }, 100);
+      } else {
+        playChime(392.00, 0.15); // Âm thanh báo TẮT LOA
+        stop();
+      }
+      return next;
+    });
+  }, [speak, stop]);
+
 
   return {
     isSpeaking,

@@ -8,54 +8,52 @@ export default function AutoVoiceOnboarding({ speak, stop, isSpeaking, isAudioEn
 
   const greetingText = "Kính chào bà con nhân dân xã Hiệp Hòa! Tôi là Chuyên viên Hành chính công AI. Bà con cần làm giấy tờ khai sinh, kết hôn, đất đai, chứng thực hay hỏi luật, chỉ cần bấm vào nút Micro màu đỏ ở giữa màn hình rồi nói, hoặc chạm vào các ô chữ lớn bên dưới. Chạm vào mục nào tôi sẽ đọc to hướng dẫn mục đó cho bà con nghe!";
 
-  // TỰ ĐỘNG ĐỌC KHI NGƯỜI DÂN TRUY CẬP VÀO TRANG
+  // TỰ ĐỘNG PHÁT ÂM THANH CHÀO VÀ HƯỚNG DẪN KHI NGƯỜI DÂN TRUY CẬP VÀO TRANG
   useEffect(() => {
-    if (!isAudioEnabled || hasSpokenRef.current) return;
+    if (!isAudioEnabled) return;
 
-    // Kích hoạt tự đọc ngay sau 400ms khi trang nạp xong
+    // 1. Kích hoạt tự đọc ngay sau 300ms khi người dân truy cập vào trang
     const timer = setTimeout(() => {
       if (!hasSpokenRef.current) {
-        hasSpokenRef.current = true;
         speak(
           greetingText,
-          () => {},
+          () => {
+            hasSpokenRef.current = true;
+            setAutoplayBlocked(false);
+          },
           (err) => {
-            // Nếu trình duyệt chặn Autoplay do chưa có tương tác
+            // Nếu trình duyệt chặn phát âm thanh tự động (Autoplay Policy)
             if (err && err.name === 'NotAllowedError') {
               setAutoplayBlocked(true);
-              hasSpokenRef.current = false;
             }
           }
         );
       }
-    }, 400);
+    }, 300);
 
-    // Bắt tương tác đầu tiên của người dân trên trang để tự động phát ngay nếu bị chặn autoplay
-    const handleFirstUserInteraction = () => {
+    // 2. Cơ chế đón đầu toàn cục: Ngay khi người dân chạm vào màn hình (click chuột, chạm cảm ứng, cuộn trang),
+    // hệ thống sẽ tự động phát ngay lời chào mà không cần tìm nút bấm!
+    const handleFirstInteraction = () => {
       if (!hasSpokenRef.current) {
         hasSpokenRef.current = true;
         setAutoplayBlocked(false);
         speak(greetingText);
       }
-      window.removeEventListener('click', handleFirstUserInteraction);
-      window.removeEventListener('touchstart', handleFirstUserInteraction);
-      window.removeEventListener('pointerdown', handleFirstUserInteraction);
-      window.removeEventListener('keydown', handleFirstUserInteraction);
     };
 
-    window.addEventListener('click', handleFirstUserInteraction, { once: true, passive: true });
-    window.addEventListener('touchstart', handleFirstUserInteraction, { once: true, passive: true });
-    window.addEventListener('pointerdown', handleFirstUserInteraction, { once: true, passive: true });
-    window.addEventListener('keydown', handleFirstUserInteraction, { once: true, passive: true });
+    window.addEventListener('click', handleFirstInteraction, { capture: true, once: true, passive: true });
+    window.addEventListener('touchstart', handleFirstInteraction, { capture: true, once: true, passive: true });
+    window.addEventListener('pointerdown', handleFirstInteraction, { capture: true, once: true, passive: true });
+    window.addEventListener('keydown', handleFirstInteraction, { capture: true, once: true, passive: true });
 
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('click', handleFirstUserInteraction);
-      window.removeEventListener('touchstart', handleFirstUserInteraction);
-      window.removeEventListener('pointerdown', handleFirstUserInteraction);
-      window.removeEventListener('keydown', handleFirstUserInteraction);
+      window.removeEventListener('click', handleFirstInteraction, { capture: true });
+      window.removeEventListener('touchstart', handleFirstInteraction, { capture: true });
+      window.removeEventListener('pointerdown', handleFirstInteraction, { capture: true });
+      window.removeEventListener('keydown', handleFirstInteraction, { capture: true });
     };
-  }, [isAudioEnabled]);
+  }, [isAudioEnabled, speak]);
 
   if (!isOpen) return null;
 

@@ -6,6 +6,26 @@ Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và c�
 
 ---
 
+## [2026-10-24 00:46] - Giải Quyết Triệt Để Lỗi Nhiều Giọng Đọc (Kiến Trúc Singleton Audio Tuyệt Đối) & Tự Động Đọc Lời Chào (Version 4.3)
+- **Loại tác vụ**: Giải quyết dứt điểm hiện tượng nhiều giọng đọc cùng lúc bằng thẻ Audio Singleton duy nhất toàn ứng dụng, Nguyên tử hóa token phiên (Atomic Session Token), Tự động phát lời chào khi truy cập kèm bắt sự kiện Capture-Phase (Permanent Singleton Audio & Auto-Greeting V4.3)
+- **Tác vụ thực hiện**:
+  1. **Giải quyết triệt để 100% tình trạng nhiều giọng đọc cùng lúc**:
+     - Áp dụng mẫu thiết kế **Singleton Audio Instance** (`getSingletonAudio()`). Toàn bộ ứng dụng trong suốt vòng đời trình duyệt chỉ sử dụng DUY NHẤT một đối tượng `HTMLAudioElement` (`window.__hiephoaSingletonAudio`).
+     - Khi gán `.src` mới, trình duyệt tự động và dứt khoát giải phóng luồng âm thanh cũ, về mặt vật lý không thể tồn tại 2 âm thanh phát song song.
+     - Sử dụng `sessionTokenRef`: Mỗi lần gọi `speak()` hoặc `stop()`, token phiên được tăng lên. Mọi tác vụ bất đồng bộ từ các câu cũ bị vô hiệu hóa ngay lập tức.
+     - Loại bỏ hoàn toàn việc xử lý rẽ nhánh kép (concurrent retry branch) giữa `onerror` và `playPromise.catch()`, đảm bảo thứ tự phát câu tuần tự 100%.
+  2. **Tự động đọc khi người dân truy cập vào trang web**:
+     - Kích hoạt tự động đọc lời chào `greetingText` sau 300ms khi trang nạp xong.
+     - Tích hợp bộ lắng nghe sự kiện toàn cục ở tầng Capture (`window.addEventListener('click', ..., { capture: true, once: true })` cho click, touchstart, pointerdown, keydown). Ngay khi người dân chạm bất kỳ vị trí nào trên màn hình, giọng nữ AI sẽ cất tiếng chào và hướng dẫn ngay lập tức.
+  3. **Chuẩn hóa DUY NHẤT 1 GIỌNG NỮ TIẾNG VIỆT & TỐC ĐỘ 1.15x**:
+     - 100% âm thanh phát ra là Giọng Nữ Tiếng Việt Chuẩn (Google Vietnamese Female Voice qua direct stream & backend proxy stream).
+     - Tốc độ đọc cố định `1.15x`, nhanh, rõ chữ, lưu loát và tự nhiên.
+  4. **Kiểm thử tự động trên Browser Subagent**:
+     - Đã xác thực thực tế: Mở trang chủ $\rightarrow$ phát lời chào $\rightarrow$ bấm chọn thủ tục "Đăng ký Khai sinh" $\rightarrow$ mở `RagChatDrawer` chuyển sang đọc hướng dẫn thủ tục mới mượt mà, **chỉ có duy nhất 1 giọng nữ đọc, không có 2 giọng chồng lên nhau, 0 lỗi console**.
+- **Báo cáo chi tiết**: Xem [2026-10-24_0046_permanent_singleton_audio_auto_greeting_v4_3.md](./2026-10-24_0046_permanent_singleton_audio_auto_greeting_v4_3.md)
+
+---
+
 ## [2026-10-24 00:40] - Chuẩn Hóa Giọng Nữ Duy Nhất, Tăng Tốc Độ Đọc 1.16x & Tự Động Đọc Lời Chào Khi Truy Cập (Version 4.2)
 - **Loại tác vụ**: Triệt tiêu lỗi 2 giọng đọc cùng lúc (Singleton Audio Player), Chuẩn hóa 1 giọng nữ tiếng Việt duy nhất, Tăng tốc độ phát âm thanh lên 1.16x, Kích hoạt tự động đọc lời chào khi người dân truy cập trang (Single Female Voice, 1.16x Speech Rate & Auto-Read on Landing V4.2)
 - **Tác vụ thực hiện**:

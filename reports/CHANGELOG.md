@@ -6,6 +6,28 @@ Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và c�
 
 ---
 
+## [2026-10-24 00:40] - Chuẩn Hóa Giọng Nữ Duy Nhất, Tăng Tốc Độ Đọc 1.16x & Tự Động Đọc Lời Chào Khi Truy Cập (Version 4.2)
+- **Loại tác vụ**: Triệt tiêu lỗi 2 giọng đọc cùng lúc (Singleton Audio Player), Chuẩn hóa 1 giọng nữ tiếng Việt duy nhất, Tăng tốc độ phát âm thanh lên 1.16x, Kích hoạt tự động đọc lời chào khi người dân truy cập trang (Single Female Voice, 1.16x Speech Rate & Auto-Read on Landing V4.2)
+- **Tác vụ thực hiện**:
+  1. **Triệt tiêu hiện tượng 2 giọng đọc cùng lúc**:
+     - Tạo biến `globalAudioPlayer` quản lý luồng âm thanh duy nhất toàn cục và hàm `stopAllAudioPlayback()`.
+     - Mỗi khi phát câu mới hoặc chuyển thủ tục, hệ thống dừng triệt để audio trước đó, xóa sạch `src`, giải phóng buffer và hủy bỏ `window.speechSynthesis.cancel()`.
+     - Loại bỏ việc chạy song song nhiều engine âm thanh, đảm bảo tại một thời điểm CHỈ DUY NHẤT MỘT giọng cất lên.
+  2. **Chuẩn hóa DUY NHẤT 1 GIỌNG NỮ TIẾNG VIỆT**:
+     - Cố định nguồn phát bằng Giọng nữ tiếng Việt chuẩn (`tl=vi` Google Vietnamese Female Voice qua client stream & backend proxy stream).
+     - Loại bỏ hoàn toàn việc rò rỉ sang giọng nam của hệ điều hành (David) hay voice tiếng Anh.
+  3. **Tăng tốc độ đọc lên 1.16x (`SPEECH_RATE = 1.16`)**:
+     - Thiết lập `audio.playbackRate = 1.16` và duy trì liên tục trong suốt quá trình phát qua sự kiện `onplay`.
+     - Giọng đọc trở nên nhanh, lưu loát, dứt khoát, thanh thoát, không còn cảm giác rề rà, chậm chạp.
+  4. **Tự động đọc khi người dân truy cập vào trang (`AutoVoiceOnboarding.jsx`)**:
+     - Tự động gọi `speak(greetingText)` sau 400ms khi trang nạp xong.
+     - Tích hợp bộ lắng nghe cử chỉ chạm đầu tiên (click/touch/scroll) để phát ngay lập tức nếu trình duyệt kích hoạt chính sách chặn Autoplay khi chưa có tương tác.
+  5. **Kiểm thử tự động trên Browser Subagent**:
+     - Xác nhận trang tải sạch lỗi (0 console error), phát đúng 1 giọng nữ, tốc độ đọc 1.16x nhanh tự nhiên, chuyển đổi thủ tục mượt mà.
+- **Báo cáo chi tiết**: Xem [2026-10-24_0040_single_female_voice_fast_rate_autoread_v4_2.md](./2026-10-24_0040_single_female_voice_fast_rate_autoread_v4_2.md)
+
+---
+
 ## [2026-10-24 00:30] - Khắc Phục Triệt Để Sự Cố Âm Thanh (TTS 3 Tầng) & Thêm Tính Năng Tạo Tài Khoản Cán Bộ (Version 4.1)
 - **Loại tác vụ**: Giải quyết triệt để lỗi âm thanh AI lúc lên lúc không, Loại bỏ Race Condition cuộc gọi kép, Cấu hình Engine Giọng đọc 3 tầng (Client Google TTS + Backend Proxy + Web Speech), Bổ sung Quản lý và Tạo tài khoản cán bộ mới (Audio Stability & Officer Management V4.1)
 - **Tác vụ thực hiện**:

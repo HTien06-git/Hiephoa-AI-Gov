@@ -1,5 +1,495 @@
 [
   {
+    "id": "audit_1792777041812_1wxwf",
+    "timestamp": "2026-10-23T17:37:21.812Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 114
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777041713_li6bq",
+    "timestamp": "2026-10-23T17:37:21.713Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 152
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777041673_u8tkr",
+    "timestamp": "2026-10-23T17:37:21.673Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 324
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777041655_8r6ce",
+    "timestamp": "2026-10-23T17:37:21.655Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 193
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777041550_xjzqn",
+    "timestamp": "2026-10-23T17:37:21.550Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 318
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777041399_cgmzq",
+    "timestamp": "2026-10-23T17:37:21.399Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 310
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777031025_s1qfn",
+    "timestamp": "2026-10-23T17:37:11.025Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 276
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777030926_7a5hr",
+    "timestamp": "2026-10-23T17:37:10.926Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 400
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777030769_fuzq8",
+    "timestamp": "2026-10-23T17:37:10.769Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 133
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777030642_nlljo",
+    "timestamp": "2026-10-23T17:37:10.642Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 219
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777030603_62evu",
+    "timestamp": "2026-10-23T17:37:10.603Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 304
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777030410_g2rd6",
+    "timestamp": "2026-10-23T17:37:10.410Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 226
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777021652_o36py",
+    "timestamp": "2026-10-23T17:37:01.652Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 316
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792777021479_utdl4",
+    "timestamp": "2026-10-23T17:37:01.479Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 256
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776977298_nt3g2",
+    "timestamp": "2026-10-23T17:36:17.298Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 164
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776977127_yhsrp",
+    "timestamp": "2026-10-23T17:36:17.127Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 126
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776977119_geh4b",
+    "timestamp": "2026-10-23T17:36:17.119Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 231
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976911_6qmz6",
+    "timestamp": "2026-10-23T17:36:16.911Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 256
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976905_nh6i9",
+    "timestamp": "2026-10-23T17:36:16.905Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 134
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976725_0eri4",
+    "timestamp": "2026-10-23T17:36:16.725Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 197
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976584_lyny5",
+    "timestamp": "2026-10-23T17:36:16.584Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 167
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976500_c3rep",
+    "timestamp": "2026-10-23T17:36:16.500Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 211
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976332_vfw0r",
+    "timestamp": "2026-10-23T17:36:16.332Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 145
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976256_4nh9z",
+    "timestamp": "2026-10-23T17:36:16.256Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 174
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976183_sw4xh",
+    "timestamp": "2026-10-23T17:36:16.183Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 367
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976143_7qnvb",
+    "timestamp": "2026-10-23T17:36:16.143Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 204
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776976077_ikku9",
+    "timestamp": "2026-10-23T17:36:16.077Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 371
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776975898_dabte",
+    "timestamp": "2026-10-23T17:36:15.898Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 322
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776975889_6x49q",
+    "timestamp": "2026-10-23T17:36:15.889Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 436
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776949710_hfj5a",
+    "timestamp": "2026-10-23T17:35:49.710Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 173
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776949576_qr7o9",
+    "timestamp": "2026-10-23T17:35:49.576Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 159
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776949557_tddoz",
+    "timestamp": "2026-10-23T17:35:49.557Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 376
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776949504_ys035",
+    "timestamp": "2026-10-23T17:35:49.503Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 199
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776949347_tus1w",
+    "timestamp": "2026-10-23T17:35:49.347Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 288
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792776949274_dwy1q",
+    "timestamp": "2026-10-23T17:35:49.274Z",
+    "action": "API_REQUEST",
+    "module": "tts",
+    "details": {
+      "method": "GET",
+      "path": "/api/tts",
+      "statusCode": 200,
+      "durationMs": 325
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
     "id": "audit_1792775882150_w0zir",
     "timestamp": "2026-10-23T17:18:02.150Z",
     "action": "API_REQUEST",

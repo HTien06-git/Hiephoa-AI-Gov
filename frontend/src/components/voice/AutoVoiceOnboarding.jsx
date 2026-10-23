@@ -1,10 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX, Sparkles, X, Headphones, Bot } from 'lucide-react';
 
 export default function AutoVoiceOnboarding({ speak, stop, isSpeaking, isAudioEnabled }) {
   const [isOpen, setIsOpen] = useState(true);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const hasSpokenRef = useRef(false);
 
   const greetingText = "Kính chào bà con nhân dân xã Hiệp Hòa! Tôi là Chuyên viên Hành chính công AI. Bà con cần làm giấy tờ khai sinh, kết hôn, đất đai, chứng thực hay hỏi luật, chỉ cần bấm vào nút Micro màu đỏ ở giữa màn hình rồi nói, hoặc chạm vào các ô chữ lớn bên dưới. Chạm vào mục nào tôi sẽ đọc to hướng dẫn mục đó cho bà con nghe!";
+
+  // TỰ ĐỘNG ĐỌC KHI NGƯỜI DÂN TRUY CẬP VÀO TRANG
+  useEffect(() => {
+    if (!isAudioEnabled || hasSpokenRef.current) return;
+
+    // Kích hoạt tự đọc ngay sau 400ms khi trang nạp xong
+    const timer = setTimeout(() => {
+      if (!hasSpokenRef.current) {
+        hasSpokenRef.current = true;
+        speak(
+          greetingText,
+          () => {},
+          (err) => {
+            // Nếu trình duyệt chặn Autoplay do chưa có tương tác
+            if (err && err.name === 'NotAllowedError') {
+              setAutoplayBlocked(true);
+              hasSpokenRef.current = false;
+            }
+          }
+        );
+      }
+    }, 400);
+
+    // Bắt tương tác đầu tiên của người dân trên trang để tự động phát ngay nếu bị chặn autoplay
+    const handleFirstUserInteraction = () => {
+      if (!hasSpokenRef.current) {
+        hasSpokenRef.current = true;
+        setAutoplayBlocked(false);
+        speak(greetingText);
+      }
+      window.removeEventListener('click', handleFirstUserInteraction);
+      window.removeEventListener('touchstart', handleFirstUserInteraction);
+      window.removeEventListener('pointerdown', handleFirstUserInteraction);
+      window.removeEventListener('keydown', handleFirstUserInteraction);
+    };
+
+    window.addEventListener('click', handleFirstUserInteraction, { once: true, passive: true });
+    window.addEventListener('touchstart', handleFirstUserInteraction, { once: true, passive: true });
+    window.addEventListener('pointerdown', handleFirstUserInteraction, { once: true, passive: true });
+    window.addEventListener('keydown', handleFirstUserInteraction, { once: true, passive: true });
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('click', handleFirstUserInteraction);
+      window.removeEventListener('touchstart', handleFirstUserInteraction);
+      window.removeEventListener('pointerdown', handleFirstUserInteraction);
+      window.removeEventListener('keydown', handleFirstUserInteraction);
+    };
+  }, [isAudioEnabled]);
 
   if (!isOpen) return null;
 
@@ -12,12 +63,14 @@ export default function AutoVoiceOnboarding({ speak, stop, isSpeaking, isAudioEn
     if (isSpeaking) {
       stop();
     } else {
+      hasSpokenRef.current = true;
+      setAutoplayBlocked(false);
       speak(greetingText);
     }
   };
 
   return (
-    <div className="bg-gradient-to-r from-red-50 via-amber-50 to-orange-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-md relative my-5 overflow-hidden">
+    <div className="bg-gradient-to-r from-red-50 via-amber-50 to-orange-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-md relative my-5 overflow-hidden animate-fade-in">
       <button
         type="button"
         onClick={() => {
@@ -74,13 +127,20 @@ export default function AutoVoiceOnboarding({ speak, stop, isSpeaking, isAudioEn
               ) : (
                 <>
                   <Volume2 className="w-5 h-5 text-amber-300 animate-bounce" />
-                  <span>Bấm vào đây để Nghe AI Chào Mừng</span>
+                  <span>{autoplayBlocked ? 'Bấm vào đây để BẬT TIẾNG AI Chào Mừng' : 'Nghe lại lời chào của AI'}</span>
                 </>
               )}
             </button>
+
+            {autoplayBlocked && !isSpeaking && (
+              <span className="text-xs sm:text-sm font-bold text-red-700 bg-red-100 px-3 py-1.5 rounded-lg border border-red-300 animate-pulse">
+                👉 Chạm vào màn hình để BẬT TIẾNG Chuyên viên AI
+              </span>
+            )}
+
             <span className="text-xs text-slate-500 italic flex items-center gap-1">
               <Headphones className="w-3.5 h-3.5 text-slate-400" />
-              (Chạm vào bất kỳ mục nào trên màn hình, hệ thống sẽ tự động đọc to cho bà con nghe)
+              (Chạm vào bất kỳ mục nào trên màn hình, Chuyên viên AI sẽ tự động đọc to cho bà con nghe)
             </span>
           </div>
         </div>

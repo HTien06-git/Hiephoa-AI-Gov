@@ -245,13 +245,15 @@ class SecurityService {
 
   // Tạo mới tài khoản Cán bộ / Admin
   createOfficer(username, password, name, role = 'OFFICER', department = 'Bộ phận Một cửa') {
+    this.loadStore();
     if (!username || !password) {
       throw new Error('Tên tài khoản và mật khẩu không được để trống.');
     }
-    const cleanUser = username.trim().toLowerCase();
+    const cleanUser = decodeURIComponent(username).trim().toLowerCase();
     const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
 
-    if (officers[cleanUser]) {
+    const existingKey = Object.keys(officers).find(k => k.toLowerCase() === cleanUser);
+    if (existingKey) {
       throw new Error(`Tài khoản "${cleanUser}" đã tồn tại trong hệ thống.`);
     }
 
@@ -285,12 +287,36 @@ class SecurityService {
 
   // Cập nhật tài khoản cán bộ (đổi mật khẩu, khóa/mở khóa, cập nhật tên)
   updateOfficer(username, updates = {}) {
+    this.loadStore();
     if (!username) return null;
-    const cleanUser = username.trim().toLowerCase();
+    const cleanUser = decodeURIComponent(username).trim().toLowerCase();
     const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
-    const officer = officers[cleanUser] || (DEFAULT_USERS[cleanUser] ? { ...DEFAULT_USERS[cleanUser] } : null);
+    
+    // Tìm kiếm không phân biệt hoa thường và hỗ trợ cả username hoặc email
+    let foundKey = Object.keys(officers).find(k => 
+      k.toLowerCase() === cleanUser || 
+      k.toLowerCase() === username.trim().toLowerCase()
+    );
 
-    if (!officer) return null;
+    let officer = foundKey 
+      ? officers[foundKey] 
+      : (DEFAULT_USERS[cleanUser] ? { ...DEFAULT_USERS[cleanUser] } : null);
+
+    // Nếu chưa tồn tại trong store (ví dụ tài khoản vừa tạo hoặc từ phiên khác), tự động upsert
+    if (!officer) {
+      officer = {
+        username: cleanUser,
+        password: updates.password || 'MotCua@2026',
+        name: updates.name ? updates.name.trim() : (updates.role === 'ADMIN' ? 'Quản Trị Viên' : 'Cán Bộ Một Cửa'),
+        role: updates.role === 'ADMIN' ? 'ADMIN' : 'OFFICER',
+        department: updates.department || 'Bộ phận Một cửa',
+        status: 'ONLINE',
+        isLocked: false,
+        processedCount: 0,
+        createdAt: new Date().toISOString()
+      };
+      foundKey = cleanUser;
+    }
 
     if (updates.password) officer.password = updates.password;
     if (updates.name) officer.name = updates.name.trim();
@@ -301,7 +327,7 @@ class SecurityService {
     if (typeof updates.processedCount === 'number') officer.processedCount = updates.processedCount;
     officer.updatedAt = new Date().toISOString();
 
-    officers[cleanUser] = officer;
+    officers[foundKey || cleanUser] = officer;
     globalThis.__HIEPHOA_SECURITY_STORE__.officers = officers;
     this.saveStore();
 
@@ -319,6 +345,7 @@ class SecurityService {
 
   // Lấy danh sách toàn bộ cán bộ & admin
   getAllOfficers() {
+    this.loadStore();
     const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
     return Object.values(officers).map(o => ({
       username: o.username,
@@ -334,17 +361,35 @@ class SecurityService {
 
   // Xác thực tài khoản (hỗ trợ cả tài khoản mặc định và tài khoản mới tạo)
   authenticateUser(username, password) {
+    this.loadStore();
     if (!username || !password) return null;
-    const cleanUser = username.trim().toLowerCase();
+    const cleanUser = decodeURIComponent(username).trim().toLowerCase();
     const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
-    const u = officers[cleanUser] || DEFAULT_USERS[cleanUser];
+    
+    // Tìm kiếm theo username không phân biệt chữ hoa thường
+    let foundKey = Object.keys(officers).find(k => 
+      k.toLowerCase() === cleanUser || 
+      k.toLowerCase() === username.trim().toLowerCase()
+    );
+
+    const u = foundKey ? officers[foundKey] : DEFAULT_USERS[cleanUser];
 
     if (!u) return null;
+    if (u.isLocked) {
+      throw new Error('Tài khoản này đã bị tạm khóa. Vui lòng liên hệ Quản trị viên.');
+    }
+
     if (u.password === password) {
+      u.status = 'ONLINE';
+      u.lastLogin = new Date().toISOString();
+      officers[foundKey || cleanUser] = u;
+      this.saveStore();
+
       return {
         username: u.username,
         role: u.role,
-        name: u.name
+        name: u.name,
+        department: u.department
       };
     }
     return null;

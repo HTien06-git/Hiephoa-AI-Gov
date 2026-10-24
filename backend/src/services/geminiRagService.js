@@ -422,6 +422,59 @@ Dạ thưa bà con, căn cứ theo **Luật Hôn nhân và Gia đình năm 2014*
         };
       }
 
+      // B3: Trường hợp An toàn giao thông & Trích xuất luật giao thông
+      if (cleanLower.includes('giao thong') || cleanLower.includes('an toan giao thong') || cleanLower.includes('den do') || cleanLower.includes('nong do con') || cleanLower.includes('mu bao hiem') || cleanLower.includes('bang lai')) {
+        return {
+          intentType: 'LEGAL_CONSULTATION',
+          voice_text: 'Dạ thưa bà con, về pháp luật an toàn giao thông đường bộ, quy định nghiêm cấm người điều khiển phương tiện có nồng độ cồn trong hơi thở, cấm vượt đèn đỏ và đi ngược chiều. Khi đi xe máy, bà con bắt buộc phải đội mũ bảo hiểm cài quai đúng cách, mang theo giấy phép lái xe và giấy đăng ký xe để đảm bảo an toàn tính mạng cho chính mình và cộng đồng nhé!',
+          answer: `### Trích xuất các quy định trọng yếu của Luật Giao thông đường bộ & Mức phạt theo Nghị định 100/2019/NĐ-CP (sửa đổi bởi Nghị định 123/2021/NĐ-CP)
+
+Dạ thưa bà con nhân dân xã Hiệp Hòa, đối với yêu cầu tra cứu và trích xuất quy định pháp luật về **An Toàn Giao Thông Đường Bộ**:
+
+#### 1. Các nguyên tắc bắt buộc khi tham gia giao thông:
+* **Đội mũ bảo hiểm:** Người điều khiển và người ngồi trên mô tô, xe gắn máy phải đội mũ bảo hiểm có cài quai đúng quy cách (*Điều 30 Luật GTĐB 2008*).
+* **Tuyệt đối không sử dụng rượu bia:** Nghiêm cấm điều khiển phương tiện giao thông mà trong máu hoặc hơi thở có nồng độ cồn (*Khoản 8 Điều 8 Luật GTĐB sửa đổi*).
+* **Tuân thủ tín hiệu đèn & vạch kẻ đường:** Phải dừng lại trước vạch dừng khi đèn đỏ; đèn vàng phải dừng lại trừ trường hợp đã đi quá vạch dừng.
+* **Tốc độ và làn đường:** Đi đúng phần đường, làn đường quy định; giữ khoảng cách an toàn và tuân thủ biển báo tốc độ.
+
+#### 2. Bảng trích xuất mức xử phạt các lỗi vi phạm phổ biến (Nghị định 100 & 123):
+* 🚫 **Vi phạm nồng độ cồn:**
+  * **Xe máy:** Phạt từ **2.000.000đ đến 8.000.000đ**, tước Giấy phép lái xe từ **10 đến 24 tháng**, tạm giữ phương tiện đến 7 ngày.
+  * **Ô tô:** Phạt từ **6.000.000đ đến 40.000.000đ**, tước GPLX từ **10 đến 24 tháng**.
+* 🚦 **Vượt đèn đỏ, đèn vàng:**
+  * **Xe máy:** Phạt từ **800.000đ đến 1.000.000đ**, tước GPLX từ 01 đến 03 tháng.
+  * **Ô tô:** Phạt từ **4.000.000đ đến 6.000.000đ**, tước GPLX từ 01 đến 03 tháng.
+* ⛑️ **Không đội mũ bảo hiểm (hoặc cài quai không đúng):**
+  * Phạt tiền từ **400.000đ đến 600.000đ** đối với mỗi người vi phạm trên xe máy.
+* ⛔ **Đi ngược chiều của đường một chiều:**
+  * **Xe máy:** Phạt từ **1.000.000đ đến 2.000.000đ**, tước GPLX từ 01 đến 03 tháng.
+  * **Ô tô:** Phạt từ **4.000.000đ đến 6.000.000đ**, tước GPLX từ 02 đến 04 tháng.
+* 🪪 **Không có Giấy phép lái xe (GPLX):**
+  * **Xe máy dưới 175cc:** Phạt tiền từ **1.000.000đ đến 2.000.000đ**.
+  * **Ô tô:** Phạt tiền từ **10.000.000đ đến 12.000.000đ**.
+
+#### 🏛️ Khuyến cáo từ Ban An toàn Giao thông xã Hiệp Hòa:
+Bà con khi lưu thông trên các tuyến đường liên ấp, đường Tỉnh lộ qua địa bàn xã Hiệp Hòa hãy luôn làm chủ tốc độ, chú ý quan sát tại các ngã ba, ngã tư và tuyệt đối *"Đã uống rượu bia – Không lái xe"* để giữ gìn bình yên cho mọi nhà!`,
+          checklist: null,
+          matchedProcedure: null,
+          legal_basis: 'Luật Giao thông đường bộ 2008 & Nghị định 100/2019/NĐ-CP (sửa đổi bởi Nghị định 123/2021/NĐ-CP).',
+          sources: [
+            {
+              title: "Thư Viện Pháp Luật: Tra cứu mức phạt vi phạm giao thông theo Nghị định 100 và Nghị định 123",
+              url: "https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/thoi-su-phap-luat/tu-van-phap-luat/39512/bang-tra-cuu-muc-phat-nong-do-con-xe-may-va-o-to"
+            },
+            {
+              title: "Luật Giao thông đường bộ 2008 toàn văn",
+              url: "https://thuvienphapluat.vn/van-ban/Giao-thong-Van-tai/Luat-Giao-thong-duong-bo-2008-23-2008-QH12-82203.aspx"
+            },
+            {
+              title: "Cổng Thông tin Điện tử Cục Cảnh sát Giao thông",
+              url: "https://csgt.vn/"
+            }
+          ]
+        };
+      }
+
       // Các trường hợp pháp luật đời sống và tình huống giả định khác
       if (webLegalFinding) {
         return {

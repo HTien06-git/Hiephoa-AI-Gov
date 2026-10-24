@@ -44,15 +44,29 @@ const LEGAL_WEB_KNOWLEDGE_BASE = [
     ]
   },
   {
-    keywords: ["nong do con", "uong bia", "uong ruou", "lai xe", "thoi nong do con", "uong bia lai xe"],
-    topic: "Xử phạt vi phạm nồng độ cồn khi điều khiển phương tiện giao thông",
-    lawName: "Nghị định 100/2019/NĐ-CP & Nghị định 123/2021/NĐ-CP",
-    articles: "Điều 5, Điều 6 Nghị định 100/2019/NĐ-CP sửa đổi bởi Nghị định 123/2021/NĐ-CP",
-    summary: "Pháp luật nghiêm cấm điều khiển phương tiện mà trong máu hoặc hơi thở có nồng độ cồn (kể cả chỉ uống 1 ngụm bia). Đối với xe máy: Mức phạt từ 2.000.000đ đến 8.000.000đ và tước bằng lái xe từ 10 đến 24 tháng. Đối với ô tô: Mức phạt từ 6.000.000đ đến 40.000.000đ và tước bằng lái xe từ 10 đến 24 tháng.",
+    keywords: [
+      "an toan giao thong", "giao thong", "luat giao thong", "luat an toan giao thong",
+      "nong do con", "uong bia", "uong ruou", "lai xe", "thoi nong do con", "uong bia lai xe",
+      "vuot den do", "den do", "den vang", "mu bao hiem", "non bao hiem", "khong doi mu bao hiem",
+      "bang lai xe", "gplx", "giay phep lai xe", "khong co bang lai", "chay qua toc do", "ban toc do",
+      "di nguoc chieu", "lan lan", "chuyen lan", "di sai lan", "tai nan giao thong", "guong chieu hau"
+    ],
+    topic: "Quy định trọng yếu Luật Giao thông đường bộ & Mức xử phạt theo Nghị định 100/2019/NĐ-CP (sửa đổi bởi Nghị định 123/2021/NĐ-CP)",
+    lawName: "Luật Giao thông đường bộ 2008 & Nghị định 100/2019/NĐ-CP (sửa đổi bởi Nghị định 123/2021/NĐ-CP)",
+    articles: "Điều 5, Điều 6, Điều 8, Điều 9, Điều 21 Nghị định 100/2019/NĐ-CP (sửa đổi bởi Nghị định 123/2021/NĐ-CP)",
+    summary: "Quy định trọng yếu của Luật Giao thông đường bộ và mức xử phạt các lỗi phổ biến:\n1. Nồng độ cồn: Xe máy phạt 2.000.000đ - 8.000.000đ (tước GPLX 10-24 tháng); Ô tô phạt 6.000.000đ - 40.000.000đ (tước GPLX 10-24 tháng).\n2. Vượt đèn đỏ/đèn vàng: Xe máy phạt 800.000đ - 1.000.000đ (tước GPLX 1-3 tháng); Ô tô phạt 4.000.000đ - 6.000.000đ (tước GPLX 1-3 tháng).\n3. Không đội mũ bảo hiểm: Phạt từ 400.000đ đến 600.000đ đối với người điều khiển và người ngồi sau xe máy.\n4. Đi ngược chiều trên đường một chiều: Xe máy phạt 1.000.000đ - 2.000.000đ (tước GPLX 1-3 tháng); Ô tô phạt 4.000.000đ - 6.000.000đ.\n5. Không có Giấy phép lái xe (GPLX): Xe máy dưới 175cc phạt 1.000.000đ - 2.000.000đ; Ô tô phạt 10.000.000đ - 12.000.000đ.\n6. Chạy quá tốc độ quy định: Xe máy phạt từ 300.000đ đến 5.000.000đ; Ô tô phạt từ 800.000đ đến 12.000.000đ tùy mức vượt.",
     sources: [
       {
-        title: "Thư Viện Pháp Luật: Bảng tra cứu mức phạt nồng độ cồn đối với xe máy và ô tô mới nhất",
+        title: "Thư Viện Pháp Luật: Toàn văn Luật Giao thông đường bộ 2008 & các văn bản hướng dẫn",
+        url: "https://thuvienphapluat.vn/van-ban/Giao-thong-Van-tai/Luat-Giao-thong-duong-bo-2008-23-2008-QH12-82203.aspx"
+      },
+      {
+        title: "Thư Viện Pháp Luật: Bảng tra cứu mức phạt vi phạm giao thông theo Nghị định 100 & Nghị định 123 mới nhất",
         url: "https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/thoi-su-phap-luat/tu-van-phap-luat/39512/bang-tra-cuu-muc-phat-nong-do-con-xe-may-va-o-to"
+      },
+      {
+        title: "Cổng Thông tin Điện tử Cục Cảnh sát Giao thông - Bộ Công An",
+        url: "https://csgt.vn/"
       }
     ]
   },

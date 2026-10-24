@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 const apiKey = process.env.GEMINI_API_KEY || '';
-const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const modelName = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 
 let genAI = null;
 if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_gemini_api_key_here') {
@@ -23,7 +23,7 @@ function getGeminiModel(customModelName) {
     return genAI.getGenerativeModel({ model: targetModel });
   } catch (e) {
     try {
-      return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      return genAI.getGenerativeModel({ model: 'gemini-3.8-flash' });
     } catch (err) {
       return null;
     }

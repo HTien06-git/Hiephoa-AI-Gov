@@ -43,15 +43,29 @@ export default function RagChatDrawer({
     sources = []
   } = chatResult;
 
-  // Tự động nhận diện thủ tục liên quan để luôn có nút Điền Đơn và Giọng Nói Từng Bước
+  // Chỉ nhận diện thủ tục khi ý định thực sự là làm thủ tục hành chính
   const findMatchingProcedure = () => {
+    // Nếu là tư vấn pháp luật, hỏi luật hoặc chào hỏi, TUYỆT ĐỐI không gán mẫu đơn hành chính
+    if (intentType === 'LEGAL_CONSULTATION' || intentType === 'GREETING') {
+      return null;
+    }
     if (matchedProcedure) return matchedProcedure;
     const textToMatch = `${answer || ''} ${voice_text || ''}`.toLowerCase();
-    if (textToMatch.includes('khai sinh')) return proceduresData.procedures.find(p => p.id === 'TT_KHAI_SINH');
-    if (textToMatch.includes('kết hôn')) return proceduresData.procedures.find(p => p.id === 'TT_KET_HON');
-    if (textToMatch.includes('hôn nhân') || textToMatch.includes('độc thân')) return proceduresData.procedures.find(p => p.id === 'TT_TINH_TRANG_HON_NHAN');
-    if (textToMatch.includes('chứng thực') || textToMatch.includes('sao y')) return proceduresData.procedures.find(p => p.id === 'TT_CHUNG_THUC_SAO_Y');
-    if (textToMatch.includes('cư trú') || textToMatch.includes('hộ nghèo')) return proceduresData.procedures.find(p => p.id === 'TT_XAC_NHAN_CU_TRU');
+    if (textToMatch.includes('làm giấy khai sinh') || textToMatch.includes('đăng ký khai sinh')) {
+      return proceduresData.procedures.find(p => p.id === 'PROC_KHAI_SINH');
+    }
+    if (textToMatch.includes('làm giấy kết hôn') || textToMatch.includes('đăng ký kết hôn')) {
+      return proceduresData.procedures.find(p => p.id === 'PROC_KET_HON');
+    }
+    if (textToMatch.includes('xác nhận tình trạng hôn nhân') || textToMatch.includes('giấy độc thân')) {
+      return proceduresData.procedures.find(p => p.id === 'PROC_TINH_TRANG_HON_NHAN');
+    }
+    if (textToMatch.includes('chứng thực bản sao') || textToMatch.includes('sao y bản chính')) {
+      return proceduresData.procedures.find(p => p.id === 'PROC_CHUNG_THUC_SAO_Y');
+    }
+    if (textToMatch.includes('xác nhận thông tin về cư trú') || textToMatch.includes('giấy xác nhận cư trú')) {
+      return proceduresData.procedures.find(p => p.id === 'PROC_XAC_NHAN_CU_TRU');
+    }
     return null;
   };
 
@@ -231,6 +245,33 @@ export default function RagChatDrawer({
             </div>
           )}
 
+          {/* KHỐI TƯ VẤN PHÁP LUẬT ĐỜI SỐNG (HIỂN THỊ KHI CÂU HỎI LÀ TƯ VẤN PHÁP LUẬT, KHÔNG LIÊN QUAN ĐẾN ĐƠN TỪ HÀNH CHÍNH) */}
+          {!activeProc && (
+            <div className="bg-gradient-to-r from-[#1C1917] via-[#292524] to-[#1C1917] p-4 sm:p-5 rounded-3xl shadow-lg border-2 border-amber-400 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-center sm:text-left">
+                <div className="text-xs uppercase font-extrabold text-amber-300 tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+                  <Scale className="w-4 h-4 text-amber-300" />
+                  <span>TRỢ GIÚP PHÁP LUẬT & HÒA GIẢI UBND XÃ HIỆP HÒA</span>
+                </div>
+                <h4 className="text-base sm:text-lg font-black mt-1 text-white">
+                  Tư Vấn Quy Định Pháp Luật Đời Sống 24/7
+                </h4>
+                <p className="text-xs text-stone-300 mt-0.5">
+                  Nội dung được trích xuất tự động từ Thư Viện Pháp Luật & các văn bản quy phạm pháp luật hiện hành.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto justify-center sm:justify-end">
+                <a
+                  href="tel:19009095"
+                  className="flex-1 sm:flex-none h-10 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all whitespace-nowrap"
+                >
+                  <span>📞 Tổng Đài Luật: 1900 9095</span>
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* CHECKLIST 4 MỤC CHUẨN (CHỈ HIỂN THỊ KHI ĐÚNG LÀ THỦ TỤC HÀNH CHÍNH) */}
           {checklist && (
             <div className="bg-white rounded-3xl p-5 md:p-6 border-2 border-red-200 shadow-sm">
@@ -368,8 +409,8 @@ export default function RagChatDrawer({
         </div>
 
         {/* Action Bottom Bar */}
-        {activeProc && (
-          <div className="bg-white p-3.5 border-t-2 border-slate-200 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+        <div className="bg-white p-3.5 border-t-2 border-slate-200 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+          {activeProc ? (
             <div className="flex items-center gap-2 flex-wrap">
               {activeProc.form_template_id && (
                 <>
@@ -411,8 +452,24 @@ export default function RagChatDrawer({
                 <span>Kiểm Tra Giấy Tờ</span>
               </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center justify-between w-full gap-2">
+              <a
+                href="tel:19009095"
+                className="h-10 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs whitespace-nowrap"
+              >
+                <span>📞 Hotline Tư Vấn: 1900 9095</span>
+              </a>
+              <button
+                type="button"
+                onClick={onClose}
+                className="h-10 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs sm:text-sm"
+              >
+                Đóng
+              </button>
+            </div>
+          )}
+        </div>
 
       </div>
     </div>

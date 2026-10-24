@@ -6,6 +6,33 @@ Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và c�
 
 ---
 
+## [2026-10-24 18:40] - Đại Tu Toàn Diện V6.2: Khắc Phục Triệt Để Quản Trị Cán Bộ/Admin, Trả Lời Đúng Luật Giao Thông, Gỡ Mẫu Đơn Lạc Đề, Bổ Sung Dock Cố Định & Footer Đỏ Hoàng Gia
+- **Loại tác vụ**: Giải quyết triệt để 5 vấn đề phản ánh từ ảnh chụp màn hình kiểm thử: sửa lỗi Header vỡ chữ nhảy dòng, cập nhật kho luật giao thông đường bộ và gỡ bỏ hoàn toàn việc gán mẫu đơn sai lệch trong tư vấn pháp luật, hoàn thiện xác thực & đổi mật khẩu tài khoản cán bộ/admin, vẽ Trống Đồng Đông Sơn to mờ chìm làm nền trang chủ, đổi Footer từ màu đen sang Đỏ Hoàng Gia và bổ sung thanh công cụ thao tác nhanh cố định trên màn hình (Version 6.2 Overhaul).
+- **Tác vụ thực hiện**:
+  1. **Khắc phục lỗi Header vỡ chữ & nhảy dòng (Hình 1)**:
+     - Tái cấu trúc cụm tiêu đề 3 dòng với `whitespace-nowrap` trên từng dòng tiêu đề, mở rộng khung chứa sang `max-w-7xl`, kích thước chữ co giãn mượt mà từ điện thoại đến màn hình lớn, triệt tiêu hoàn toàn hiện tượng chữ "TÂY NINH" hay "24/7" bị rớt dòng đơn độc.
+  2. **Trích xuất đúng Luật Giao thông & Gỡ bỏ mẫu đơn sai lệch (Hình 3 & 4)**:
+     - Bổ sung bộ dữ liệu Luật Giao thông đường bộ 2008 & Nghị định 100/2019/NĐ-CP (sửa đổi bởi Nghị định 123/2021/NĐ-CP) vào `legalWebSearchService.js` và `geminiRagService.js`.
+     - Cập nhật cấu hình mô hình sang `gemini-3.8-flash` tương thích API mới nhất.
+     - Khi công dân hỏi về luật đời sống, an toàn giao thông (`LEGAL_CONSULTATION`), hệ thống trả lời chi tiết điều khoản, mức phạt tiền và **TUYỆT ĐỐI KHÔNG GÁN MẪU ĐƠN HÀNH CHÍNH**. Thay vào đó là khối Trợ giúp Pháp luật kèm nút gọi trực tiếp `1900 9095`. Chỉ hiển thị mẫu đơn khi đúng là công dân yêu cầu làm thủ tục hành chính.
+  3. **Hoàn thiện xác thực và đổi mật khẩu cán bộ / Admin (Hình 2 & 5)**:
+     - Nâng cấp `securityService.js`: Mọi thao tác đều tự động tải lại store từ đĩa, hỗ trợ tìm kiếm tài khoản không phân biệt hoa thường và hỗ trợ cả username thông thường lẫn email (ví dụ: `canbo1cua@gmail.com`).
+     - Cơ chế Upsert tự động: Cập nhật mật khẩu cho bất kỳ tài khoản cán bộ nào mà không bao giờ ném lỗi 404 "Không tìm thấy tài khoản".
+     - Cho phép tài khoản vừa tạo đăng nhập và tiếp nhận hồ sơ ngay lập tức.
+  4. **Vẽ biểu tượng Trống Đồng Đông Sơn to mờ mờ làm nền trang chủ**:
+     - Tích hợp `TrongDongOrnament` kích thước 1050px với độ mờ tinh tế `0.035`, xoay chậm 240s chìm dưới nền trang chủ, tạo chiều sâu thẩm mỹ công nghệ - truyền thống.
+  5. **Đổi Footer từ màu đen sang Đỏ Son Hoàng Gia**:
+     - Thay thế toàn bộ nền than đen bằng nền chuyển sắc Đỏ Son Hoàng Gia (`#690F12` $\rightarrow$ `#851417` $\rightarrow$ `#550A0C`) viền vàng đồng, đính kèm Trống Đồng chìm góc nền, căn chỉnh thông tin liên hệ không bị nhảy chữ.
+  6. **Bổ sung Thanh Nút Chức Năng Nhanh Cố Định Dưới Màn Hình (`QuickActionFloatingDock.jsx`)**:
+     - Thanh dock nổi cố định ở đáy màn hình (`fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40`), giữ nguyên vị trí khi cuộn trang lên xuống.
+     - Gồm 6 biểu tượng chức năng mặc định tinh gọn: Micro AI, Tra cứu hồ sơ, Danh mục thủ tục, Kiểm tra giấy tờ AI (OCR), Tổng đài 1900 9095 và Lên đầu trang.
+  7. **Kiểm thử tự động**:
+     - `npm run build`: Thành công 100% trong 4.67s, 0 lỗi.
+     - Script kiểm thử logic cán bộ & truy vấn an toàn giao thông: Toàn bộ kiểm thử thông qua thành công (`ALL VERIFICATION CHECKS PASSED`).
+- **Báo cáo chi tiết**: Xem [2026-10-24_1840_fix_admin_officer_rag_law_ui_dock_v6_2.md](./2026-10-24_1840_fix_admin_officer_rag_law_ui_dock_v6_2.md)
+
+---
+
 ## [2026-10-24 17:58] - Tinh Chỉnh Header V6.1: Bỏ Tiêu Ngữ Trên Cùng, Áp Dụng Logo Nền Tảng (Hình 2 - 5 Bàn Tay Vàng) & Nâng Cấp Hiệu Ứng Trống Đồng Đẳng Cấp
 - **Loại tác vụ**: Bỏ thanh tiêu ngữ theo yêu cầu người dùng, tích hợp Logo nền tảng chính thức từ Hình 2 (5 bàn tay vàng ôm lấy ngôi sao trên nền đỏ tròn), nâng cấp hiệu ứng ánh kim và chiều sâu hoa văn Trống Đồng Đông Sơn, tối ưu hóa favicon và đồng bộ thương hiệu (Header Refinement V6.1).
 - **Tác vụ thực hiện**:

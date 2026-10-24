@@ -136,7 +136,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         />
 
         {/* Main Content: Bố cục tinh gọn gồm 03 khu vực mạch lạc */}
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 overflow-x-hidden pb-28 sm:pb-20">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 overflow-x-hidden pb-32 sm:pb-28">
           
           {/* KHU VỰC 1: TRUNG TÂM TƯ VẤN GIỌNG NÓI & HỎI ĐÁP PHÁP LUẬT AI 24/7 (Hero Voice Station) */}
           <HeroVoiceStation

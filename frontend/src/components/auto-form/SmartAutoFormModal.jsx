@@ -116,6 +116,16 @@ export default function SmartAutoFormModal({
     setFormData(initial);
   }, [schema]);
 
+  // Lắng nghe sự kiện làm sạch dữ liệu khi công dân bấm "Đã nhận thông tin & Thoát"
+  useEffect(() => {
+    const handleClearSession = () => {
+      setFormData({});
+      sessionStorage.removeItem(`hiep_hoa_form_v3_${schema.id}`);
+    };
+    window.addEventListener('hh_clear_citizen_session', handleClearSession);
+    return () => window.removeEventListener('hh_clear_citizen_session', handleClearSession);
+  }, [schema.id]);
+
   const currentField = schema.fields[wizardStep] || schema.fields[0];
 
   // Đọc câu hỏi giọng nói khi chuyển bước trong Voice Wizard
@@ -502,11 +512,11 @@ export default function SmartAutoFormModal({
               />
             </div>
             <div className="min-w-0">
-              <div className="text-[9px] sm:text-xs uppercase font-extrabold text-amber-300 tracking-wider flex items-center gap-1 truncate">
+              <div className="text-[9px] sm:text-xs uppercase font-extrabold text-amber-300 tracking-wider flex items-center gap-1">
                 <FileCheck className="w-3 h-3 text-amber-300 shrink-0" />
-                <span className="truncate">BIỂU MẪU CHUẨN QUỐC GIA (XÃ HIỆP HÒA)</span>
+                <span>BIỂU MẪU CHUẨN QUỐC GIA (XÃ HIỆP HÒA)</span>
               </div>
-              <h3 className="text-sm sm:text-xl md:text-2xl font-black text-white leading-tight truncate">
+              <h3 className="text-xs sm:text-lg md:text-xl font-black text-white leading-tight line-clamp-2">
                 {norm(schema.title)}
               </h3>
             </div>
@@ -549,47 +559,66 @@ export default function SmartAutoFormModal({
           </div>
         </div>
 
-        {/* CHUYỂN ĐỔI CHẾ ĐỘ XEM TRÊN ĐIỆN THOẠI (MOBILE VIEW SELECTOR) */}
-        <div className="lg:hidden flex items-center justify-between p-2 bg-amber-100/90 border-b border-amber-300 gap-2 flex-shrink-0">
-          <div className="grid grid-cols-2 flex-1 bg-white rounded-xl p-0.5 border border-amber-300 shadow-xs">
+        {/* ======================================================== */}
+        {/* CHUYỂN ĐỔI CHẾ ĐỘ TRÊN ĐIỆN THOẠI (1 DÒNG DUY NHẤT 3 TAB)  */}
+        {/* ======================================================== */}
+        <div className="lg:hidden p-2 bg-amber-50 border-b border-amber-300 flex-shrink-0">
+          <div className="grid grid-cols-3 bg-amber-200/60 p-1 rounded-2xl border border-amber-300 shadow-xs gap-1">
             <button
               type="button"
-              onClick={() => setMobileView('form')}
-              className={`py-1.5 px-2 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1 ${
-                mobileView === 'form'
-                  ? 'bg-[#991B1B] text-white shadow-xs'
-                  : 'text-slate-700 hover:bg-slate-100'
+              onClick={() => {
+                setMobileView('form');
+                setInputMode('data_input');
+              }}
+              className={`py-1.5 px-1 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1 ${
+                mobileView === 'form' && inputMode === 'data_input'
+                  ? 'bg-[#991B1B] text-white shadow-sm'
+                  : 'text-amber-950 hover:bg-white/60'
               }`}
             >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>📝 Điền Thông Tin</span>
+              <Edit3 className="w-3 h-3 shrink-0" />
+              <span className="truncate">Tự Điền Đơn</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMobileView('form');
+                setInputMode('voice_wizard');
+              }}
+              className={`py-1.5 px-1 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1 ${
+                mobileView === 'form' && inputMode === 'voice_wizard'
+                  ? 'bg-[#991B1B] text-white shadow-sm'
+                  : 'text-amber-950 hover:bg-white/60'
+              }`}
+            >
+              <Mic className="w-3 h-3 text-amber-300 shrink-0" />
+              <span className="truncate">AI Hỏi Từng Bước</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setMobileView('preview')}
-              className={`py-1.5 px-2 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1 ${
+              className={`py-1.5 px-1 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1 ${
                 mobileView === 'preview'
-                  ? 'bg-[#991B1B] text-white shadow-xs'
-                  : 'text-slate-700 hover:bg-slate-100'
+                  ? 'bg-[#991B1B] text-white shadow-sm'
+                  : 'text-amber-950 hover:bg-white/60'
               }`}
             >
-              <FileText className="w-3.5 h-3.5" />
-              <span>📄 Xem Đơn A4</span>
+              <FileText className="w-3 h-3 shrink-0" />
+              <span className="truncate">Xem A4 ({progressPercent}%)</span>
             </button>
           </div>
-          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded-lg shrink-0">
-            {filledRequiredFields}/{totalRequiredFields} mục ({progressPercent}%)
-          </span>
         </div>
 
-        {/* Thanh chuyển chế độ (Bảng nhập liệu vs Trợ lý giọng nói từng bước) */}
-        <div className="bg-amber-50 px-3 sm:px-4 py-1.5 sm:py-2 border-b border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-950 font-semibold flex-shrink-0">
+        {/* THANH CHUYỂN CHẾ ĐỘ TRÊN DESKTOP (MÀN HÌNH LỚN) */}
+        <div className="hidden lg:flex bg-amber-50 px-4 py-2 border-b border-amber-200 items-center justify-between text-xs text-amber-950 font-semibold flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="inline-flex p-0.5 bg-amber-200/70 rounded-xl border border-amber-300">
               <button
                 type="button"
                 onClick={() => setInputMode('data_input')}
-                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
                   inputMode === 'data_input'
                     ? 'bg-red-700 text-white shadow-xs'
                     : 'text-amber-950 hover:bg-amber-100'
@@ -602,7 +631,7 @@ export default function SmartAutoFormModal({
               <button
                 type="button"
                 onClick={() => setInputMode('voice_wizard')}
-                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
                   inputMode === 'voice_wizard'
                     ? 'bg-red-700 text-white shadow-xs'
                     : 'text-amber-950 hover:bg-amber-100'
@@ -613,12 +642,12 @@ export default function SmartAutoFormModal({
               </button>
             </div>
 
-            <span className="hidden md:inline text-slate-600 text-[11px]">
+            <span className="text-slate-600 text-[11px]">
               (Bà con có thể gõ trực tiếp hoặc để AI hỏi từng câu bằng giọng nói)
             </span>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="flex items-center gap-2">
             {notification && (
               <span className="bg-blue-100 text-blue-900 px-2 py-0.5 rounded-md font-bold text-[11px] animate-fade-in">
                 {notification}
@@ -809,9 +838,9 @@ export default function SmartAutoFormModal({
 
                 {/* Danh sách các trường thông tin cần điền */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/60">
-                  <div className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
+                  <div className="text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <span>Các trường thông tin cần điền:</span>
-                    <span className="text-[11px] text-slate-400 font-normal">Chạm biểu tượng Mic để nói</span>
+                    <span className="text-[11px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-medium inline-block w-fit">💡 Chạm Mic bên cạnh để đọc thay vì gõ phím</span>
                   </div>
 
                   {schema.fields.map((field) => {
@@ -877,19 +906,19 @@ export default function SmartAutoFormModal({
                   })}
                 </div>
 
-                {/* Chân cột trái: Nút xuất file, xem A4 & QR */}
+                {/* Chân cột trái: Nút xuất file, xem A4 & Nộp QR */}
                 <div className="p-2.5 sm:p-3 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 flex-shrink-0">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                     <button
                       type="button"
                       onClick={() => {
                         if (onGenerateQr) onGenerateQr({ formId, schema, formData });
                       }}
-                      className="h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
-                      title="Tạo mã QR lưu hồ sơ lên điện thoại của bà con"
+                      className="h-9 sm:h-10 px-3 sm:px-3.5 rounded-xl bg-gradient-to-r from-red-700 to-[#991B1B] hover:from-red-800 hover:to-red-900 text-white text-xs sm:text-sm font-black flex items-center gap-1.5 shadow-md active:scale-95 transition-all ring-2 ring-amber-300"
+                      title="Tạo mã QR lưu hồ sơ lên điện thoại của bà con và gửi tới Cán bộ"
                     >
-                      <QrCode className="w-4 h-4 text-slate-700 shrink-0" />
-                      <span>Mã QR</span>
+                      <QrCode className="w-4 h-4 text-amber-300 shrink-0" />
+                      <span>Tạo Mã QR & Nộp Hồ Sơ</span>
                     </button>
 
                     {/* Nút chuyển nhanh sang xem đơn A4 trên điện thoại */}
@@ -907,9 +936,9 @@ export default function SmartAutoFormModal({
                     type="button"
                     onClick={handleDownloadDocx}
                     disabled={isExporting}
-                    className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-black flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+                    className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs sm:text-sm font-black flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                   >
-                    <Download className="w-4 h-4 text-amber-300 shrink-0" />
+                    <Download className="w-4 h-4 text-stone-950 shrink-0" />
                     <span>Xuất File Word</span>
                   </button>
                 </div>

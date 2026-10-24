@@ -24,33 +24,36 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
           codes = [];
         }
 
-        // Nếu thiết bị chưa từng tạo/tra cứu hồ sơ, dùng mã mặc định demo HH-1022 để bà con thấy tính năng thông báo
-        if (!codes || codes.length === 0) {
-          codes = ['HH-1022'];
-        }
+        // Lấy tối đa 5 mã hồ sơ gần nhất mà người dân đã tạo hoặc tra cứu
+        const codesToCheck = codes.length > 0 ? codes.slice(0, 5) : ['HH-1022'];
 
-        // Lấy mã mới nhất
-        const latestCode = codes[0];
-        if (!latestCode) return;
+        for (const code of codesToCheck) {
+          try {
+            const res = await apiClient.getSubmission(code);
+            if (res && res.success && res.submission) {
+              const sub = res.submission;
+              const statusKey = `${sub.submissionCode}_${sub.status}_${sub.updatedAt}`;
 
-        const res = await apiClient.getSubmission(latestCode);
-        if (res && res.success && res.submission) {
-          const sub = res.submission;
-          const statusKey = `${sub.submissionCode}_${sub.status}_${sub.updatedAt}`;
+              // Nếu trạng thái chưa bị người dân đóng
+              if (!dismissedMap[statusKey]) {
+                setActiveAlert(sub);
 
-          // Nếu chưa bị đóng trong phiên này
-          if (!dismissedMap[statusKey]) {
-            setActiveAlert(sub);
-
-            // Đọc giọng nói nhắc nhở 1 lần khi có trạng thái mới
-            if (speakText && lastSpokenStatusRef.current[sub.submissionCode] !== sub.status) {
-              lastSpokenStatusRef.current[sub.submissionCode] = sub.status;
-              if (sub.status === 'COMPLETED') {
-                speakText(`Thông báo từ UBND xã Hiệp Hòa: Hồ sơ ${sub.submissionCode} của bà con đã được xử lý xong. Kính mời bà con xem kết quả!`);
-              } else if (sub.status === 'PROCESSING') {
-                speakText(`UBND xã Hiệp Hòa thông báo: Hồ sơ ${sub.submissionCode} của bà con đang được cán bộ một cửa thụ lý xử lý.`);
+                // Đọc giọng nói nhắc nhở 1 lần khi có trạng thái mới
+                if (speakText && lastSpokenStatusRef.current[sub.submissionCode] !== sub.status) {
+                  lastSpokenStatusRef.current[sub.submissionCode] = sub.status;
+                  if (sub.status === 'COMPLETED') {
+                    speakText(`Thông báo từ UBND xã Hiệp Hòa: Hồ sơ ${sub.submissionCode} của bà con đã được xử lý xong. Kính mời bà con xem kết quả và bấm xác nhận đã nhận thông tin!`);
+                  } else if (sub.status === 'PROCESSING') {
+                    speakText(`UBND xã Hiệp Hòa thông báo: Hồ sơ ${sub.submissionCode} của bà con đang được cán bộ một cửa thụ lý xử lý.`);
+                  } else if (sub.status === 'NEEDS_SUPPLEMENT') {
+                    speakText(`UBND xã Hiệp Hòa thông báo: Hồ sơ ${sub.submissionCode} cần bổ sung giấy tờ theo ghi chú của cán bộ.`);
+                  }
+                }
+                break; // Ưu tiên hiển thị thông báo hồ sơ tìm thấy đầu tiên
               }
             }
+          } catch (e) {
+            // bỏ qua lỗi từng mã
           }
         }
       } catch (err) {
@@ -58,9 +61,9 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
       }
     };
 
-    // Kiểm tra ngay sau 2 giây khi mở trang và sau đó lặp lại mỗi 8 giây
-    const initialTimer = setTimeout(checkTrackedSubmissions, 2000);
-    const interval = setInterval(checkTrackedSubmissions, 8000);
+    // Kiểm tra ngay sau 1.5 giây khi mở trang và sau đó lặp lại mỗi 3 giây để đồng bộ tức thì
+    const initialTimer = setTimeout(checkTrackedSubmissions, 1500);
+    const interval = setInterval(checkTrackedSubmissions, 3000);
 
     return () => {
       clearTimeout(initialTimer);
@@ -73,6 +76,34 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
   const handleDismiss = () => {
     const statusKey = `${activeAlert.submissionCode}_${activeAlert.status}_${activeAlert.updatedAt}`;
     setDismissedMap(prev => ({ ...prev, [statusKey]: true }));
+    setActiveAlert(null);
+  };
+
+  // Hành động: Đã nhận thông tin & Thoát -> Làm sạch lịch sử thiết bị
+  const handleAcknowledgeAndExit = () => {
+    try {
+      // 1. Xóa danh sách hồ sơ theo dõi
+      localStorage.removeItem('hh_tracked_submissions');
+      // 2. Xóa phiên điền đơn trong sessionStorage
+      sessionStorage.clear();
+      // 3. Xóa các khóa lưu trữ nháp
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('hiep_hoa_') || k.startsWith('hh_'))) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch (e) {}
+
+    // 4. Phát sự kiện toàn cục để form và modal làm sạch trắng tinh
+    window.dispatchEvent(new CustomEvent('hh_clear_citizen_session'));
+
+    if (speakText) {
+      speakText('Bà con đã xác nhận nhận thông tin thành công. Toàn bộ lịch sử hồ sơ trên thiết bị đã được làm sạch để bà con an tâm nộp hồ sơ mới!');
+    }
+
     setActiveAlert(null);
   };
 
@@ -149,29 +180,40 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
               Thủ tục: <strong>{activeAlert.procedureTitle}</strong>
             </p>
 
-            {/* Nút Xem chi tiết kết quả */}
-            <div className="mt-2.5 flex items-center gap-2">
+            {/* Hàng nút tác vụ thông báo */}
+            <div className="mt-2.5 flex items-center gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={handleView}
-                className={`px-3 py-1.5 rounded-xl font-black text-xs inline-flex items-center gap-1 shadow-md active:scale-95 transition-all ${
-                  isCompleted
-                    ? 'bg-amber-400 text-stone-950 hover:bg-amber-300'
-                    : 'bg-amber-400 text-stone-950 hover:bg-amber-300'
-                }`}
+                className="px-3 py-1.5 rounded-xl font-black text-xs inline-flex items-center gap-1 shadow-md active:scale-95 transition-all bg-amber-400 text-stone-950 hover:bg-amber-300"
               >
-                <span>Mời bà con xem chi tiết</span>
+                <span>Xem chi tiết</span>
                 <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+              </button>
+
+              {/* NÚT ĐÃ NHẬN THÔNG TIN & THOÁT (LÀM SẠCH LỊCH SỬ THIẾT BỊ) */}
+              <button
+                type="button"
+                onClick={handleAcknowledgeAndExit}
+                className="px-3 py-1.5 rounded-xl font-black text-xs inline-flex items-center gap-1 shadow-md active:scale-95 transition-all bg-emerald-500 hover:bg-emerald-400 text-white border border-emerald-300 ring-2 ring-emerald-400/50"
+                title="Bấm để xác nhận đã nhận thông tin và làm sạch lịch sử thiết bị để làm hồ sơ mới không bị đụng chạm"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-white shrink-0" />
+                <span>Đã nhận thông tin & Thoát</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                className="px-2 py-1.5 rounded-xl text-[11px] font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
               >
                 Để sau
               </button>
             </div>
+
+            <p className="text-[10px] text-amber-200/80 mt-1.5 italic">
+              💡 Bấm "Đã nhận thông tin & Thoát" sẽ xóa sạch lịch sử trên thiết bị để bà con làm hồ sơ mới không bị đụng chạm.
+            </p>
           </div>
 
           {/* Nút đóng */}

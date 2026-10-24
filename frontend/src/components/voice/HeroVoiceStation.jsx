@@ -122,8 +122,8 @@ export default function HeroVoiceStation({
           </div>
 
           {/* Tiêu đề */}
-          <h2 className="text-lg sm:text-2xl lg:text-[26px] font-black text-slate-900 tracking-tight leading-tight sm:leading-snug">
-            Bà con cần làm giấy tờ gì hoặc hỏi luật, hãy chạm vào Micro để nói chuyện!
+          <h2 className="text-lg sm:text-2xl lg:text-[26px] font-black text-slate-900 tracking-tight leading-snug">
+            Bà con cần làm giấy tờ hoặc hỏi&nbsp;luật, hãy chạm vào Micro để nói&nbsp;chuyện!
           </h2>
 
           {/* Hộp lời chào ngắn gọn kèm nút Nghe lời chào */}

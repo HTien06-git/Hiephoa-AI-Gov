@@ -6,7 +6,31 @@ Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và c�
 
 ---
 
-## [2026-10-24 19:30] - Phiên Bản V6.3: Tối Ưu Toàn Diện Giao Diện Mobile, Sửa Lỗi Lặp Giọng Nói Stutter, Tra Cứu Bằng CCCD 12 Số, Thông Báo Nhắc Kết Quả Trên Thiết Bị & Giải Mã Từ Viết Tắt
+## [2026-10-24 20:15] - Phiên Bản V6.4: Đại Tu Dock Chức Năng Nhanh Badges Đa Sắc, Chống Nhảy Chữ Mobile, Nút Nộp Hồ Sơ Trực Tuyến QR, Tra Cứu Giọng Nói & Nút "Đã Nhận Thông Tin & Thoát" Làm Sạch Dữ Liệu
+- **Loại tác vụ**: Giải quyết triệt để 5 vấn đề phản ánh từ 3 ảnh chụp màn hình kiểm thử thực tế trên điện thoại: đại tu dock chức năng nhanh thành circular badges chuyên nghiệp có tính năng thu gọn/mở rộng chống che khuất (Hình 1), chống nhảy chữ rớt dòng trên điện thoại và tối ưu biểu mẫu điền đơn 1 dòng 3 tab không cắt chữ (Hình 2 & 3), bổ sung nút nộp hồ sơ trực tuyến trong modal xem QR, tích hợp tra cứu hồ sơ bằng giọng nói và theo hướng dẫn của AI, đồng bộ thông báo kết quả tức thì mỗi 3 giây và nút "Đã nhận thông tin & Thoát" làm sạch lịch sử thiết bị để an tâm làm hồ sơ mới (Version 6.4 Overhaul).
+- **Tác vụ thực hiện**:
+  1. **Đại tu QuickActionFloatingDock.jsx (Hình 1)**:
+     - Nâng cấp từng nút bấm thành circular badge phát sáng đa sắc chuẩn nhận diện hành chính công (Mic Vàng Hoàng Gia, Tra cứu Lam Ngọc, Thủ tục Hồng Ngọc, Chụp ảnh Thạch Anh Tím, Tổng đài Ngọc Lục Bảo, Lên đầu trang Kim Loại Vàng).
+     - Bổ sung nút thu gọn `ChevronDown` giúp dock co lại thành viên thuốc `[⚡ Thao Tác Nhanh 🔼]`, tránh hoàn toàn việc che lấp thanh tab danh mục thủ tục.
+  2. **Chống nhảy chữ và tối ưu biểu mẫu trên điện thoại (Hình 2 & 3)**:
+     - Dùng `&nbsp;` trong `Header.jsx` và `HeroVoiceStation.jsx` ngăn chữ "HÒA", "hỏi", "nói" rớt dòng đơn độc.
+     - `SmartAutoFormModal.jsx`: Gỡ bỏ `truncate` gây cắt chữ tên biểu mẫu, hợp nhất thanh chọn chế độ trên điện thoại thành 1 dòng duy nhất 3 tab (`[📝 Tự Điền Đơn] [🎙️ AI Hỏi Từng Bước] [📄 Xem Đơn A4]`), chống va chạm tiêu đề trường nhập.
+  3. **Nút "Nộp hồ sơ trực tuyến" trong xem QR (`CitizenQrModal.jsx`)**:
+     - Bổ sung nút lớn: `[🚀 BẤM NỘP HỒ SƠ TRỰC TUYẾN TỚI CÁN BỘ MỘT CỬA]` với phản hồi trạng thái xanh đã gửi thành công và hướng dẫn rõ ràng cho người dân.
+  4. **Tra cứu hồ sơ bằng giọng nói & Hướng dẫn của AI (`CitizenLookupModal.jsx`)**:
+     - Bổ sung nút Micro trong ô tìm kiếm: Người dân chỉ cần chạm và đọc 12 số CCCD hoặc mã hồ sơ, hệ thống tự động nhận diện tiếng Việt chuyển thành dãy số và tra cứu tức thì.
+     - Bổ sung nút `[🎙️ Nghe AI Hướng Dẫn]`: AI phát giọng nói hướng dẫn chi tiết cách tra cứu tiến độ bằng CCCD.
+  5. **Thông báo kết quả tức thì & Nút "Đã nhận thông tin & Thoát" làm sạch dữ liệu (`CitizenDeviceNotificationToast.jsx`)**:
+     - Tự động ghi nhớ mã hồ sơ vào thiết bị ngay khi tạo đơn; nâng tần suất polling lên 3 giây/lần.
+     - Bổ sung nút bấm `[✅ Đã nhận thông tin & Thoát]`: Khi người dân bấm, hệ thống xóa sạch lịch sử theo dõi, xóa sạch nháp đơn và bộ nhớ tạm, phát sự kiện làm sạch toàn cục để không bị đụng chạm khi nộp hồ sơ mới.
+  6. **Kiểm thử tự động**:
+     - `npm run build`: Hoàn tất 100% trong 4.69 giây, 0 lỗi.
+     - `node --check`: Cú pháp Node.js backend chuẩn 100%.
+- **Báo cáo chi tiết**: Xem [2026-10-24_2015_v6_4_dock_voice_lookup_submit_clean.md](./2026-10-24_2015_v6_4_dock_voice_lookup_submit_clean.md)
+
+---
+
+## [2026-10-24 19:30] - Phiên Bản V6.3: Tối Ưu Toàn Diện Giao Diện Mobile, Sửa Lỗi Lặp Giọng Nói Stutter, Tra Cứu Bằng CCCD 12 Số, Thông Báo Nhắc Kết QuẢ Trên Thiết Bị & Giải Mã Từ Viết Tắt
 - **Loại tác vụ**: Giải quyết triệt để 5 vấn đề phản ánh từ 4 ảnh chụp màn hình kiểm thử thực tế trên điện thoại: sửa lỗi chữ tràn viền Header trên mobile (Hình 1 & 2), loại bỏ hiện tượng lặp giọng nói stutter loop của Android Chrome (Hình 3), tái cấu trúc biểu mẫu nhập liệu và bản xem trước A4 chuẩn mobile (Hình 4), bổ sung tính năng tra cứu hồ sơ bằng Căn cước công dân (12 số CCCD) kèm hướng dẫn chi tiết, thiết lập hệ thống thông báo nhắc kết quả hồ sơ trên thiết bị người dân và chuẩn hóa đọc từ viết tắt / chào hỏi xã giao (Version 6.3 Overhaul).
 - **Tác vụ thực hiện**:
   1. **Khắc phục lỗi vỡ chữ & tràn viền Header trên điện thoại (Hình 1 & 2)**:

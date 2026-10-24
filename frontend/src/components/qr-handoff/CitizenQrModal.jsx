@@ -30,8 +30,25 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isSubmittedConfirmed, setIsSubmittedConfirmed] = useState(false);
   const previousStatusRef = useRef(submission.status);
   const hasAnnouncedRef = useRef(false);
+
+  const handleExplicitSubmit = () => {
+    setIsSubmittedConfirmed(true);
+    try {
+      const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
+      const targetCode = submission.submissionCode;
+      if (targetCode && !tracked.includes(targetCode)) {
+        tracked.unshift(targetCode);
+        localStorage.setItem('hh_tracked_submissions', JSON.stringify(tracked.slice(0, 10)));
+      }
+    } catch (e) {}
+
+    if (speakText) {
+      speakText(`Hồ sơ mã số ${submission.submissionCode} đã được nộp trực tuyến vào hàng đợi của cán bộ Một cửa xã Hiệp Hòa. Thiết bị của bà con sẽ tự động nhận thông báo khi cán bộ xử lý xong ạ!`);
+    }
+  };
 
   // Gửi hồ sơ lên backend ngay khi mở Modal nếu chưa có code thực
   useEffect(() => {
@@ -49,6 +66,16 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
         if (isMounted && res && res.submission) {
           setSubmission(res.submission);
           previousStatusRef.current = res.submission.status;
+
+          // Lưu mã hồ sơ vào thiết bị để tự động hiển thị thông báo kết quả từ cán bộ
+          try {
+            const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
+            const targetCode = res.submission.submissionCode;
+            if (targetCode && !tracked.includes(targetCode)) {
+              tracked.unshift(targetCode);
+              localStorage.setItem('hh_tracked_submissions', JSON.stringify(tracked.slice(0, 10)));
+            }
+          } catch (e) {}
         }
       } catch (e) {
         console.warn('[CitizenQrModal] Error creating live submission:', e);
@@ -188,6 +215,34 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
             level="M"
             includeMargin={true}
           />
+        </div>
+
+        {/* NÚT XÁC NHẬN NỘP HỒ SƠ TRỰC TUYẾN TỚI CÁN BỘ MỘT CỬA */}
+        <div className="my-3 text-center">
+          <button
+            type="button"
+            onClick={handleExplicitSubmit}
+            className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs sm:text-sm md:text-base flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 ${
+              isSubmittedConfirmed
+                ? 'bg-emerald-700 text-white ring-4 ring-emerald-300'
+                : 'bg-gradient-to-r from-[#991B1B] via-red-700 to-[#7F1D1D] text-amber-300 hover:from-red-800 hover:to-red-950 ring-2 ring-amber-400'
+            }`}
+          >
+            {isSubmittedConfirmed ? (
+              <>
+                <CheckCircle2 className="w-5 h-5 text-white" />
+                <span>✅ ĐÃ NỘP HỒ SƠ VÀO HÀNG ĐỢI CỦA CÁN BỘ MỘT CỬA!</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5 text-amber-300 animate-spin" />
+                <span>🚀 BẤM NỘP HỒ SƠ TRỰC TUYẾN TỚI CÁN BỘ MỘT CỬA</span>
+              </>
+            )}
+          </button>
+          <p className="text-[11px] text-slate-500 mt-1 font-medium">
+            (Bấm nút trên để gửi hồ sơ vào hàng đợi. Cán bộ Một cửa sẽ nhận được ngay và thiết bị của bà con sẽ tự động báo kết quả)
+          </p>
         </div>
 
         {/* Hướng dẫn bà con */}

@@ -60,12 +60,12 @@ export default function Header({ currentMode, setCurrentMode }) {
             <div className="text-left min-w-0 flex-1">
               {/* Dòng 1: Đơn vị chủ quản (Chữ vàng kim in hoa thanh lịch) */}
               <div className="text-amber-300 font-extrabold text-[10px] sm:text-xs md:text-sm tracking-wide sm:tracking-wider uppercase drop-shadow-xs leading-tight">
-                ỦY BAN NHÂN DÂN XÃ HIỆP HÒA — TỈNH TÂY NINH
+                ỦY BAN NHÂN DÂN XÃ&nbsp;HIỆP&nbsp;HÒA — TỈNH&nbsp;TÂY&nbsp;NINH
               </div>
 
-              {/* Dòng 2: Tiêu đề lớn màu trắng uy nghiêm (Tự động co giãn mượt trên điện thoại) */}
-              <h1 className="text-white font-black text-xs sm:text-lg md:text-xl lg:text-[22px] tracking-tight leading-tight sm:leading-snug drop-shadow-md mt-0.5 break-words">
-                TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA
+              {/* Dòng 2: Tiêu đề lớn màu trắng uy nghiêm (Tự ngắt nhịp cân đối: Trung tâm một dòng, Xã Hiệp Hòa một dòng) */}
+              <h1 className="text-white font-black text-xs sm:text-lg md:text-xl lg:text-[22px] tracking-tight leading-tight sm:leading-snug drop-shadow-md mt-0.5">
+                TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG <span className="inline sm:inline-block">XÃ&nbsp;HIỆP&nbsp;HÒA</span>
               </h1>
 
               {/* Dòng 3: Huy hiệu Nền tảng Vàng Kim & Mô tả chuyên viên AI */}

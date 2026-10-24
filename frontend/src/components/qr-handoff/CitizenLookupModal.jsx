@@ -1,6 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, Clock, CheckCircle2, AlertCircle, Building2, User, Phone, FileText, Sparkles, RefreshCw } from 'lucide-react';
+import {
+  Search,
+  X,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Building2,
+  User,
+  Phone,
+  FileText,
+  Sparkles,
+  RefreshCw,
+  Mic,
+  MicOff,
+  Volume2,
+  HelpCircle
+} from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+
+// Chuyển đổi giọng nói tiếng Việt (số, chữ) thành mã số CCCD hoặc mã hồ sơ
+export function parseSpokenQuery(text) {
+  if (!text) return '';
+  let str = text.toLowerCase()
+    .replace(/[,.]/g, ' ')
+    .replace(/\bhát\s+hát\b/g, 'HH-')
+    .replace(/\bhát\b/g, 'H')
+    .replace(/\bh\s+h\b/g, 'HH-')
+    .replace(/\bhắc\s+hắc\b/g, 'HH-')
+    .replace(/\bkhông\b/g, '0')
+    .replace(/\bmột\b|\bmốt\b/g, '1')
+    .replace(/\bhai\b/g, '2')
+    .replace(/\bba\b/g, '3')
+    .replace(/\bbốn\b|\btư\b/g, '4')
+    .replace(/\bnăm\b|\blăm\b/g, '5')
+    .replace(/\bsáu\b/g, '6')
+    .replace(/\bbảy\b|\bbẩy\b/g, '7')
+    .replace(/\btám\b/g, '8')
+    .replace(/\bchín\b/g, '9');
+
+  // Kiểm tra nếu có dạng HH-1234
+  const hhMatch = str.match(/hh[-\s]?(\d{3,5})/i);
+  if (hhMatch) {
+    return `HH-${hhMatch[1]}`;
+  }
+
+  // Lấy toàn bộ chữ số liên tục
+  const digitsOnly = str.replace(/\D/g, '');
+  if (digitsOnly.length >= 9) {
+    return digitsOnly;
+  }
+
+  if (digitsOnly.length >= 3 && digitsOnly.length <= 6) {
+    return `HH-${digitsOnly}`;
+  }
+
+  return str.trim();
+}
 
 export default function CitizenLookupModal({ onClose, speakText, initialQuery = '' }) {
   const [searchCode, setSearchCode] = useState(initialQuery);
@@ -9,6 +65,39 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showGuide, setShowGuide] = useState(false);
+  const [voiceNotice, setVoiceNotice] = useState('');
+
+  const { isListening, toggleListening } = useSpeechRecognition({
+    onResult: (text) => {
+      if (text && text.trim().length > 0) {
+        const parsed = parseSpokenQuery(text);
+        if (parsed) {
+          setSearchCode(parsed);
+          setVoiceNotice(`Đã nghe: "${parsed}"`);
+          handleLookup(parsed);
+          setTimeout(() => setVoiceNotice(''), 4000);
+        }
+      }
+    }
+  });
+
+  const handleVoiceSearchClick = () => {
+    if (isListening) {
+      toggleListening();
+    } else {
+      if (speakText) {
+        speakText('Bà con vui lòng đọc 12 số Căn cước công dân hoặc mã hồ sơ để em tra cứu giúp bà con nhé!');
+      }
+      toggleListening();
+    }
+  };
+
+  const handleAiGuidanceVoice = () => {
+    if (speakText) {
+      speakText('Kính chào bà con! Để tra cứu tiến độ hồ sơ, bà con có thể gõ hoặc chạm vào Micro màu đỏ và đọc 12 số trên thẻ Căn cước công dân của mình, hoặc đọc mã hồ sơ ví dụ Hát Hát một không hai một. Hệ thống sẽ hiển thị kết quả từ cán bộ Một cửa ngay lập tức ạ!');
+    }
+    setShowGuide(true);
+  };
 
   const handleLookup = async (codeToSearch) => {
     const code = (codeToSearch || searchCode).trim();
@@ -104,7 +193,7 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
           </div>
         </div>
 
-        {/* Khung tìm kiếm mã hồ sơ hoặc số CCCD */}
+        {/* Khung tìm kiếm mã hồ sơ hoặc số CCCD bằng Bàn phím & Giọng nói */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -117,9 +206,25 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
               type="text"
               value={searchCode}
               onChange={(e) => setSearchCode(e.target.value)}
-              placeholder="Nhập số CCCD (12 số) hoặc Mã hồ sơ..."
+              placeholder="Nhập hoặc chạm Mic đọc 12 số CCCD / Mã hồ sơ..."
               className="min-w-0 flex-1 px-3 py-2 text-xs sm:text-sm outline-none font-bold text-slate-900 placeholder:text-slate-400"
             />
+
+            {/* Nút Mic đọc số CCCD bằng giọng nói */}
+            <button
+              type="button"
+              onClick={handleVoiceSearchClick}
+              className={`p-2 rounded-lg font-bold text-xs flex items-center justify-center transition-all mr-1 ${
+                isListening
+                  ? 'bg-red-600 text-white animate-pulse ring-2 ring-red-300'
+                  : 'bg-amber-100 hover:bg-amber-200 text-[#991B1B]'
+              }`}
+              title={isListening ? 'Đang nghe... Bấm để dừng' : 'Chạm để đọc 12 số CCCD hoặc mã hồ sơ'}
+            >
+              <Mic className={`w-4 h-4 ${isListening ? 'animate-bounce text-white' : 'text-[#991B1B]'}`} />
+              <span className="sr-only">Nói để tra cứu</span>
+            </button>
+
             <button
               type="submit"
               disabled={isLoading}
@@ -137,7 +242,20 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
           </div>
         </form>
 
-        {/* Nút bấm mẫu thử nhanh & Nút xem hướng dẫn */}
+        {/* Trạng thái lắng nghe giọng nói */}
+        {isListening && (
+          <div className="mt-1.5 px-3 py-1.5 rounded-lg bg-red-100 border border-red-300 text-red-900 text-xs font-bold flex items-center gap-2 animate-pulse shrink-0">
+            <Mic className="w-3.5 h-3.5 animate-bounce text-red-600 shrink-0" />
+            <span>🔴 Đang nghe bà con đọc... Đọc xong hệ thống tự tìm ngay!</span>
+          </div>
+        )}
+        {voiceNotice && (
+          <div className="mt-1 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-900 text-xs font-bold shrink-0">
+            {voiceNotice}
+          </div>
+        )}
+
+        {/* Nút bấm mẫu thử nhanh & Nút xem hướng dẫn & Nghe AI Hướng Dẫn */}
         <div className="mt-2 flex items-center justify-between gap-2 flex-wrap text-xs shrink-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="font-bold text-slate-500 text-[11px]">Thử nhanh:</span>
@@ -156,13 +274,25 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowGuide(!showGuide)}
-            className="text-[11px] font-bold text-amber-800 hover:underline flex items-center gap-0.5"
-          >
-            <span>{showGuide ? 'Ẩn hướng dẫn' : '📖 Hướng dẫn tra cứu'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleAiGuidanceVoice}
+              className="text-[11px] font-bold text-[#991B1B] hover:text-red-900 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg border border-red-200 flex items-center gap-1 transition-all active:scale-95"
+              title="Bấm để nghe AI hướng dẫn tra cứu bằng giọng nói"
+            >
+              <Volume2 className="w-3.5 h-3.5 text-red-700" />
+              <span>Nghe AI Hướng Dẫn</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowGuide(!showGuide)}
+              className="text-[11px] font-bold text-amber-800 hover:underline flex items-center gap-0.5"
+            >
+              <span>{showGuide ? 'Ẩn' : '📖 Hướng dẫn'}</span>
+            </button>
+          </div>
         </div>
 
         {/* Hộp hướng dẫn tra cứu chi tiết */}

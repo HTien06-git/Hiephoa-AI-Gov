@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import {
   ExternalLink,
   Smartphone,
-  CheckCircle,
   Volume2,
-  Sparkles,
-  BookOpen,
-  ArrowRight
+  Sparkles
 } from 'lucide-react';
+import TrongDongOrnament from '../common/TrongDongOrnament';
 
 const VNEID_STEPS = [
   {
@@ -47,40 +45,45 @@ export default function DvcGuideSection({ speakText }) {
   };
 
   return (
-    <section className="my-10 bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-2xl border-4 border-gov-gold">
+    <section className="my-10 bg-gradient-to-br from-[#6B1114] via-[#7F1416] to-[#580C0E] border-2 border-amber-500/70 rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden shadow-lg">
       
+      {/* Họa tiết Trống Đồng Đông Sơn chìm góc nền sang trọng */}
+      <div className="absolute -right-20 -bottom-20 w-80 h-80 opacity-10 pointer-events-none text-amber-300">
+        <TrongDongOrnament size={320} animated={false} />
+      </div>
+
       {/* Top Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-blue-700/50 pb-6 mb-8">
+      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-amber-500/30 pb-6 mb-8">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400 text-blue-950 text-xs font-black uppercase mb-2">
-            <Sparkles className="w-4 h-4 text-gov-red" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400 text-[#7F1D1D] text-xs font-extrabold uppercase mb-2 shadow-xs">
+            <Sparkles className="w-4 h-4 text-[#7F1D1D]" />
             <span>KẾT NỐI CHUYỂN ĐỔI SỐ QUỐC GIA & TỈNH TÂY NINH</span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Cổng Dịch Vụ Công Trực Tuyến & Cẩm Nang VNeID
           </h2>
-          <p className="text-blue-200 text-base mt-1 max-w-2xl">
+          <p className="text-amber-100/90 text-sm sm:text-base mt-1 max-w-2xl leading-relaxed">
             Bà con nhân dân xã Hiệp Hòa có thể nộp hồ sơ trực tuyến ngay tại nhà thông qua Cổng DVC và tài khoản định danh VNeID mà không cần xếp hàng!
           </p>
         </div>
 
-        {/* 3 Deep-link Portal Buttons */}
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5">
+        {/* 03 Nút liên kết đồng bộ sắc Đỏ Rượu - Vàng Kim */}
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
           <a
             href="https://dichvucong.tayninh.gov.vn/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-3 rounded-2xl bg-gov-gold hover:bg-amber-400 text-slate-950 font-black text-sm md:text-base flex items-center justify-between gap-2 shadow-lg transition-transform active:scale-95"
+            className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm sm:text-base flex items-center justify-between gap-3 shadow-md transition-all active:scale-95"
           >
             <span>Cổng DVC Tỉnh Tây Ninh</span>
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="w-4 h-4 text-slate-950" />
           </a>
 
           <a
             href="https://dichvucong.gov.vn/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm md:text-base flex items-center justify-between gap-2 border border-white/20 transition-all"
+            className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-amber-400/50 text-amber-100 font-semibold text-sm sm:text-base flex items-center justify-between gap-3 transition-all active:scale-95"
           >
             <span>Cổng DVC Quốc Gia</span>
             <ExternalLink className="w-4 h-4 text-amber-300" />
@@ -90,7 +93,7 @@ export default function DvcGuideSection({ speakText }) {
             href="https://dichvucong.bocongan.gov.vn/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm md:text-base flex items-center justify-between gap-2 border border-white/20 transition-all"
+            className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-amber-400/50 text-amber-100 font-semibold text-sm sm:text-base flex items-center justify-between gap-3 transition-all active:scale-95"
           >
             <span>Cổng DVC Bộ Công An (Cư trú)</span>
             <ExternalLink className="w-4 h-4 text-amber-300" />
@@ -99,60 +102,63 @@ export default function DvcGuideSection({ speakText }) {
       </div>
 
       {/* CẨM NANG VNEID "CẦM TAY CHỈ VIỆC" */}
-      <div>
+      <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl md:text-2xl font-black text-amber-300 flex items-center gap-2">
-            <Smartphone className="w-6 h-6 text-amber-400" />
+          <h3 className="text-lg sm:text-xl font-bold text-amber-300 flex items-center gap-2">
+            <Smartphone className="w-5 h-5 text-amber-400" />
             <span>Cẩm Nang VNeID "Cầm Tay Chỉ Việc" (Có Giọng Đọc Từng Bước)</span>
           </h3>
-          <span className="text-xs text-blue-200 hidden sm:inline">
-            Bấm vào từng bước để nghe AI đọc to hướng dẫn
+          <span className="text-xs text-amber-200/80 hidden sm:inline">
+            Chạm vào từng bước để nghe AI đọc to hướng dẫn
           </span>
         </div>
 
-        {/* 4 Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 04 Thẻ bước hướng dẫn VNeID nền bg-black/25 border border-amber-400/30 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {VNEID_STEPS.map((s, index) => {
             const isActive = activeStep === index;
             return (
               <div
                 key={s.step}
+                role="button"
+                tabIndex={0}
                 onClick={() => handleReadStep(index)}
-                className={`p-5 rounded-2xl cursor-pointer transition-all duration-200 border-2 flex flex-col justify-between ${
+                onKeyDown={(e) => { if (e.key === 'Enter') handleReadStep(index); }}
+                className={`p-4 rounded-xl cursor-pointer transition-all duration-200 border flex flex-col justify-between ${
                   isActive
-                    ? 'bg-blue-800/80 border-amber-400 shadow-xl scale-102 ring-4 ring-amber-400/30'
-                    : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-blue-400'
+                    ? 'bg-black/40 border-amber-400 shadow-md ring-2 ring-amber-400/50'
+                    : 'bg-black/25 border-amber-400/30 hover:border-amber-400/70 hover:bg-black/30'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${
-                      isActive ? 'bg-amber-400 text-blue-950' : 'bg-blue-600 text-white'
-                    }`}>
+                    {/* Số thứ tự đặt trong vòng tròn vàng kim */}
+                    <span className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs bg-amber-400 text-[#7F1D1D] shadow-xs">
                       {s.step}
                     </span>
 
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleReadStep(index);
                       }}
-                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300"
+                      className="p-1 rounded-md bg-white/10 hover:bg-white/20 text-amber-300"
                       title="Đọc bước này"
                     >
-                      <Volume2 className="w-4 h-4" />
+                      <Volume2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
-                  <h4 className="text-base md:text-lg font-black text-white leading-snug">
+                  <h4 className="text-sm font-bold text-white leading-snug">
                     {s.title}
                   </h4>
-                  <p className="text-sm text-blue-100 mt-2 leading-relaxed">
+                  <p className="text-xs text-amber-50/90 mt-1.5 leading-relaxed">
                     {s.desc}
                   </p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-white/10 text-xs font-semibold text-amber-300">
+                <div className="mt-3 pt-2.5 border-t border-amber-400/20 text-[11px] font-medium text-amber-300">
                   💡 {s.tip}
                 </div>
               </div>

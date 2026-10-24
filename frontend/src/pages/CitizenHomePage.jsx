@@ -1,57 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/layout/Header';
 import AccessibilityBar from '../components/layout/AccessibilityBar';
-import AutoVoiceOnboarding from '../components/voice/AutoVoiceOnboarding';
-import VoiceMicButton from '../components/voice/VoiceMicButton';
+import HeroVoiceStation from '../components/voice/HeroVoiceStation';
 import CategoryGrid from '../components/categories/CategoryGrid';
+import DvcGuideSection from '../components/dvc-guide/DvcGuideSection';
 import RagChatDrawer from '../components/rag-chat/RagChatDrawer';
 import SmartAutoFormModal from '../components/auto-form/SmartAutoFormModal';
 import DocumentPreCheckModal from '../components/pre-check/DocumentPreCheckModal';
 import CitizenQrModal from '../components/qr-handoff/CitizenQrModal';
-import DvcGuideSection from '../components/dvc-guide/DvcGuideSection';
+import CitizenLookupModal from '../components/qr-handoff/CitizenLookupModal';
+import FloatingBottomNav from '../components/layout/FloatingBottomNav';
 
 import { useFontScale } from '../hooks/useFontScale';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useZeroDataSession } from '../hooks/useZeroDataSession';
 import { apiClient } from '../services/apiClient';
 
-// Import offline data
+// Offline fallback data
 import proceduresData from '../data/procedures_demo.json';
-import localInfoData from '../data/local_info.json';
-
-import KTechKpiStrip from '../components/common/KTechKpiStrip';
-import KTechEcosystemSteps from '../components/common/KTechEcosystemSteps';
-import FloatingBottomNav from '../components/layout/FloatingBottomNav';
-import CitizenLookupModal from '../components/qr-handoff/CitizenLookupModal';
 
 export default function CitizenHomePage({ onSwitchToOfficer }) {
   const { scale, setScale } = useFontScale();
   const { isSpeaking, isAudioEnabled, speak, stop, toggleAudio } = useSpeechSynthesis();
-  const { formData, updateFormData, clearSecurityData, hasData } = useZeroDataSession();
+  const { clearSecurityData, hasData } = useZeroDataSession();
 
   // Modals & Drawers state
-  const [categories, setCategories] = useState(proceduresData.categories || []);
-  const [procedures, setProcedures] = useState(proceduresData.procedures || []);
-  const [selectedProcedure, setSelectedProcedure] = useState(null);
+  const [categories] = useState(proceduresData.categories || []);
+  const [procedures] = useState(proceduresData.procedures || []);
+  const [, setSelectedProcedure] = useState(null);
   const [chatResult, setChatResult] = useState(null);
   const [autoFormProc, setAutoFormProc] = useState(null);
   const [autoFormMode, setAutoFormMode] = useState('data_input');
   const [preCheckProc, setPreCheckProc] = useState(null);
   const [qrPayload, setQrPayload] = useState(null);
   const [isLookupOpen, setIsLookupOpen] = useState(false);
+  const [, setIsQueryLoading] = useState(false);
 
   const handleOpenAutoForm = (proc, mode = 'data_input') => {
     setAutoFormMode(mode);
     setAutoFormProc(proc);
   };
-  const [isQueryLoading, setIsQueryLoading] = useState(false);
 
   // Cuộn mượt lên đầu trang
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Cuộn đến phần Micro
+  // Cuộn đến phần Hero Voice
   const handleActivateMic = () => {
     const micSection = document.getElementById('voice-hero-section');
     if (micSection) {
@@ -61,18 +56,16 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
     }
   };
 
-  // Handle Citizen Query (from Voice Mic or input box)
+  // Xử lý gửi câu hỏi người dân (từ Micro hoặc thanh nhập liệu)
   const handleQuerySubmit = async (queryText) => {
     if (!queryText || !queryText.trim()) return;
 
     setIsQueryLoading(true);
-    // Dừng âm thanh cũ nếu đang phát dở
     stop();
 
     try {
       const response = await apiClient.chatQuery(queryText);
       if (response && response.data) {
-        // RagChatDrawer sẽ tự động đọc to và đầy đủ nội dung tư vấn khi mở
         setChatResult(response.data);
       }
     } catch (err) {
@@ -82,7 +75,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
     }
   };
 
-  // When a procedure is clicked from the list
+  // Khi bấm xem chi tiết thủ tục
   const handleSelectProcedure = (proc) => {
     setSelectedProcedure(proc);
     setChatResult({
@@ -99,12 +92,12 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-between overflow-x-hidden max-w-full pb-16 md:pb-0">
+    <div className="min-h-screen bg-stone-100/70 flex flex-col justify-between overflow-x-hidden max-w-full pb-16 md:pb-0">
       <div>
-        {/* Header - Sticky 60px-68px */}
+        {/* Header chuẩn Cổng Dịch vụ công Chính phủ với Trống Đồng Đông Sơn */}
         <Header currentMode="citizen" setCurrentMode={(m) => m === 'officer' && onSwitchToOfficer()} />
 
-        {/* Compact Accessibility Bar - Sticky right below Header */}
+        {/* Thanh Công Cụ Trợ Năng */}
         <AccessibilityBar
           fontScale={scale}
           setFontScale={setScale}
@@ -114,33 +107,19 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
           hasData={hasData}
         />
 
-        {/* Main Content Container */}
-        <main className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-5 overflow-x-hidden">
+        {/* Main Content: Bố cục tinh gọn chỉ gồm đúng 03 khu vực mạch lạc */}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 overflow-x-hidden">
           
-          {/* Auto Voice Onboarding Greeting (Compact Bar) */}
-          <AutoVoiceOnboarding
-            speak={speak}
-            stop={stop}
+          {/* KHU VỰC 1: TRUNG TÂM TƯ VẤN GIỌNG NÓI & HỎI ĐÁP PHÁP LUẬT AI 24/7 (Hero Voice Station) */}
+          <HeroVoiceStation
+            onQuerySubmit={handleQuerySubmit}
             isSpeaking={isSpeaking}
+            stopSpeaking={stop}
+            speak={speak}
             isAudioEnabled={isAudioEnabled}
           />
 
-          {/* Khu vực 1: Hero Section Voice-First Chạm & Nói */}
-          <div id="voice-hero-section">
-            <VoiceMicButton
-              onQuerySubmit={handleQuerySubmit}
-              isSpeaking={isSpeaking}
-              stopSpeaking={stop}
-            />
-          </div>
-
-          {/* Khu vực 2: Dải 04 Chỉ Số Hiệu Quả Cải Cách Hành Chính (K-Tech Style KPI Counter Strip) */}
-          <KTechKpiStrip />
-
-          {/* Khu vực 3: Hệ Sinh Thái 03 Bước Tự Động Hóa Hồ Sơ (K-Tech Ecosystem Cards) */}
-          <KTechEcosystemSteps />
-
-          {/* Khu vực 4: Danh Mục Dịch Vụ Công Có Bộ Lọc Tab Ngang (K-Tech Filterable Portfolio Grid) */}
+          {/* KHU VỰC 2: DANH MỤC 08 THỦ TỤC HÀNH CHÍNH (Sạch sẽ, 2 nút chuẩn mực) */}
           <CategoryGrid
             categories={categories}
             procedures={procedures}
@@ -158,7 +137,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
             speakText={speak}
           />
 
-          {/* DVC Portals & VNeID Handbook */}
+          {/* KHU VỰC 3: CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN & CẨM NANG VNeID (Sắc Đỏ Thẫm Chính Phủ) */}
           <DvcGuideSection speakText={speak} />
 
         </main>
@@ -187,7 +166,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         />
       )}
 
-      {/* Smart Auto-Form Modal (Voice Wizard, OCR, Big Form, 4 Exports) */}
+      {/* Smart Auto-Form Modal (Voice Wizard, OCR, Điền đơn, 4 Định dạng tải về) */}
       {autoFormProc && (
         <SmartAutoFormModal
           procedure={autoFormProc}
@@ -202,7 +181,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         />
       )}
 
-      {/* Document Pre-Check Modal (AI Document Pre-Check) */}
+      {/* Document Pre-Check Modal (AI Kiểm tra ảnh chụp giấy tờ trước khi nộp) */}
       {preCheckProc && (
         <DocumentPreCheckModal
           procedure={preCheckProc}
@@ -212,7 +191,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         />
       )}
 
-      {/* Quick Citizen QR Code Modal */}
+      {/* Citizen QR Code Modal (Mã QR bảo mật nộp hồ sơ tại Bộ phận Một cửa) */}
       {qrPayload && (
         <CitizenQrModal
           qrPayload={qrPayload}
@@ -237,47 +216,67 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         onSwitchToOfficer={onSwitchToOfficer}
       />
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-10 px-4 border-t-4 border-gov-gold mt-16">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <div className="text-amber-400 font-extrabold text-lg uppercase mb-2">
-              Ủy ban nhân dân xã Hiệp Hòa
+      {/* ======================================================== */}
+      {/* FOOTER CHÍNH QUYỀN XÃ HIỆP HÒA (THÔNG TIN CHÍNH THỨC V6.0) */}
+      {/* ======================================================== */}
+      <footer className="bg-[#1C1917] text-stone-300 py-10 px-4 border-t-4 border-amber-500 relative mt-16">
+        {/* Đường diềm Đông Sơn vàng kim */}
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700" />
+
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Cột 1: Đơn vị hành chính */}
+          <div className="space-y-2">
+            <div className="text-amber-400 font-extrabold text-sm sm:text-base uppercase tracking-wide">
+              Ủy Ban Nhân Dân Xã Hiệp Hòa — Tỉnh Tây Ninh
             </div>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Trung tâm Phục vụ Hành chính công xã Hiệp Hòa, tỉnh Tây Ninh.
+            <p className="text-xs sm:text-sm text-stone-400 leading-relaxed">
+              <strong>Trung tâm Phục vụ Hành chính công xã Hiệp Hòa</strong><br />
               Địa chỉ: Ấp Văn Hiệp, xã Hiệp Hòa, tỉnh Tây Ninh.
             </p>
-            <p className="text-sm text-slate-400 mt-2">
-              Thời gian làm việc: Sáng 7h00 - 11h30, Chiều 13h30 - 17h00 (Thứ 2 đến Thứ 6).
+            <p className="text-xs text-stone-400">
+              Thời gian làm việc: Sáng 07h00 - 11h30, Chiều 13h30 - 17h00 (Thứ 2 đến Thứ 6).
             </p>
           </div>
 
-          <div>
-            <div className="text-amber-400 font-extrabold text-lg uppercase mb-2">
-              Đường dây nóng hỗ trợ bà con
+          {/* Cột 2: Đường dây nóng & Kỹ thuật chính thức */}
+          <div className="space-y-2">
+            <div className="text-amber-400 font-extrabold text-sm sm:text-base uppercase tracking-wide">
+              Đường Dây Nóng & Hỗ Trợ Kỹ Thuật
             </div>
-            <p className="text-base font-bold text-white">
-              Tổng đài tư vấn: <span className="text-gov-gold">1900 9095</span>
-            </p>
-            <p className="text-sm text-slate-400 mt-1">
-              Bộ phận Một cửa xã: 0276.3888.xxx
-            </p>
-            <p className="text-sm text-slate-400 mt-2">
-              Công an xã Hiệp Hòa (Cư trú & VNeID): 0276.3888.yyy
-            </p>
+            <div className="space-y-1 text-xs sm:text-sm">
+              <p className="text-white">
+                📞 <strong>Tổng đài Dịch vụ công Quốc gia:</strong>{' '}
+                <a href="tel:18001096" className="text-amber-300 font-bold hover:underline">1800 1096</a>
+              </p>
+              <p className="text-stone-300">
+                🛠 <strong>Hỗ trợ kỹ thuật dự án Hiệp Hòa AI-Gov:</strong>{' '}
+                <a href="tel:0362872772" className="text-amber-300 font-bold hover:underline">0362 872 772</a>
+              </p>
+              <p className="text-stone-400 text-xs">
+                Tác giả: <strong>Trương Hoàng Tiến</strong> – Bí thư Chi Đoàn ấp Văn Hiệp
+              </p>
+              <p className="text-stone-400 text-xs">
+                Email: <span className="text-stone-300">truonghoangtien90@gmail.com</span>
+              </p>
+            </div>
           </div>
 
-          <div>
-            <div className="text-amber-400 font-extrabold text-lg uppercase mb-2">
-              Bảo mật & Trợ năng cao tuổi
+          {/* Cột 3: Bảo mật & Bản quyền */}
+          <div className="space-y-2">
+            <div className="text-amber-400 font-extrabold text-sm sm:text-base uppercase tracking-wide">
+              Bảo Mật Quyền Riêng Tư & Trợ Năng
             </div>
-            <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-300 space-y-1">
-              <div className="font-bold text-emerald-400">✓ Chuẩn Zero-Data Retention:</div>
-              <div>Thông tin cá nhân trên đơn từ được xử lý cục bộ trên điện thoại của bà con và tự động xóa sạch khi kết thúc phiên.</div>
+            <div className="p-3 rounded-xl bg-stone-900 border border-stone-800 text-xs text-stone-300 space-y-1">
+              <div className="font-bold text-emerald-400 flex items-center gap-1.5">
+                <span>🛡</span>
+                <span>Chuẩn Zero-Data Retention:</span>
+              </div>
+              <p className="text-stone-400 text-[11px] leading-relaxed">
+                Dữ liệu tờ khai và giấy tờ cá nhân được xử lý trực tiếp trên thiết bị của bà con và giải phóng ngay khi hoàn thành phiên.
+              </p>
             </div>
-            <div className="mt-3 text-xs text-slate-500">
-              © 2026 HIỆP HÒA AI-GOV. Dự án tham gia Hội thi Đổi mới Sáng tạo & Chuyển đổi số.
+            <div className="text-[11px] text-stone-500 pt-1">
+              © 2026 HIỆP HÒA AI-GOV. Nền tảng Chuyên viên Hành chính công AI Đa phương thức phục vụ Nhân dân.
             </div>
           </div>
         </div>

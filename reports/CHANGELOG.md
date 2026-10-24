@@ -6,6 +6,40 @@ Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và c�
 
 ---
 
+## [2026-10-24 17:27] - Tái Cấu Trúc Giao Diện Chuẩn Cổng Dịch Vụ Công Chính Phủ, Khôi Phục Header Hình 7, Tinh Gọn Bố Cục & Hiệu Ứng Trống Đồng Đông Sơn (Version 6.0)
+- **Loại tác vụ**: Tái cấu trúc chuẩn Cổng Dịch vụ công Chính phủ, khôi phục 100% nội dung tiêu đề Header từ Bản cũ (Hình 7), tích hợp biểu tượng Trống Đồng Đông Sơn / Ngọc Lũ vector SVG, tinh gọn bố cục trang chủ thành 03 khu vực mạch lạc, chuẩn hóa thẻ thủ tục 02 nút hành động, đồng bộ sắc Đỏ Thẫm Chính phủ và cập nhật thông tin liên hệ chính thức (Version 6.0 Overhaul).
+- **Tác vụ thực hiện**:
+  1. **Khôi phục 100% Header Bản Cũ (Hình 7) & Họa tiết Trống Đồng Đông Sơn**:
+     - Thêm thanh Tiêu ngữ trên cùng: `CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM — ĐỘC LẬP - TỰ DO - HẠNH PHÚC` nền đỏ sẫm `#630F12` viền vàng đồng.
+     - Biểu tượng Quốc huy Trống Đồng Tròn (56px–64px) có ngôi sao vàng 5 cánh ở giữa vòng hoa văn Đông Sơn.
+     - Dòng 1: `ỦY BAN NHÂN DÂN XÃ HIỆP HÒA — TỈNH TÂY NINH` (chữ vàng in hoa).
+     - Dòng 2: `TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA` (chữ trắng uy nghiêm cỡ lớn).
+     - Dòng 3: Huy hiệu nền vàng `HIỆP HÒA AI-GOV` kèm mô tả `Chuyên viên Hành chính công AI Đa phương thức 24/7`.
+     - Cụm chuyển đổi 2 nút đồng nhất `Dành cho Nhân Dân` | `Cán Bộ Một Cửa` và huy hiệu `Zero-Data Retention`.
+     - Thanh công cụ trợ năng với các nút bằng nhau `A (Vừa)`, `A+ (To)`, `A++ (Siêu to)`, `Loa: BẬT` và `Tổng đài: 1900 9095`.
+     - Đường diềm hoa văn Đông Sơn cao 6px chuyển sắc vàng đồng.
+  2. **Xây dựng component Trống Đồng Ngọc Lũ / Đông Sơn Vector SVG (`TrongDongOrnament.jsx`)**:
+     - Chi tiết ngôi sao 14 cánh, vòng chim Lạc 16 con bay ngược chiều kim đồng hồ, vòng chấm tròn và hoa văn răng cưa.
+     - Tích hợp tại 3 vị trí: Header (xoay chậm 120s), Vòng bao quanh nút Micro Chạm & Nói 2 lớp phát sáng vàng ấm, và góc nền Cẩm nang VNeID.
+  3. **Tinh gọn Trang chủ thành đúng 03 khu vực mạch lạc**:
+     - Xóa bỏ hộp robot hoạt hình, xóa 4 hộp KPI, xóa 3 hộp bước đánh số to đè chữ.
+     - Gộp thành duy nhất **Khu vực 1 - "Trung Tâm Tư Vấn Giọng Nói & Hỏi Đáp Pháp Luật AI 24/7" (`HeroVoiceStation.jsx`)**:
+       * Cột Trái (60%): Lời chào AI có nút nghe/dừng, 4 câu hỏi gợi ý phổ biến, dải cam kết 1 dòng (`✓ Tra cứu 5 giây` • `✓ Tự động điền đơn Word chuẩn` • `✓ Trích dẫn Thư Viện Pháp Luật`).
+       * Cột Phải (40%): Tâm điểm Nút Micro Đỏ Son đặt giữa vòng Trống Đồng Đông Sơn, thanh gõ câu hỏi trực tiếp kèm nút Gửi 100% không tràn viền.
+  4. **Tái thiết kế Danh mục 08 Thủ tục Cấp xã (`CategoryGrid.jsx`)**:
+     - Bộ lọc 05 tab danh mục đồng bộ sắc đỏ son.
+     - Thẻ thủ tục chỉ gồm 4 thành phần tinh gọn: Icon trong huy hiệu đỏ son - vàng kim + Tên thủ tục + Nhãn trạng thái; Khung thông tin 2 dòng (Cơ quan & Thời hạn/Lệ phí); Thanh nghe hướng dẫn nhanh nền kem; Chân thẻ đúng **02 Nút hành động chuẩn mực**: `Điền Đơn & Mã QR` (Đỏ son) và `Chi Tiết & Hỏi AI` (Trắng viền vàng đồng). Bỏ kiểu 3 nút 3 màu chói mắt.
+  5. **Đồng bộ màu sắc Cổng Dịch vụ công & Cẩm nang VNeID (`DvcGuideSection.jsx`)**:
+     - Đổi nền tím xanh sang sắc Đỏ Thẫm Hoàng Gia / Chính Phủ (`#6B1114` - `#7F1416`), đính kèm Trống Đồng chìm.
+     - 03 nút liên kết Cổng DVC đồng bộ Vàng Kim - Đỏ Rượu.
+     - 04 thẻ bước VNeID nền đen mờ viền vàng đồng, số thứ tự đặt trong vòng tròn vàng kim.
+  6. **Cập nhật Footer Chính thức xã Hiệp Hòa**:
+     - Thay số điện thoại giả định bằng số điện thoại chính thức từ Thuyết minh: Tổng đài DVC Quốc gia `1800 1096`, Đường dây nóng hỗ trợ kỹ thuật `0362 872 772` (Trương Hoàng Tiến, Bí thư Chi Đoàn ấp Văn Hiệp, Email: `truonghoangtien90@gmail.com`).
+  7. **Kiểm thử xây dựng**: `npm run build` thành công 100% trong 13.93s, 0 lỗi.
+- **Báo cáo chi tiết**: Xem [2026-10-24_1727_gov_ui_cleanup_header_restore_v6.md](./2026-10-24_1727_gov_ui_cleanup_header_restore_v6.md)
+
+---
+
 ## [2026-10-24 17:05] - Đại Tu Giao Diện Mobile/Web (K-Tech + Hành Chính Công) & Đồng Bộ Thời Gian Thực Cho Cán Bộ Một Cửa (Version 5.0 - Production Pilot Ready)
 - **Loại tác vụ**: Đại tu toàn diện UI/UX Mobile-First, khắc phục triệt để 04 lỗi vỡ giao diện trên điện thoại, tái cấu trúc bố cục K-Tech & Hành chính công, triển khai phân hệ hàng đợi hồ sơ trực tuyến thời gian thực (3s Polling) kết nối người dân với Cán bộ Một cửa & Quản trị viên (Major Version 5.0 Overhaul).
 - **Tác vụ thực hiện**:

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Search, X, Clock, CheckCircle2, AlertCircle, Building2, User, Phone, FileText, Sparkles, RefreshCw } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
 
-export default function CitizenLookupModal({ onClose, speakText }) {
-  const [searchCode, setSearchCode] = useState('');
+export default function CitizenLookupModal({ onClose, speakText, initialQuery = '' }) {
+  const [searchCode, setSearchCode] = useState(initialQuery);
   const [submission, setSubmission] = useState(null);
+  const [submissionsList, setSubmissionsList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showGuide, setShowGuide] = useState(false);
 
   const handleLookup = async (codeToSearch) => {
     const code = (codeToSearch || searchCode).trim();
@@ -16,9 +18,26 @@ export default function CitizenLookupModal({ onClose, speakText }) {
     setErrorMsg('');
     try {
       const res = await apiClient.getSubmission(code);
-      if (res && res.success && res.submission) {
-        setSubmission(res.submission);
-        if (speakText) {
+      if (res && res.success) {
+        if (Array.isArray(res.submissions) && res.submissions.length > 1) {
+          setSubmissionsList(res.submissions);
+          setSubmission(res.submissions[0]);
+        } else if (res.submission) {
+          setSubmissionsList([res.submission]);
+          setSubmission(res.submission);
+        }
+
+        // Lưu vào thiết bị để tự động hiển thị thông báo tiến độ
+        try {
+          const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
+          const targetCode = res.submission?.submissionCode;
+          if (targetCode && !tracked.includes(targetCode)) {
+            tracked.unshift(targetCode);
+            localStorage.setItem('hh_tracked_submissions', JSON.stringify(tracked.slice(0, 10)));
+          }
+        } catch (e) {}
+
+        if (speakText && res.submission) {
           const statusMap = {
             WAITING: 'Hồ sơ đang trong hàng đợi chờ tiếp nhận tại Bộ phận Một cửa.',
             PROCESSING: 'Hồ sơ đang được cán bộ thụ lý và in ấn tại quầy.',
@@ -28,8 +47,9 @@ export default function CitizenLookupModal({ onClose, speakText }) {
           speakText(`Mã hồ sơ ${res.submission.submissionCode}: ${statusMap[res.submission.status] || ''}`);
         }
       } else {
-        setErrorMsg('Không tìm thấy hồ sơ với mã số này. Bà con vui lòng kiểm tra lại mã số (Ví dụ: HH-1021, HH-1024).');
+        setErrorMsg('Không tìm thấy hồ sơ với thông tin này. Bà con vui lòng kiểm tra lại số Căn cước công dân hoặc Mã hồ sơ (Ví dụ: 072096001234, HH-1021).');
         setSubmission(null);
+        setSubmissionsList([]);
       }
     } catch (err) {
       setErrorMsg('Không thể tra cứu vào lúc này. Vui lòng thử lại sau.');
@@ -37,6 +57,12 @@ export default function CitizenLookupModal({ onClose, speakText }) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (initialQuery) {
+      handleLookup(initialQuery);
+    }
+  }, [initialQuery]);
 
   // Polling mỗi 3s khi đang mở xem 1 hồ sơ
   useEffect(() => {
@@ -54,7 +80,7 @@ export default function CitizenLookupModal({ onClose, speakText }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border-2 border-amber-300 p-5 sm:p-6 text-left relative animate-scale-up my-auto">
+      <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border-2 border-amber-300 p-5 sm:p-6 text-left relative animate-scale-up my-auto max-h-[90vh] flex flex-col overflow-hidden">
         <button
           type="button"
           onClick={onClose}
@@ -64,40 +90,40 @@ export default function CitizenLookupModal({ onClose, speakText }) {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-2 shrink-0">
           <div className="w-9 h-9 rounded-xl bg-red-100 text-[#991B1B] flex items-center justify-center shrink-0">
             <Search className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-black text-slate-900">
-              Tra Cứu Hồ Sơ Trực Tuyến Thời Gian Thực
+              Tra Cứu Hồ Sơ Bằng CCCD & Mã Số
             </h3>
             <p className="text-xs text-slate-500">
-              UBND xã Hiệp Hòa • Hệ thống tiếp nhận Một cửa
+              UBND xã Hiệp Hòa • Tra cứu tiến độ thời gian thực
             </p>
           </div>
         </div>
 
-        {/* Khung tìm kiếm mã hồ sơ */}
+        {/* Khung tìm kiếm mã hồ sơ hoặc số CCCD */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleLookup();
           }}
-          className="mt-3.5 flex items-center gap-2"
+          className="mt-2.5 flex items-center gap-2 shrink-0"
         >
           <div className="flex items-center w-full rounded-xl border border-slate-300 bg-white p-1 shadow-xs focus-within:border-red-700 focus-within:ring-2 focus-within:ring-red-700/20">
             <input
               type="text"
               value={searchCode}
               onChange={(e) => setSearchCode(e.target.value)}
-              placeholder="Nhập mã hồ sơ (Ví dụ: HH-1021, HH-1024)..."
-              className="min-w-0 flex-1 px-3 py-2 text-sm outline-none uppercase font-bold text-slate-900"
+              placeholder="Nhập số CCCD (12 số) hoặc Mã hồ sơ..."
+              className="min-w-0 flex-1 px-3 py-2 text-xs sm:text-sm outline-none font-bold text-slate-900 placeholder:text-slate-400"
             />
             <button
               type="submit"
               disabled={isLoading}
-              className="shrink-0 rounded-lg bg-[#991B1B] hover:bg-red-800 px-4 py-2 text-xs font-bold text-white flex items-center gap-1 shadow-xs active:scale-95"
+              className="shrink-0 rounded-lg bg-[#991B1B] hover:bg-red-800 px-3.5 sm:px-4 py-2 text-xs font-bold text-white flex items-center gap-1 shadow-xs active:scale-95 transition-all"
             >
               {isLoading ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
@@ -111,92 +137,147 @@ export default function CitizenLookupModal({ onClose, speakText }) {
           </div>
         </form>
 
-        {/* Mã mẫu thử nhanh */}
-        <div className="mt-2.5 flex items-center gap-1.5 flex-wrap text-xs text-slate-600">
-          <span className="font-bold text-slate-700">Mã mẫu thử nghiệm:</span>
-          {['HH-1021', 'HH-1022', 'HH-1023'].map((code) => (
-            <button
-              key={code}
-              type="button"
-              onClick={() => {
-                setSearchCode(code);
-                handleLookup(code);
-              }}
-              className="px-2 py-0.5 rounded bg-slate-100 hover:bg-red-50 text-[#991B1B] font-bold border border-slate-200 text-[11px]"
-            >
-              {code}
-            </button>
-          ))}
+        {/* Nút bấm mẫu thử nhanh & Nút xem hướng dẫn */}
+        <div className="mt-2 flex items-center justify-between gap-2 flex-wrap text-xs shrink-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="font-bold text-slate-500 text-[11px]">Thử nhanh:</span>
+            {['072096001234', 'HH-1021', 'HH-1022'].map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => {
+                  setSearchCode(code);
+                  handleLookup(code);
+                }}
+                className="px-2 py-0.5 rounded bg-slate-100 hover:bg-red-50 text-[#991B1B] font-bold border border-slate-200 text-[11px] transition-all"
+              >
+                {code}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowGuide(!showGuide)}
+            className="text-[11px] font-bold text-amber-800 hover:underline flex items-center gap-0.5"
+          >
+            <span>{showGuide ? 'Ẩn hướng dẫn' : '📖 Hướng dẫn tra cứu'}</span>
+          </button>
         </div>
 
+        {/* Hộp hướng dẫn tra cứu chi tiết */}
+        {showGuide && (
+          <div className="mt-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-slate-700 space-y-1.5 shrink-0 animate-fade-in">
+            <div className="font-bold text-amber-900 flex items-center gap-1">
+              <span>👉 Cách tra cứu hồ sơ cho bà con:</span>
+            </div>
+            <ul className="list-disc pl-4 space-y-1 text-[11px] leading-relaxed">
+              <li><strong>Bằng Căn cước công dân:</strong> Bà con chỉ cần nhập 12 số CCCD của mình vào ô trên, hệ thống sẽ tự động tìm toàn bộ hồ sơ của bà con tại xã.</li>
+              <li><strong>Bằng Mã hồ sơ:</strong> Nhập mã dạng <code>HH-1021</code> in trên phiếu hẹn hoặc nhận khi điền đơn online.</li>
+              <li><strong>Bằng Số điện thoại:</strong> Nhập số điện thoại bà con đã cung cấp khi làm thủ tục.</li>
+            </ul>
+          </div>
+        )}
+
         {errorMsg && (
-          <div className="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
+          <div className="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold shrink-0">
             {errorMsg}
           </div>
         )}
 
-        {/* Kết quả tra cứu */}
-        {submission && (
-          <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 animate-fade-in">
-            <div className="flex items-center justify-between gap-2">
-              <span className="px-2.5 py-1 rounded-full bg-[#991B1B] text-amber-300 text-xs font-black">
-                {submission.submissionCode}
-              </span>
-              <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-bold">
-                <RefreshCw className="w-3 h-3 text-emerald-600 animate-spin" />
-                <span>Tự đồng bộ mỗi 3s</span>
-              </div>
+        {/* Danh sách các hồ sơ nếu tìm thấy nhiều hơn 1 */}
+        {submissionsList.length > 1 && (
+          <div className="mt-3 shrink-0">
+            <span className="text-[11px] font-bold text-slate-500 uppercase block mb-1">
+              Tìm thấy {submissionsList.length} hồ sơ liên quan (bấm để xem chi tiết):
+            </span>
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
+              {submissionsList.map((sub) => (
+                <button
+                  key={sub.submissionCode}
+                  type="button"
+                  onClick={() => setSubmission(sub)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+                    submission?.submissionCode === sub.submissionCode
+                      ? 'bg-red-700 text-white border-red-700 shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
+                  }`}
+                >
+                  {sub.submissionCode} - {sub.procedureTitle.slice(0, 15)}...
+                </button>
+              ))}
             </div>
+          </div>
+        )}
 
-            <div>
-              <div className="text-sm font-black text-slate-900">
-                {submission.procedureTitle}
+        {/* Khu vực chi tiết hồ sơ được chọn */}
+        <div className="flex-1 overflow-y-auto mt-3">
+          {submission ? (
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 animate-fade-in">
+              <div className="flex items-center justify-between gap-2">
+                <span className="px-2.5 py-1 rounded-full bg-[#991B1B] text-amber-300 text-xs font-black">
+                  {submission.submissionCode}
+                </span>
+                <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-bold">
+                  <RefreshCw className="w-3 h-3 text-emerald-600 animate-spin" />
+                  <span>Tự đồng bộ mỗi 3s</span>
+                </div>
               </div>
-              <div className="text-xs text-slate-600 mt-0.5">
-                Người nộp: <strong>{submission.citizenName}</strong> {submission.citizenCccd ? `(CCCD: ${submission.citizenCccd})` : ''} • {submission.hamlet || 'Xã Hiệp Hòa'}
-              </div>
-            </div>
 
-            {/* Trạng thái */}
-            <div className="pt-2 border-t border-slate-200">
-              <span className="text-xs font-bold text-slate-500 uppercase block mb-1">
-                Trạng thái hiện tại:
-              </span>
-              {submission.status === 'COMPLETED' ? (
-                <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-950 text-xs font-black border border-emerald-400 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
-                  <span>ĐÃ XỬ LÝ XONG • MỜI ĐẾN QUẦY KÝ TÊN & NHẬN KẾT QUẢ</span>
+              <div>
+                <div className="text-sm font-black text-slate-900">
+                  {submission.procedureTitle}
                 </div>
-              ) : submission.status === 'PROCESSING' ? (
-                <div className="p-2.5 rounded-xl bg-blue-100 text-blue-950 text-xs font-black border border-blue-400 flex items-center gap-2 animate-pulse">
-                  <Clock className="w-4 h-4 text-blue-700 shrink-0 animate-spin" />
-                  <span>CÁN BỘ ĐANG XỬ LÝ & IN TỜ KHAI TẠI QUẦY</span>
+                <div className="text-xs text-slate-600 mt-0.5">
+                  Người nộp: <strong>{submission.citizenName}</strong> {submission.citizenCccd ? `(CCCD: ${submission.citizenCccd})` : ''} • {submission.hamlet || 'Xã Hiệp Hòa'}
                 </div>
-              ) : submission.status === 'NEEDS_SUPPLEMENT' ? (
-                <div className="p-2.5 rounded-xl bg-amber-100 text-amber-950 text-xs font-black border border-amber-400 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
-                  <span>CẦN BỔ SUNG GIẤY TỜ: {submission.officerNote || 'Xem hướng dẫn'}</span>
+              </div>
+
+              {/* Trạng thái */}
+              <div className="pt-2 border-t border-slate-200">
+                <span className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                  Trạng thái hiện tại:
+                </span>
+                {submission.status === 'COMPLETED' ? (
+                  <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-950 text-xs font-black border border-emerald-400 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                    <span>ĐÃ XỬ LÝ XONG • MỜI ĐẾN QUẦY KÝ TÊN & NHẬN KẾT QUẢ</span>
+                  </div>
+                ) : submission.status === 'PROCESSING' ? (
+                  <div className="p-2.5 rounded-xl bg-blue-100 text-blue-950 text-xs font-black border border-blue-400 flex items-center gap-2 animate-pulse">
+                    <Clock className="w-4 h-4 text-blue-700 shrink-0 animate-spin" />
+                    <span>CÁN BỘ ĐANG XỬ LÝ & IN TỜ KHAI TẠI QUẦY</span>
+                  </div>
+                ) : submission.status === 'NEEDS_SUPPLEMENT' ? (
+                  <div className="p-2.5 rounded-xl bg-amber-100 text-amber-950 text-xs font-black border border-amber-400 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                    <span>CẦN BỔ SUNG GIẤY TỜ: {submission.officerNote || 'Xem hướng dẫn'}</span>
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-amber-50 text-amber-900 text-xs font-black border border-amber-300 flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-600 animate-ping shrink-0" />
+                    <span>ĐANG TRONG HÀNG ĐỢI TIẾP NHẬN TRỰC TUYẾN</span>
+                  </div>
+                )}
+              </div>
+
+              {submission.assignedOfficer && submission.assignedOfficer !== 'Chờ tiếp nhận' && (
+                <div className="text-xs text-slate-700">
+                  <strong>Cán bộ thụ lý:</strong> {submission.assignedOfficer}
                 </div>
-              ) : (
-                <div className="p-2.5 rounded-xl bg-amber-50 text-amber-900 text-xs font-black border border-amber-300 flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-600 animate-ping shrink-0" />
-                  <span>ĐANG TRONG HÀNG ĐỢI TIẾP NHẬN TRỰC TUYẾN</span>
+              )}
+              {submission.officerNote && (
+                <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-950">
+                  <strong>Ghi chú từ cán bộ:</strong> {submission.officerNote}
                 </div>
               )}
             </div>
-
-            {submission.assignedOfficer && submission.assignedOfficer !== 'Chờ tiếp nhận' && (
-              <div className="text-xs text-slate-700">
-                <strong>Cán bộ thụ lý:</strong> {submission.assignedOfficer}
-              </div>
-            )}
-            {submission.officerNote && (
-              <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-950">
-                <strong>Ghi chú từ cán bộ:</strong> {submission.officerNote}
-              </div>
-            )}
-          </div>
-        )}
+          ) : !errorMsg ? (
+            <div className="text-center py-8 text-slate-400 text-xs font-medium">
+              Nhập số CCCD hoặc mã hồ sơ để xem tiến độ xử lý trực tuyến.
+            </div>
+          ) : null}
+        </div>
 
       </div>
     </div>

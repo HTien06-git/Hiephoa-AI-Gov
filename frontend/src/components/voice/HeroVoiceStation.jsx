@@ -122,16 +122,16 @@ export default function HeroVoiceStation({
           </div>
 
           {/* Tiêu đề */}
-          <h2 className="text-xl sm:text-2xl lg:text-[26px] font-black text-slate-900 tracking-tight leading-snug">
+          <h2 className="text-lg sm:text-2xl lg:text-[26px] font-black text-slate-900 tracking-tight leading-tight sm:leading-snug">
             Bà con cần làm giấy tờ gì hoặc hỏi luật, hãy chạm vào Micro để nói chuyện!
           </h2>
 
           {/* Hộp lời chào ngắn gọn kèm nút Nghe lời chào */}
-          <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/90 text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
+          <div className="p-3 sm:p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/90 text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
             <p className="line-clamp-2">
               "{greetingText}"
             </p>
-            <div className="mt-2.5 flex items-center gap-2">
+            <div className="mt-2 sm:mt-2.5 flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleToggleGreeting}
@@ -176,7 +176,7 @@ export default function HeroVoiceStation({
                   }}
                   className="px-3 py-2 rounded-xl bg-white hover:bg-amber-50/80 text-slate-700 hover:text-[#991B1B] text-xs font-semibold border border-slate-200/90 hover:border-amber-300 transition-all text-left shadow-2xs active:scale-95 truncate flex items-center gap-1.5"
                 >
-                  <span className="text-amber-600 font-bold">💬</span>
+                  <span className="text-amber-600 font-bold shrink-0">💬</span>
                   <span className="truncate">{q}</span>
                 </button>
               ))}
@@ -184,19 +184,19 @@ export default function HeroVoiceStation({
           </div>
 
           {/* Dải 3 cam kết ngắn gọn trên 1 dòng */}
-          <div className="pt-2 border-t border-amber-200/60 flex items-center gap-3 sm:gap-4 flex-wrap text-xs text-slate-600 font-semibold">
+          <div className="pt-2 border-t border-amber-200/60 flex items-center gap-2 sm:gap-4 flex-wrap text-[11px] sm:text-xs text-slate-600 font-semibold">
             <span className="text-emerald-700 flex items-center gap-1">
-              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               Tra cứu 5 giây
             </span>
             <span className="text-slate-400">•</span>
             <span className="text-red-800 flex items-center gap-1">
-              <Check className="w-3.5 h-3.5 text-red-700" />
+              <Check className="w-3.5 h-3.5 text-red-700 shrink-0" />
               Tự động điền đơn Word chuẩn
             </span>
             <span className="text-slate-400">•</span>
             <span className="text-blue-800 flex items-center gap-1">
-              <Check className="w-3.5 h-3.5 text-blue-700" />
+              <Check className="w-3.5 h-3.5 text-blue-700 shrink-0" />
               Trích dẫn Thư Viện Pháp Luật
             </span>
           </div>

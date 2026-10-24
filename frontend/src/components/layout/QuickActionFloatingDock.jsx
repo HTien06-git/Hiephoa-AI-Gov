@@ -24,9 +24,9 @@ export default function QuickActionFloatingDock({
   return (
     <aside 
       aria-label="Thanh công cụ thao tác nhanh"
-      className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 select-none animate-fadeIn"
+      className="fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-35 select-none animate-fadeIn max-w-[96vw]"
     >
-      <div className="flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r from-[#690F12]/95 via-[#851417]/95 to-[#5C0A0D]/95 border-2 border-amber-400 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-md">
+      <div className="flex items-center gap-1 sm:gap-2.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-[#690F12]/95 via-[#851417]/95 to-[#5C0A0D]/95 border-2 border-amber-400 shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-md">
         
         {/* 1. NÚT MICRO - CHẠM & NÓI VỚI CHUYÊN VIÊN AI (Nổi bật nhất ở trung tâm) */}
         <button
@@ -34,13 +34,13 @@ export default function QuickActionFloatingDock({
           onClick={onActivateMic}
           aria-label="Chạm và nói với Chuyên viên AI"
           title="Chạm và nói với Chuyên viên AI"
-          className="relative group p-2.5 sm:p-3 rounded-full bg-gradient-to-tr from-amber-400 to-amber-300 text-stone-950 shadow-md hover:scale-110 active:scale-95 transition-all ring-2 ring-amber-200"
+          className="relative group p-2 sm:p-3 rounded-full bg-gradient-to-tr from-amber-400 to-amber-300 text-stone-950 shadow-md hover:scale-110 active:scale-95 transition-all ring-2 ring-amber-200 shrink-0"
         >
-          <Mic className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-[#7F1416] animate-pulse" />
+          <Mic className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 text-[#7F1416] animate-pulse" />
           <span className="sr-only">Nói với AI</span>
         </button>
 
-        <div className="w-[1px] h-6 bg-amber-400/30" />
+        <div className="w-[1px] h-5 sm:h-6 bg-amber-400/30" />
 
         {/* 2. NÚT TRA CỨU MÃ HỒ SƠ TRỰC TUYẾN */}
         <button

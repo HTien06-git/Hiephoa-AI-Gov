@@ -1,12 +1,41 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
+ * Tự động chuyển đổi các từ viết tắt hành chính thành câu đầy đủ để AI đọc tự nhiên,
+ * không bị lỗi đọc đánh vần từng chữ cái (như C-C-C-D hay U-B-N-D).
+ */
+export function expandAbbreviationsForTTS(text) {
+  if (!text) return '';
+  return text
+    .replace(/\bCCCD\b/gi, 'Căn cước công dân')
+    .replace(/\bCMND\b/gi, 'Chứng minh nhân dân')
+    .replace(/\bUBND\b/gi, 'Ủy ban nhân dân')
+    .replace(/\bDVC\b/gi, 'Dịch vụ công')
+    .replace(/\bBTP\b/gi, 'Bộ Tư pháp')
+    .replace(/\bBCA\b/gi, 'Bộ Công an')
+    .replace(/\bBHXH\b/gi, 'Bảo hiểm xã hội')
+    .replace(/\bBHYT\b/gi, 'Bảo hiểm y tế')
+    .replace(/\bGPLX\b/gi, 'Giấy phép lái xe')
+    .replace(/\bĐKTT\b/gi, 'Đăng ký thường trú')
+    .replace(/\bPCCC\b/gi, 'Phòng cháy chữa cháy')
+    .replace(/\bHĐND\b/gi, 'Hội đồng nhân dân')
+    .replace(/\bTTHC\b/gi, 'Thủ tục hành chính')
+    .replace(/\bNĐ-CP\b/gi, 'Nghị định Chính phủ')
+    .replace(/\bNĐ\/CP\b/gi, 'Nghị định Chính phủ')
+    .replace(/\bTT-BTP\b/gi, 'Thông tư Bộ Tư pháp')
+    .replace(/\bQĐ-UBND\b/gi, 'Quyết định Ủy ban nhân dân')
+    .replace(/\bCT01\b/gi, 'Mẫu C Tê 01')
+    .replace(/\bVNeID\b/gi, 'ứng dụng VNeID');
+}
+
+/**
  * Tách văn bản dài thành các câu ngắn (< 110 ký tự) để phát thanh tự nhiên, dứt khoát
  */
 function chunkTextForTTS(text) {
   if (!text) return [];
 
-  const cleaned = text
+  const expanded = expandAbbreviationsForTTS(text);
+  const cleaned = expanded
     .normalize('NFC')
     .replace(/[*#_`>\[\]\(\)]/g, '')
     .replace(/\s+/g, ' ')

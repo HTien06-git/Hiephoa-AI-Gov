@@ -26,8 +26,34 @@ CÁC NGUYÊN TẮC BẮT BUỘC:
 2. PHONG CÁCH GIAO TIẾP "ELDER-FRIENDLY & VOICE-FIRST":
    - Luôn mở đầu bằng: "Dạ thưa bà con..." hoặc "Thưa cô chú anh chị..."
    - Trả lời TRỰC TIẾP, ĐÚNG VÀO NỘI DUNG câu hỏi, không nói vòng vo, không lặp lại câu hỏi của người dân.
-   - Tuyệt đối KHÔNG ghép chuỗi mẫu cứng nhắc, không máy móc.
+3. XỬ LÝ TỪ VIẾT TẮT & PHÁT ÂM (VOICE-FRIENDLY):
+   - Tuyệt đối KHÔNG đọc đánh vần các chữ cái viết tắt (như C-C-C-D, U-B-N-D, D-V-C, B-T-P, B-C-A, G-P-L-X).
+   - Trong trường "voice_text", BẮT BUỘC phải viết ra đầy đủ: "Căn cước công dân", "Ủy ban nhân dân xã Hiệp Hòa", "Dịch vụ công", "Bộ Tư pháp", "Bộ Công an", "Giấy phép lái xe", "Nghị định Chính phủ".
+   - Đối với câu chào hỏi hoặc câu hỏi xã giao của người dân ("Chào em", "Em khỏe không", "Bạn là ai", "Cảm ơn em", "Xã làm việc mấy giờ"):
+     Hãy trả lời thật lễ phép, ấm áp, thân tình như một người con cháu phục vụ nhân dân xã Hiệp Hòa, không trả lời cộc lốc hoặc lặp lại câu hỏi.
 `;
+
+function expandVietnameseGovAbbreviations(text) {
+  if (!text) return '';
+  return text
+    .replace(/\bCCCD\b/gi, 'Căn cước công dân')
+    .replace(/\bCMND\b/gi, 'Chứng minh nhân dân')
+    .replace(/\bUBND\b/gi, 'Ủy ban nhân dân')
+    .replace(/\bDVC\b/gi, 'Dịch vụ công')
+    .replace(/\bBTP\b/gi, 'Bộ Tư pháp')
+    .replace(/\bBCA\b/gi, 'Bộ Công an')
+    .replace(/\bBHXH\b/gi, 'Bảo hiểm xã hội')
+    .replace(/\bBHYT\b/gi, 'Bảo hiểm y tế')
+    .replace(/\bGPLX\b/gi, 'Giấy phép lái xe')
+    .replace(/\bĐKTT\b/gi, 'Đăng ký thường trú')
+    .replace(/\bPCCC\b/gi, 'Phòng cháy chữa cháy')
+    .replace(/\bHĐND\b/gi, 'Hội đồng nhân dân')
+    .replace(/\bTTHC\b/gi, 'Thủ tục hành chính')
+    .replace(/\bNĐ-CP\b/gi, 'Nghị định Chính phủ')
+    .replace(/\bTT-BTP\b/gi, 'Thông tư Bộ Tư pháp')
+    .replace(/\bCT01\b/gi, 'Tờ khai CT01 cư trú')
+    .replace(/\bVNeID\b/gi, 'ứng dụng VNeID');
+}
 
 class GeminiRagService {
   /**
@@ -36,8 +62,8 @@ class GeminiRagService {
    * @param {Object} options { procedureId, categoryId, history }
    */
   async processQuery(userMessage, options = {}) {
-    const trimmedMsg = (userMessage || '').trim();
-    if (!trimmedMsg) {
+    const rawMsg = (userMessage || '').trim();
+    if (!rawMsg) {
       return {
         intentType: 'GREETING',
         answer: 'Dạ, kính chào bà con nhân dân xã Hiệp Hòa! Em là Chuyên viên Hành chính công AI. Bà con cần làm giấy tờ thủ tục gì hoặc hỏi thăm quy định pháp luật nào, xin cứ nói cho em nghe ạ!',
@@ -47,6 +73,8 @@ class GeminiRagService {
         sources: []
       };
     }
+
+    const trimmedMsg = expandVietnameseGovAbbreviations(rawMsg);
 
     const cleanLower = trimmedMsg
       .toLowerCase()
@@ -61,8 +89,9 @@ class GeminiRagService {
 
     // Nhóm A: Chào hỏi, giao tiếp thường ngày
     const greetingPatterns = [
-      'chao', 'xin chao', 'hello', 'hi', 'ban ten gi', 'em ten gi', 'ai do', 
-      'cam on', 'thank', 'xa co lam viec khong', 'gio lam viec', 'may gio mo cua', 'khoe khong'
+      'chao', 'xin chao', 'hello', 'hi', 'ban ten gi', 'em ten gi', 'ai do', 'ban la ai', 'em la ai',
+      'cam on', 'thank', 'xa co lam viec khong', 'gio lam viec', 'may gio mo cua', 'khoe khong', 'suc khoe',
+      'tam biet', 'chuc ngu ngon', 'hom nay the nao', 'thoi tiet'
     ];
     const isGreeting = greetingPatterns.some(p => cleanLower === p || cleanLower.startsWith(p + ' ') || cleanLower.endsWith(' ' + p));
 
@@ -206,6 +235,41 @@ Bà con cần hướng dẫn giấy tờ gì, em xin sẵn lòng hỗ trợ bà 
 Dạ không có gì đâu bà con ơi! Được đồng hành, giải đáp pháp luật và hướng dẫn thủ tục hành chính cho bà con nhân dân xã Hiệp Hòa là trách nhiệm và niềm vinh dự của em.
 
 Chúc bà con và gia đình luôn dồi dào sức khỏe, bình an và hạnh phúc! Bất cứ khi nào cần làm giấy tờ hay hỏi luật, bà con cứ bấm vào đây trò chuyện với em nhé!`,
+          checklist: null,
+          matchedProcedure: null,
+          sources: defaultSources
+        };
+      }
+
+      if (cleanLower.includes('khoe khong') || cleanLower.includes('suc khoe')) {
+        return {
+          intentType: 'GREETING',
+          voice_text: 'Dạ em cảm ơn bà con nhiều lắm! Em là trợ lý AI nên luôn tràn đầy năng lượng 24/7 để phục vụ bà con xã mình. Kính chúc bà con và gia đình luôn dồi dào sức khỏe và bình an nhé!',
+          answer: `### Chuyên viên AI Xã Hiệp Hòa kính chúc sức khỏe bà con!
+
+Dạ em cảm ơn bà con đã quan tâm hỏi thăm! Em là **Chuyên viên Hành chính công AI** của UBND xã Hiệp Hòa, em luôn túc trực 24/7 với năng lượng cao nhất để hỗ trợ bà con giải đáp pháp luật và làm thủ tục hành chính.
+
+Kính chúc bà con và gia đình luôn dồi dào sức khỏe, công việc thuận lợi và vạn sự như ý ạ!`,
+          checklist: null,
+          matchedProcedure: null,
+          sources: defaultSources
+        };
+      }
+
+      if (cleanLower.includes('ban la ai') || cleanLower.includes('em la ai') || cleanLower.includes('ban ten gi') || cleanLower.includes('em ten gi')) {
+        return {
+          intentType: 'GREETING',
+          voice_text: 'Dạ em là Hiệp Hòa AI-Gov, Chuyên viên Hành chính công AI của UBND xã Hiệp Hòa, tỉnh Tây Ninh. Em luôn sẵn sàng hỗ trợ bà con tra cứu luật và tự động điền đơn giấy tờ 24/7 ạ!',
+          answer: `### Giới thiệu về Nền tảng Hiệp Hòa AI-Gov
+
+Dạ, em là **Chuyên viên Hành chính công AI** trực thuộc **Trung tâm Phục vụ Hành chính công xã Hiệp Hòa, tỉnh Tây Ninh**.
+
+* **Nhiệm vụ của em:** 
+  1. Hướng dẫn bà con chuẩn bị hồ sơ thủ tục hành chính cấp xã (Khai sinh, Kết hôn, Đất đai, Chứng thực...).
+  2. Tự động điền đơn Word chuẩn 100% trong 3 giây qua thẻ Căn cước công dân hoặc trợ lý giọng nói.
+  3. Trả lời và trích xuất quy định pháp luật đời sống từ Thư Viện Pháp Luật & Cổng DVC Quốc gia.
+
+Bà con cứ tự nhiên hỏi bất kỳ thắc mắc nào, em luôn ở đây đồng hành cùng bà con!`,
           checklist: null,
           matchedProcedure: null,
           sources: defaultSources

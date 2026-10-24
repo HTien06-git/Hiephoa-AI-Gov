@@ -52,28 +52,60 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
         setError(null);
       };
 
-      recognition.onresult = (event) => {
-        let interim = '';
-        let final = '';
+// Hàm loại bỏ từ hoặc cụm từ lặp lại do cơ chế Web Speech API trên Android Chrome
+function deduplicateSpeechText(text) {
+  if (!text) return '';
+  const words = text.trim().split(/\s+/);
+  if (words.length <= 1) return text.trim();
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+  // 1. Loại bỏ các từ đơn lặp lại liên tiếp: "Tôi Tôi Tôi" -> "Tôi"
+  const dedupWords = [];
+  for (let i = 0; i < words.length; i++) {
+    const cur = words[i];
+    const prev = dedupWords[dedupWords.length - 1];
+    if (!prev || cur.toLowerCase() !== prev.toLowerCase()) {
+      dedupWords.push(cur);
+    }
+  }
+
+  // 2. Kiểm tra cụm từ lặp kép ở cuối: "Tôi muốn đăng ký kết hôn Tôi muốn đăng ký kết hôn" -> "Tôi muốn đăng ký kết hôn"
+  const halfLen = Math.floor(dedupWords.length / 2);
+  for (let len = halfLen; len >= 2; len--) {
+    const phraseA = dedupWords.slice(dedupWords.length - len * 2, dedupWords.length - len).join(' ');
+    const phraseB = dedupWords.slice(dedupWords.length - len).join(' ');
+    if (phraseA.toLowerCase() === phraseB.toLowerCase()) {
+      return dedupWords.slice(0, dedupWords.length - len).join(' ');
+    }
+  }
+
+  return dedupWords.join(' ');
+}
+
+      recognition.onresult = (event) => {
+        let final = '';
+        let interim = '';
+
+        // Đọc toàn bộ danh sách kết quả từ 0 để chống bug cộng dồn prev + final của Android Chrome
+        for (let i = 0; i < event.results.length; i++) {
           const item = event.results[i];
-          if (item.isFinal) {
-            final += item[0].transcript;
-          } else {
-            interim += item[0].transcript;
+          if (item && item[0]) {
+            if (item.isFinal) {
+              final += item[0].transcript + ' ';
+            } else {
+              interim += item[0].transcript + ' ';
+            }
           }
         }
 
-        if (interim) {
-          setInterimTranscript(interim);
+        const cleanFinal = deduplicateSpeechText(final);
+        const cleanInterim = deduplicateSpeechText(interim);
+
+        if (cleanInterim) {
+          setInterimTranscript(cleanInterim);
         }
 
-        if (final) {
-          setTranscript(prev => {
-            const updated = prev ? `${prev} ${final.trim()}` : final.trim();
-            return updated;
-          });
+        if (cleanFinal) {
+          setTranscript(cleanFinal);
           setInterimTranscript('');
 
           // Reset silence timer: sau 1.5s không nói thêm thì tự động hoàn tất

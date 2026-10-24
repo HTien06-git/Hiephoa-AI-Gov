@@ -6,6 +6,37 @@ Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và c�
 
 ---
 
+## [2026-10-24 19:30] - Phiên Bản V6.3: Tối Ưu Toàn Diện Giao Diện Mobile, Sửa Lỗi Lặp Giọng Nói Stutter, Tra Cứu Bằng CCCD 12 Số, Thông Báo Nhắc Kết Quả Trên Thiết Bị & Giải Mã Từ Viết Tắt
+- **Loại tác vụ**: Giải quyết triệt để 5 vấn đề phản ánh từ 4 ảnh chụp màn hình kiểm thử thực tế trên điện thoại: sửa lỗi chữ tràn viền Header trên mobile (Hình 1 & 2), loại bỏ hiện tượng lặp giọng nói stutter loop của Android Chrome (Hình 3), tái cấu trúc biểu mẫu nhập liệu và bản xem trước A4 chuẩn mobile (Hình 4), bổ sung tính năng tra cứu hồ sơ bằng Căn cước công dân (12 số CCCD) kèm hướng dẫn chi tiết, thiết lập hệ thống thông báo nhắc kết quả hồ sơ trên thiết bị người dân và chuẩn hóa đọc từ viết tắt / chào hỏi xã giao (Version 6.3 Overhaul).
+- **Tác vụ thực hiện**:
+  1. **Khắc phục lỗi vỡ chữ & tràn viền Header trên điện thoại (Hình 1 & 2)**:
+     - Tinh chỉnh `Header.jsx`: Chuyển sang kích thước chữ co giãn linh hoạt (`text-xs sm:text-lg md:text-xl`), loại bỏ thuộc tính ép cứng `whitespace-nowrap` trên điện thoại hẹp (< 380px), cụm 2 nút chuyển đổi co giãn theo lưới 2 cột gọn gàng không bao giờ bị cắt chữ.
+  2. **Tránh Floating Dock che khuất nút Mic & ô nhập (Hình 2 & 3)**:
+     - Bổ sung `pb-28 sm:pb-20` vào khung `main` trong `CitizenHomePage.jsx`.
+     - Tối ưu `QuickActionFloatingDock.jsx`: Thu gọn padding và kích thước icon trên mobile (`max-w-[96vw]`), giữ nguyên độ nổi bật của nút Micro mà không cản trở thao tác cuộn trang.
+  3. **Khắc phục triệt để lỗi nói lặp lại stutter loop trên Android Chrome (Hình 3)**:
+     - Tái cấu trúc `useSpeechRecognition.js`: Đọc trực tiếp danh sách kết quả `event.results` từ index 0 thay vì cộng dồn chuỗi tích lũy `prev + final`.
+     - Tích hợp thuật toán `deduplicateSpeechText` tự động khử sạch từ đơn lặp liên tiếp (`"Tôi Tôi Tôi"` $\rightarrow$ `"Tôi"`) và cụm từ lặp kép (`"Tôi muốn đăng ký kết hôn Tôi muốn đăng ký kết hôn"` $\rightarrow$ `"Tôi muốn đăng ký kết hôn"`).
+  4. **Tối ưu biểu mẫu nhập liệu & bản xem trước A4 trên điện thoại (Hình 4)**:
+     - Tích hợp Mobile View Selector `[📝 Điền Thông Tin] [📄 Xem Đơn A4]` trong `SmartAutoFormModal.jsx`.
+     - Khi ở chế độ điền đơn, cột nhập liệu chiếm 100% chiều cao màn hình điện thoại với ô nhập rộng rãi (`py-2 text-sm`), độ tương phản cao, dễ chạm; khi chuyển xem đơn, trang A4 hiển thị trọn vẹn, không còn bị chèn ép co cụm.
+  5. **Bổ sung tính năng tra cứu hồ sơ bằng Căn cước công dân (12 số CCCD)**:
+     - Nâng cấp `realtimeSyncService.js` và `submissionController.js` với phương thức `lookupSubmissions`: Cho phép người dân tra cứu linh hoạt bằng số CCCD 12 số, Mã hồ sơ (`HH-1021`) hoặc Số điện thoại.
+     - `CitizenLookupModal.jsx`: Cho phép hiển thị danh sách nhiều hồ sơ nếu tìm thấy nhiều kết quả; bổ sung hộp hướng dẫn tra cứu `📖 Hướng dẫn tra cứu` dễ hiểu cho người cao tuổi.
+  6. **Thông báo nhắc kết quả hồ sơ trên thiết bị người dân (`CitizenDeviceNotificationToast.jsx`)**:
+     - Tự động ghi nhớ các hồ sơ công dân đã nộp/tra cứu trên thiết bị qua `localStorage`.
+     - Polling ngầm trạng thái mỗi 8 giây; khi hồ sơ được tiếp nhận hoặc đã xử lý xong, tự động hiển thị thẻ thông báo nổi trên góc màn hình kèm âm thanh/giọng nói nhắc nhở và nút bấm xem ngay kết quả.
+  7. **Chuẩn hóa phát âm từ viết tắt & Chào hỏi xã giao thân tình**:
+     - Bổ sung `expandAbbreviationsForTTS` trong `useSpeechSynthesis.js` và `expandVietnameseGovAbbreviations` trong `geminiRagService.js` (CCCD $\rightarrow$ Căn cước công dân, UBND $\rightarrow$ Ủy ban nhân dân, DVC $\rightarrow$ Dịch vụ công, GPLX $\rightarrow$ Giấy phép lái xe...).
+     - Bổ sung phản hồi ấm áp, kính cẩn, lễ phép cho các câu chào hỏi xã giao thường ngày ("Chào em", "Em khỏe không", "Bạn là ai", "Cảm ơn em").
+  8. **Kiểm thử tự động**:
+     - `npm run build`: Thành công 100% trong 4.53s, 0 lỗi.
+     - `node --check`: Backend controllers và services cú pháp chuẩn 100%.
+     - Kiểm thử tra cứu CCCD `072096001234` và mã `HH-1021` thành công 100%.
+- **Báo cáo chi tiết**: Xem [2026-10-24_1930_mobile_ui_stutter_cccd_lookup_v6_3.md](./2026-10-24_1930_mobile_ui_stutter_cccd_lookup_v6_3.md)
+
+---
+
 ## [2026-10-24 18:40] - Đại Tu Toàn Diện V6.2: Khắc Phục Triệt Để Quản Trị Cán Bộ/Admin, Trả Lời Đúng Luật Giao Thông, Gỡ Mẫu Đơn Lạc Đề, Bổ Sung Dock Cố Định & Footer Đỏ Hoàng Gia
 - **Loại tác vụ**: Giải quyết triệt để 5 vấn đề phản ánh từ ảnh chụp màn hình kiểm thử: sửa lỗi Header vỡ chữ nhảy dòng, cập nhật kho luật giao thông đường bộ và gỡ bỏ hoàn toàn việc gán mẫu đơn sai lệch trong tư vấn pháp luật, hoàn thiện xác thực & đổi mật khẩu tài khoản cán bộ/admin, vẽ Trống Đồng Đông Sơn to mờ chìm làm nền trang chủ, đổi Footer từ màu đen sang Đỏ Hoàng Gia và bổ sung thanh công cụ thao tác nhanh cố định trên màn hình (Version 6.2 Overhaul).
 - **Tác vụ thực hiện**:

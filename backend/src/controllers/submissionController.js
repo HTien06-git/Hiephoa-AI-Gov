@@ -32,20 +32,41 @@ function handleGetLiveQueue(req, res) {
   }
 }
 
-// GET /api/submissions/:code: Người dân theo dõi tiến độ hồ sơ từ điện thoại
+// GET /api/submissions/:code: Người dân theo dõi tiến độ hồ sơ từ điện thoại (Hỗ trợ Mã HH-xxxx, Số CCCD 12 số, hoặc SĐT)
 function handleGetSubmission(req, res) {
   try {
     const { code } = req.params;
-    const sub = realtimeSyncService.getSubmissionByCode(code);
+    const clean = (code || '').trim();
+    if (!clean) {
+      return res.status(400).json({ success: false, error: 'Vui lòng cung cấp mã hồ sơ hoặc số CCCD' });
+    }
+
+    // 1. Kiểm tra khớp mã hồ sơ
+    let sub = realtimeSyncService.getSubmissionByCode(clean);
+    let matches = [];
+
+    // 2. Nếu không thấy theo mã hồ sơ, tra cứu linh hoạt theo số CCCD (12 số) hoặc SĐT
+    if (!sub) {
+      matches = realtimeSyncService.lookupSubmissions(clean);
+      if (matches.length > 0) {
+        sub = matches[0];
+      }
+    } else {
+      matches = [sub];
+    }
+
     if (!sub) {
       return res.status(404).json({
         success: false,
-        error: `Không tìm thấy hồ sơ có mã ${code}`
+        error: `Không tìm thấy hồ sơ với mã hoặc số CCCD/SĐT "${clean}". Bà con vui lòng kiểm tra lại.`
       });
     }
+
     return res.json({
       success: true,
       submission: sub,
+      submissions: matches,
+      totalMatches: matches.length,
       data: sub
     });
   } catch (err) {

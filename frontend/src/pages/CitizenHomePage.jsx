@@ -10,6 +10,7 @@ import DocumentPreCheckModal from '../components/pre-check/DocumentPreCheckModal
 import CitizenQrModal from '../components/qr-handoff/CitizenQrModal';
 import CitizenLookupModal from '../components/qr-handoff/CitizenLookupModal';
 import QuickActionFloatingDock from '../components/layout/QuickActionFloatingDock';
+import CitizenDeviceNotificationToast from '../components/layout/CitizenDeviceNotificationToast';
 import TrongDongOrnament from '../components/common/TrongDongOrnament';
 
 import { useFontScale } from '../hooks/useFontScale';
@@ -35,6 +36,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
   const [preCheckProc, setPreCheckProc] = useState(null);
   const [qrPayload, setQrPayload] = useState(null);
   const [isLookupOpen, setIsLookupOpen] = useState(false);
+  const [lookupInitialQuery, setLookupInitialQuery] = useState('');
   const [, setIsQueryLoading] = useState(false);
 
   const handleOpenAutoForm = (proc, mode = 'data_input') => {
@@ -134,7 +136,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         />
 
         {/* Main Content: Bố cục tinh gọn gồm 03 khu vực mạch lạc */}
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 overflow-x-hidden">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 overflow-x-hidden pb-28 sm:pb-20">
           
           {/* KHU VỰC 1: TRUNG TÂM TƯ VẤN GIỌNG NÓI & HỎI ĐÁP PHÁP LUẬT AI 24/7 (Hero Voice Station) */}
           <HeroVoiceStation
@@ -228,13 +230,26 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         />
       )}
 
-      {/* Tra cứu mã hồ sơ trực tuyến Modal */}
+      {/* Tra cứu mã hồ sơ trực tuyến Modal (Hỗ trợ CCCD & Mã hồ sơ) */}
       {isLookupOpen && (
         <CitizenLookupModal
-          onClose={() => setIsLookupOpen(false)}
+          initialQuery={lookupInitialQuery}
+          onClose={() => {
+            setIsLookupOpen(false);
+            setLookupInitialQuery('');
+          }}
           speakText={speak}
         />
       )}
+
+      {/* Thông Báo Nhắc Kết Quả Hồ Sơ Trên Thiết Bị Người Dân */}
+      <CitizenDeviceNotificationToast
+        onOpenLookupWithCode={(code) => {
+          setLookupInitialQuery(code);
+          setIsLookupOpen(true);
+        }}
+        speakText={speak}
+      />
 
       {/* ======================================================== */}
       {/* THANH NÚT CHỨC NĂNG NHANH CỐ ĐỊNH PHÍA DƯỚI MÀN HÌNH     */}
@@ -242,7 +257,10 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
       {/* ======================================================== */}
       <QuickActionFloatingDock
         onActivateMic={handleActivateMic}
-        onOpenLookup={() => setIsLookupOpen(true)}
+        onOpenLookup={() => {
+          setLookupInitialQuery('');
+          setIsLookupOpen(true);
+        }}
         onScrollToProcedures={handleScrollToProcedures}
         onOpenPreCheck={handleOpenPreCheckDefault}
         onScrollToTop={handleScrollToTop}

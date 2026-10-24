@@ -83,6 +83,7 @@ export default function SmartAutoFormModal({
   const schema = formSchemasData.forms.find(f => f.id === formId) || formSchemasData.forms[0];
 
   const [inputMode, setInputMode] = useState(initialMode); // 'data_input' | 'voice_wizard'
+  const [mobileView, setMobileView] = useState('form'); // 'form' | 'preview' trên màn hình điện thoại
   const [wizardStep, setWizardStep] = useState(0);
   const [formData, setFormData] = useState({});
   const [activeVoiceField, setActiveVoiceField] = useState(null);
@@ -491,43 +492,43 @@ export default function SmartAutoFormModal({
       <div className="bg-slate-100 rounded-3xl w-full max-w-7xl shadow-2xl border-4 border-amber-400 flex flex-col h-[95vh] max-h-[95vh] overflow-hidden animate-scale-up">
         
         {/* TOP HEADER: Logo DVC + Tiêu đề biểu mẫu */}
-        <div className="bg-gradient-to-r from-[#7F1D1D] via-[#991B1B] to-[#7F1D1D] text-white p-3 sm:p-4 flex items-center justify-between border-b-2 border-amber-400 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white p-1.5 flex-shrink-0 shadow-lg ring-2 ring-amber-400 flex items-center justify-center">
+        <div className="bg-gradient-to-r from-[#7F1D1D] via-[#991B1B] to-[#7F1D1D] text-white p-2.5 sm:p-4 flex items-center justify-between border-b-2 border-amber-400 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white p-1 flex-shrink-0 shadow-lg ring-2 ring-amber-400 flex items-center justify-center">
               <img
                 src="/logo_gov.png"
                 alt="Logo Cổng DVC"
                 className="w-full h-full object-contain"
               />
             </div>
-            <div>
-              <div className="text-[11px] sm:text-xs uppercase font-extrabold text-amber-300 tracking-wider flex items-center gap-1.5">
-                <FileCheck className="w-3.5 h-3.5 text-amber-300" />
-                <span>BIỂU MẪU HÀNH CHÍNH CHUẨN QUỐC GIA (XÃ HIỆP HÒA, TÂY NINH)</span>
+            <div className="min-w-0">
+              <div className="text-[9px] sm:text-xs uppercase font-extrabold text-amber-300 tracking-wider flex items-center gap-1 truncate">
+                <FileCheck className="w-3 h-3 text-amber-300 shrink-0" />
+                <span className="truncate">BIỂU MẪU CHUẨN QUỐC GIA (XÃ HIỆP HÒA)</span>
               </div>
-              <h3 className="text-base sm:text-xl md:text-2xl font-black text-white leading-snug">
+              <h3 className="text-sm sm:text-xl md:text-2xl font-black text-white leading-tight truncate">
                 {norm(schema.title)}
               </h3>
             </div>
           </div>
 
           {/* Các nút tác vụ nhanh */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               type="button"
               onClick={handleDownloadDocx}
               disabled={isExporting}
-              className="h-10 px-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-red-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+              className="h-8 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-red-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
               title="Tải về file Microsoft Word (.docx) chuẩn"
             >
               <Download className="w-4 h-4 flex-shrink-0" />
-              <span className="hidden sm:inline">{isExporting ? 'Đang xuất...' : 'Tải File Word (.docx)'}</span>
+              <span className="hidden sm:inline">{isExporting ? 'Đang xuất...' : 'Tải File Word'}</span>
             </button>
 
             <button
               type="button"
               onClick={handlePrint}
-              className="h-10 px-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 border border-white/20 transition-all cursor-pointer"
+              className="h-8 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 border border-white/20 transition-all cursor-pointer"
               title="In trực tiếp ra giấy A4"
             >
               <Printer className="w-4 h-4 flex-shrink-0 text-amber-300" />
@@ -540,22 +541,55 @@ export default function SmartAutoFormModal({
                 if (stopSpeaking) stopSpeaking();
                 onClose();
               }}
-              className="w-10 h-10 rounded-full bg-red-950/80 hover:bg-red-900 text-white flex items-center justify-center transition-all flex-shrink-0 cursor-pointer ml-1"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-950/80 hover:bg-red-900 text-white flex items-center justify-center transition-all flex-shrink-0 cursor-pointer ml-1"
               title="Đóng cửa sổ"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
 
+        {/* CHUYỂN ĐỔI CHẾ ĐỘ XEM TRÊN ĐIỆN THOẠI (MOBILE VIEW SELECTOR) */}
+        <div className="lg:hidden flex items-center justify-between p-2 bg-amber-100/90 border-b border-amber-300 gap-2 flex-shrink-0">
+          <div className="grid grid-cols-2 flex-1 bg-white rounded-xl p-0.5 border border-amber-300 shadow-xs">
+            <button
+              type="button"
+              onClick={() => setMobileView('form')}
+              className={`py-1.5 px-2 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1 ${
+                mobileView === 'form'
+                  ? 'bg-[#991B1B] text-white shadow-xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>📝 Điền Thông Tin</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileView('preview')}
+              className={`py-1.5 px-2 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1 ${
+                mobileView === 'preview'
+                  ? 'bg-[#991B1B] text-white shadow-xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>📄 Xem Đơn A4</span>
+            </button>
+          </div>
+          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded-lg shrink-0">
+            {filledRequiredFields}/{totalRequiredFields} mục ({progressPercent}%)
+          </span>
+        </div>
+
         {/* Thanh chuyển chế độ (Bảng nhập liệu vs Trợ lý giọng nói từng bước) */}
-        <div className="bg-amber-50 px-4 py-2 border-b border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-950 font-semibold flex-shrink-0">
+        <div className="bg-amber-50 px-3 sm:px-4 py-1.5 sm:py-2 border-b border-amber-200 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-950 font-semibold flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="inline-flex p-0.5 bg-amber-200/70 rounded-xl border border-amber-300">
               <button
                 type="button"
                 onClick={() => setInputMode('data_input')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
                   inputMode === 'data_input'
                     ? 'bg-red-700 text-white shadow-xs'
                     : 'text-amber-950 hover:bg-amber-100'
@@ -568,7 +602,7 @@ export default function SmartAutoFormModal({
               <button
                 type="button"
                 onClick={() => setInputMode('voice_wizard')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all ${
                   inputMode === 'voice_wizard'
                     ? 'bg-red-700 text-white shadow-xs'
                     : 'text-amber-950 hover:bg-amber-100'
@@ -584,7 +618,7 @@ export default function SmartAutoFormModal({
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-2">
             {notification && (
               <span className="bg-blue-100 text-blue-900 px-2 py-0.5 rounded-md font-bold text-[11px] animate-fade-in">
                 {notification}
@@ -603,7 +637,7 @@ export default function SmartAutoFormModal({
           {/* ======================================================== */}
           {/* KHU VỰC BÊN TRÁI: BẢNG NHẬP LIỆU HOẶC VOICE WIZARD        */}
           {/* ======================================================== */}
-          <div className="lg:col-span-5 bg-white border-r border-slate-300 flex flex-col h-full overflow-hidden">
+          <div className={`lg:col-span-5 bg-white border-r border-slate-300 flex flex-col h-full overflow-hidden ${mobileView === 'form' ? 'flex' : 'hidden lg:flex'}`}>
             
             {/* CHẾ ĐỘ 1: TRỢ LÝ GIỌNG NÓI TỪNG BƯỚC (VOICE WIZARD) */}
             {inputMode === 'voice_wizard' && (
@@ -820,7 +854,7 @@ export default function SmartAutoFormModal({
                           <select
                             value={val}
                             onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                            className="w-full px-3.5 py-2 text-sm font-semibold rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-600"
                           >
                             <option value="">-- Chọn thông tin --</option>
                             {field.options?.map((opt) => (
@@ -835,7 +869,7 @@ export default function SmartAutoFormModal({
                             value={val}
                             onChange={(e) => handleFieldChange(field.name, e.target.value)}
                             placeholder={field.placeholder || `Nhập ${field.label.toLowerCase()}...`}
-                            className="w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-600 placeholder:text-slate-400"
+                            className="w-full px-3.5 py-2 text-sm font-semibold rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-600 placeholder:text-slate-400"
                           />
                         )}
                       </div>
@@ -843,28 +877,40 @@ export default function SmartAutoFormModal({
                   })}
                 </div>
 
-                {/* Chân cột trái: Nút xuất file & QR */}
-                <div className="p-3 bg-white border-t border-slate-200 flex items-center justify-between gap-2 flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (onGenerateQr) onGenerateQr({ formId, schema, formData });
-                    }}
-                    className="h-10 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
-                    title="Tạo mã QR lưu hồ sơ lên điện thoại của bà con"
-                  >
-                    <QrCode className="w-4 h-4 text-slate-700" />
-                    <span>Mã QR Hồ Sơ</span>
-                  </button>
+                {/* Chân cột trái: Nút xuất file, xem A4 & QR */}
+                <div className="p-2.5 sm:p-3 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (onGenerateQr) onGenerateQr({ formId, schema, formData });
+                      }}
+                      className="h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
+                      title="Tạo mã QR lưu hồ sơ lên điện thoại của bà con"
+                    >
+                      <QrCode className="w-4 h-4 text-slate-700 shrink-0" />
+                      <span>Mã QR</span>
+                    </button>
+
+                    {/* Nút chuyển nhanh sang xem đơn A4 trên điện thoại */}
+                    <button
+                      type="button"
+                      onClick={() => setMobileView('preview')}
+                      className="lg:hidden h-9 px-3 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-bold flex items-center gap-1 transition-all border border-amber-300"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+                      <span>Xem A4</span>
+                    </button>
+                  </div>
 
                   <button
                     type="button"
                     onClick={handleDownloadDocx}
                     disabled={isExporting}
-                    className="h-10 px-4 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-black flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+                    className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-black flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
                   >
-                    <Download className="w-4 h-4 text-amber-300" />
-                    <span>Xuất File Đơn (.docx)</span>
+                    <Download className="w-4 h-4 text-amber-300 shrink-0" />
+                    <span>Xuất File Word</span>
                   </button>
                 </div>
               </>
@@ -875,16 +921,31 @@ export default function SmartAutoFormModal({
           {/* ======================================================== */}
           {/* KHU VỰC BÊN PHẢI: BẢN XEM TRƯỚC MẪU ĐƠN CHUẨN 100% (A4)   */}
           {/* ======================================================== */}
-          <div className="lg:col-span-7 bg-slate-300 flex flex-col h-full overflow-hidden">
+          <div className={`lg:col-span-7 bg-slate-300 flex flex-col h-full overflow-hidden ${mobileView === 'preview' ? 'flex' : 'hidden lg:flex'}`}>
             
+            {/* Thanh điều hướng quay lại trên điện thoại */}
+            <div className="lg:hidden bg-amber-500 text-stone-950 px-3 py-1.5 flex items-center justify-between font-bold text-xs shrink-0">
+              <button
+                type="button"
+                onClick={() => setMobileView('form')}
+                className="inline-flex items-center gap-1 text-slate-900 bg-white/95 hover:bg-white px-2.5 py-1 rounded-lg shadow-2xs font-black active:scale-95 transition-all"
+              >
+                <ChevronLeft className="w-4 h-4 text-red-800" />
+                <span>Quay lại Điền Thông Tin</span>
+              </button>
+              <span className="text-[11px] font-bold text-stone-900">
+                📄 Bản xem trước A4
+              </span>
+            </div>
+
             {/* Header thanh công cụ Xem trước */}
-            <div className="bg-slate-800 text-white px-4 py-2 flex items-center justify-between text-xs font-bold flex-shrink-0">
+            <div className="bg-slate-800 text-white px-3 sm:px-4 py-2 flex items-center justify-between text-xs font-bold flex-shrink-0">
               <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-amber-400" />
-                <span className="uppercase tracking-wider">BẢN XEM TRƯỚC MẪU ĐƠN A4 (LIVE DOCUMENT PREVIEW)</span>
+                <FileText className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="uppercase tracking-wider">BẢN XEM TRƯỚC MẪU ĐƠN A4 (LIVE PREVIEW)</span>
               </div>
               <span className="text-[11px] text-slate-300 font-normal hidden sm:inline">
-                Khổ giấy A4 (210 x 297mm) • Phông Times New Roman chuẩn hành chính
+                Khổ giấy A4 (210 x 297mm) • Phông Times New Roman
               </span>
             </div>
 

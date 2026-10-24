@@ -278,6 +278,39 @@ class RealtimeSyncService {
     return store.submissions.find(s => s.submissionCode === clean) || null;
   }
 
+  // Tra cứu linh hoạt theo Căn cước công dân (12 số CCCD), Số điện thoại hoặc Mã hồ sơ
+  lookupSubmissions(query) {
+    if (!query) return [];
+    const q = query.trim().toUpperCase();
+    const qDigits = q.replace(/[^0-9]/g, '');
+    const store = globalThis.__HIEPHOA_REALTIME_STORE__;
+
+    return store.submissions.filter(s => {
+      // 1. Khớp chính xác hoặc chứa mã hồ sơ (HH-1021)
+      if (s.submissionCode && s.submissionCode.toUpperCase().includes(q)) return true;
+
+      // 2. Khớp số CCCD (072...)
+      if (qDigits && qDigits.length >= 6) {
+        if (s.citizenCccd && s.citizenCccd.includes(qDigits)) return true;
+        const fd = s.formData || {};
+        if (fd.so_cccd && String(fd.so_cccd).includes(qDigits)) return true;
+        if (fd.so_cccd_nam && String(fd.so_cccd_nam).includes(qDigits)) return true;
+        if (fd.so_cccd_nu && String(fd.so_cccd_nu).includes(qDigits)) return true;
+        if (fd.so_cccd_nguoi_yeu_cau && String(fd.so_cccd_nguoi_yeu_cau).includes(qDigits)) return true;
+      }
+
+      // 3. Khớp số điện thoại
+      if (qDigits && qDigits.length >= 8 && s.citizenPhone && s.citizenPhone.includes(qDigits)) {
+        return true;
+      }
+
+      // 4. Khớp họ tên người nộp
+      if (s.citizenName && s.citizenName.toUpperCase().includes(q)) return true;
+
+      return false;
+    });
+  }
+
   // Cập nhật hồ sơ bởi cán bộ Một cửa (PUT /api/submissions/:code)
   updateSubmission(code, updates) {
     if (!code) return null;

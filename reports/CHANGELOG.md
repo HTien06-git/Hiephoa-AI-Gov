@@ -4,6 +4,22 @@ Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phư
 
 Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
 
+## [2026-10-24 21:45] - Phiên Bản V6.8: Ẩn Dock Nhanh Khi Mở Kết Quả & Khắc Phục Lỗi Tràn Viền Nút Gửi Chat
+- **Loại tác vụ**: Giải quyết 2 yêu cầu tinh chỉnh giao diện từ ảnh chụp thực tế màn hình trả kết quả trên điện thoại di động: tự động ẩn thanh nút điều hướng nhanh Quick Action Dock khi mở phần trả kết quả (không để dock che khuất Action Bar), và sửa lỗi nút Gửi bị tràn ra ngoài viền phải trong khung chat trả lời câu hỏi của người dân (Version 6.8 Drawer Layout Polish).
+- **Tác vụ thực hiện**:
+  1. **Tự động ẩn Dock điều hướng nhanh khi mở kết quả (`CitizenHomePage.jsx`)**:
+     - Thiết lập điều kiện `!chatResult && !autoFormProc && !preCheckProc && !qrPayload && !isLookupOpen` trước khi hiển thị `QuickActionFloatingDock`.
+     - Khi người dân xem kết quả trả lời, hướng dẫn thủ tục (`RagChatDrawer`), hoặc mở biểu mẫu điền đơn, kiểm tra giấy tờ, tra cứu CCCD, thanh dock nổi sẽ tự động biến mất, giúp toàn bộ Action Bar (`Điền Đơn Trong Word`, `Điền Bằng Giọng Nói`, `Kiểm Tra Giấy Tờ`) hiển thị thoáng đãng 100%, không bị che lấp.
+  2. **Khắc phục lỗi tràn viền nút Gửi trong khung chat người dân (`ContextualChatBox.jsx`)**:
+     - *Nguyên nhân*: Thẻ `<input>` thiếu thuộc tính `min-w-0`, khiến kích thước intrinsic mặc định của trình duyệt đẩy nút Gửi tràn ra khỏi biên phải của card trên màn hình điện thoại hẹp.
+     - *Khắc phục*:
+       * Bổ sung `min-w-0 flex-1 truncate` cho ô input, cho phép co giãn mượt mà xuống bất kỳ độ phân giải di động nào.
+       * Đặt `w-full max-w-full box-border overflow-hidden` cho khung form.
+       * Tinh chỉnh kích thước nút Mic và nút Gửi co giãn linh hoạt (`h-9 sm:h-11 px-3 sm:px-5 shrink-0`), đảm bảo nút Gửi luôn nằm gọn gàng 100% bên trong khung card.
+  3. **Kiểm thử xây dựng**: `npm run build` hoàn tất 100% trong 4.73 giây, 0 cảnh báo lỗi.
+
+---
+
 ## [2026-10-24 21:30] - Phiên Bản V6.7: Khắc Phục Triệt Để Lỗi Lặp Từ Web Speech API & Chuẩn Hóa 100% Khớp Đúng Thủ Tục Hành Chính (Công Chứng / Chứng Thực)
 - **Loại tác vụ**: Giải quyết tận gốc hai vấn đề nghiêm trọng phản ánh từ ảnh chụp màn hình kiểm thử thực tế trên điện thoại di động: lỗi lặp từ lũy tiến của Web Speech API trên Android Chrome khiến câu nói bị lặp hàng chục lần ("hướng dẫn hướng dẫn tôi làm..."), và lỗi nhận diện sai thủ tục hành chính ("công chứng" bị match nhầm do từ khóa 'da' trong ma túy khớp chuỗi 'huong dan') (Version 6.7 Speech Stutter & Intent Engine Fix).
 - **Tác vụ thực hiện**:

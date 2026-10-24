@@ -253,18 +253,20 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
 
       {/* ======================================================== */}
       {/* THANH NÚT CHỨC NĂNG NHANH CỐ ĐỊNH PHÍA DƯỚI MÀN HÌNH     */}
-      {/* Cố định vị trí, khi lướt lên xuống các nút vẫn giữ nguyên */}
+      {/* Ẩn hoàn toàn khi đang mở phần trả kết quả hoặc modal     */}
       {/* ======================================================== */}
-      <QuickActionFloatingDock
-        onActivateMic={handleActivateMic}
-        onOpenLookup={() => {
-          setLookupInitialQuery('');
-          setIsLookupOpen(true);
-        }}
-        onScrollToProcedures={handleScrollToProcedures}
-        onOpenPreCheck={handleOpenPreCheckDefault}
-        onScrollToTop={handleScrollToTop}
-      />
+      {!chatResult && !autoFormProc && !preCheckProc && !qrPayload && !isLookupOpen && (
+        <QuickActionFloatingDock
+          onActivateMic={handleActivateMic}
+          onOpenLookup={() => {
+            setLookupInitialQuery('');
+            setIsLookupOpen(true);
+          }}
+          onScrollToProcedures={handleScrollToProcedures}
+          onOpenPreCheck={handleOpenPreCheckDefault}
+          onScrollToTop={handleScrollToTop}
+        />
+      )}
 
       {/* ======================================================== */}
       {/* FOOTER CHÍNH QUYỀN XÃ HIỆP HÒA (ĐỎ HOÀNG GIA - VÀNG ĐỒNG) */}

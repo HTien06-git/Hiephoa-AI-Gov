@@ -260,39 +260,39 @@ export default function ContextualChatBox({
           e.preventDefault();
           handleSendMessage();
         }}
-        className="flex items-center gap-2 mt-2 bg-slate-50 p-1.5 rounded-2xl border-2 border-slate-300 focus-within:border-[#991B1B] transition-all"
+        className="flex items-center gap-1.5 sm:gap-2 mt-2 bg-slate-50 p-1 sm:p-1.5 rounded-2xl border-2 border-slate-300 focus-within:border-[#991B1B] transition-all w-full max-w-full box-border overflow-hidden"
       >
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Bà con còn thắc mắc gì cứ gõ hoặc bấm Mic hỏi tiếp tại đây..."
+          placeholder="Bà con còn thắc mắc gì cứ gõ hoặc bấm Mic..."
           disabled={isLoading}
-          className="flex-1 bg-transparent px-3 py-2 text-sm sm:text-base outline-none font-medium text-slate-900 placeholder:text-slate-400"
+          className="min-w-0 flex-1 bg-transparent px-2.5 sm:px-3 py-2 text-xs sm:text-base outline-none font-medium text-slate-900 placeholder:text-slate-400 truncate"
         />
 
         {/* Nút Micro thu âm ngay tại thanh chat */}
         <button
           type="button"
           onClick={toggleListening}
-          className={`h-11 w-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
+          className={`h-9 w-9 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center transition-all shrink-0 ${
             isListening
               ? 'bg-red-600 text-white animate-mic-pulse ring-4 ring-red-200'
               : 'bg-red-100 hover:bg-red-200 text-[#991B1B]'
           }`}
           title="Bấm vào để nói câu hỏi"
         >
-          <Mic className="w-5 h-5" />
+          <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
         {/* Nút Gửi câu hỏi */}
         <button
           type="submit"
           disabled={isLoading || !inputText.trim()}
-          className="h-11 px-4 sm:px-5 rounded-xl bg-[#991B1B] hover:bg-red-800 disabled:opacity-50 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all flex-shrink-0 whitespace-nowrap"
+          className="h-9 sm:h-11 px-3 sm:px-5 rounded-xl bg-[#991B1B] hover:bg-red-800 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active:scale-95 transition-all shrink-0 whitespace-nowrap"
         >
           <span>Gửi</span>
-          <Send className="w-4 h-4 flex-shrink-0" />
+          <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
         </button>
       </form>
 

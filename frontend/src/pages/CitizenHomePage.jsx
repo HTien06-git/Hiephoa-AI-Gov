@@ -282,7 +282,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
           {/* Cột 1: Đơn vị hành chính */}
           <div className="space-y-2.5">
-            <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider whitespace-nowrap">
+            <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider leading-snug">
               Ủy Ban Nhân Dân Xã Hiệp Hòa — Tỉnh Tây Ninh
             </div>
             <p className="text-xs sm:text-sm text-amber-100/90 leading-relaxed">
@@ -294,34 +294,26 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
             </p>
           </div>
 
-          {/* Cột 2: Đường dây nóng & Kỹ thuật chính thức */}
+          {/* Cột 2: Đường dây nóng Dịch vụ công */}
           <div className="space-y-2.5">
-            <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider whitespace-nowrap">
-              Đường Dây Nóng & Hỗ Trợ Kỹ Thuật
+            <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider leading-snug">
+              Đường Dây Nóng Hỗ Trợ
             </div>
-            <div className="space-y-1.5 text-xs sm:text-sm">
-              <p className="text-white flex items-center gap-1.5 whitespace-nowrap">
+            <div className="space-y-2 text-xs sm:text-sm">
+              <p className="text-white flex items-center gap-1.5 flex-wrap">
                 <span>📞</span>
                 <strong>Tổng đài Dịch vụ công Quốc gia:</strong>{' '}
-                <a href="tel:18001096" className="text-amber-300 font-extrabold hover:underline">1800 1096</a>
+                <a href="tel:18001096" className="text-amber-300 font-extrabold hover:underline text-sm sm:text-base">1800 1096</a>
               </p>
-              <p className="text-amber-100 flex items-center gap-1.5 whitespace-nowrap">
-                <span>🛠</span>
-                <strong>Đường dây nóng dự án Hiệp Hòa AI-Gov:</strong>{' '}
-                <a href="tel:0362872772" className="text-amber-300 font-extrabold hover:underline">0362 872 772</a>
-              </p>
-              <p className="text-amber-200/90 text-xs">
-                Tác giả: <strong>Trương Hoàng Tiến</strong> – Bí thư Chi Đoàn ấp Văn Hiệp
-              </p>
-              <p className="text-amber-200/90 text-xs">
-                Email liên hệ: <span className="text-amber-100 font-mono">truonghoangtien90@gmail.com</span>
+              <p className="text-amber-100/80 text-xs leading-relaxed">
+                Tiếp nhận phản ánh, kiến nghị và hướng dẫn thủ tục hành chính công 24/7.
               </p>
             </div>
           </div>
 
           {/* Cột 3: Bảo mật & Bản quyền */}
           <div className="space-y-2.5">
-            <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider whitespace-nowrap">
+            <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider leading-snug">
               Bảo Mật Quyền Riêng Tư & Trợ Năng
             </div>
             <div className="p-3.5 rounded-2xl bg-black/30 border border-amber-400/30 text-xs text-amber-50 space-y-1 backdrop-blur-xs">

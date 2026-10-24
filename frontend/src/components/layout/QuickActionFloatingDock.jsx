@@ -31,12 +31,13 @@ export default function QuickActionFloatingDock({
     return (
       <aside
         aria-label="Thanh công cụ thu gọn"
-        className="fixed bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 z-35 select-none animate-fadeIn"
+        style={{ zIndex: 60 }}
+        className="fixed bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 z-50 select-none animate-fadeIn pointer-events-auto"
       >
         <button
           type="button"
           onClick={() => setIsCollapsed(false)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#690F12] via-[#851417] to-[#5C0A0D] text-amber-300 border-2 border-amber-400 shadow-xl text-xs font-black hover:scale-105 active:scale-95 transition-all backdrop-blur-md"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#690F12] text-amber-300 border-2 border-amber-400 shadow-[0_8px_30px_rgba(0,0,0,0.7)] text-xs font-black hover:scale-105 active:scale-95 transition-all"
           title="Bấm để mở thanh chức năng nhanh"
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
@@ -50,9 +51,10 @@ export default function QuickActionFloatingDock({
   return (
     <aside 
       aria-label="Thanh công cụ thao tác nhanh"
-      className="fixed bottom-2 sm:bottom-5 left-1/2 -translate-x-1/2 z-35 select-none animate-fadeIn max-w-[96vw]"
+      style={{ zIndex: 60 }}
+      className="fixed bottom-2 sm:bottom-5 left-1/2 -translate-x-1/2 z-50 select-none animate-fadeIn max-w-[96vw] pointer-events-auto"
     >
-      <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#5B0B0E]/95 via-[#7E1316]/95 to-[#54090C]/95 border-2 border-amber-400 shadow-[0_10px_35px_rgba(0,0,0,0.55)] backdrop-blur-md">
+      <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-[#5B0B0E] border-2 border-amber-400 shadow-[0_12px_45px_rgba(0,0,0,0.85)]">
         
         {/* 1. NÚT MICRO - CHẠM & NÓI VỚI CHUYÊN VIÊN AI (Vàng Hoàng Gia tỏa sáng) */}
         <button

@@ -1,6 +1,13 @@
 import React from 'react';
 import { Volume2, VolumeX, PhoneCall, Trash2, Eye } from 'lucide-react';
 
+/**
+ * Thanh Công Cụ Trợ Năng (Accessibility Bar V6.5)
+ * - Tinh chỉnh bố cục hoàn toàn cân đối, đồng bộ tỷ lệ trên cả điện thoại và máy tính.
+ * - Triệt tiêu hiện tượng "cái dài cái ngắn cái cao cái thấp" trên màn hình điện thoại.
+ * - Cỡ chữ chia đều 3 nút (33.3% mỗi nút).
+ * - Nút Loa và Tổng đài chia đều 2 nút đối xứng 50% - 50% chuẩn mực cùng chiều cao h-10.
+ */
 export default function AccessibilityBar({
   fontScale,
   setFontScale,
@@ -10,22 +17,27 @@ export default function AccessibilityBar({
   hasData
 }) {
   return (
-    <div className="bg-[#FFFBEB] border-b border-amber-200/80 py-2.5 px-4 shadow-2xs z-20">
-      <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-slate-800">
+    <aside
+      aria-label="Thanh công cụ trợ năng"
+      className="bg-[#FFFBEB] border-b border-amber-200/90 py-2 sm:py-2.5 px-3 sm:px-6 shadow-2xs z-20 select-none"
+    >
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-slate-800">
         
-        {/* BÊN TRÁI: CỠ CHỮ CHO BÀ CON A (Vừa) | A+ (To) | A++ (Siêu to) */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs sm:text-sm font-extrabold text-amber-950 flex items-center gap-1.5 whitespace-nowrap">
+        {/* ======================================================== */}
+        {/* KHU VỰC 1: CỠ CHỮ CHO BÀ CON (CÂN ĐỐI 3 NÚT BẰNG NHAU 100%) */}
+        {/* ======================================================== */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-xs sm:text-sm font-extrabold text-amber-950 flex items-center gap-1 shrink-0 whitespace-nowrap">
             <Eye className="w-4 h-4 text-[#D97706] shrink-0" />
             <span>Cỡ chữ:</span>
           </span>
 
-          <div className="inline-flex p-0.5 bg-white border border-amber-300 rounded-xl shadow-2xs">
+          <div className="grid grid-cols-3 flex-1 sm:flex-none sm:inline-grid sm:w-64 bg-white border border-amber-300 rounded-xl p-0.5 shadow-2xs gap-0.5">
             <button
               type="button"
               onClick={() => setFontScale('normal')}
               title="Cỡ chữ Vừa"
-              className={`h-9 px-3 text-xs sm:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${
+              className={`h-9 sm:h-9.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center ${
                 fontScale === 'normal'
                   ? 'bg-[#991B1B] text-white font-black shadow-xs'
                   : 'text-slate-700 hover:bg-amber-50'
@@ -33,11 +45,12 @@ export default function AccessibilityBar({
             >
               A (Vừa)
             </button>
+
             <button
               type="button"
               onClick={() => setFontScale('large')}
               title="Cỡ chữ To"
-              className={`h-9 px-3 text-xs sm:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${
+              className={`h-9 sm:h-9.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center ${
                 fontScale === 'large'
                   ? 'bg-[#991B1B] text-white font-black shadow-xs'
                   : 'text-slate-700 hover:bg-amber-50'
@@ -45,11 +58,12 @@ export default function AccessibilityBar({
             >
               A+ (To)
             </button>
+
             <button
               type="button"
               onClick={() => setFontScale('xlarge')}
               title="Cỡ chữ Siêu to"
-              className={`h-9 px-3 text-xs sm:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${
+              className={`h-9 sm:h-9.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center ${
                 fontScale === 'xlarge'
                   ? 'bg-[#991B1B] text-white font-black shadow-xs'
                   : 'text-slate-700 hover:bg-amber-50'
@@ -60,13 +74,15 @@ export default function AccessibilityBar({
           </div>
         </div>
 
-        {/* BÊN PHẢI: LOA: BẬT / TẮT & TỔNG ĐÀI 1900 9095 CÙNG CHIỀU CAO h-9 */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Nút Loa: BẬT */}
+        {/* ======================================================== */}
+        {/* KHU VỰC 2: LOA & TỔNG ĐÀI (CÂN ĐỐI 50% - 50% CÙNG CHIỀU CAO h-9) */}
+        {/* ======================================================== */}
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+          {/* Nút Loa: BẬT / TẮT (50% trên mobile, bằng chiều cao nút Tổng đài) */}
           <button
             type="button"
             onClick={toggleAudio}
-            className={`h-9 px-3.5 text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 rounded-xl border transition-all whitespace-nowrap shadow-2xs ${
+            className={`h-9 sm:h-9.5 px-3 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 rounded-xl border transition-all shadow-2xs ${
               isAudioEnabled
                 ? 'bg-emerald-700 text-white border-emerald-800 hover:bg-emerald-800'
                 : 'bg-slate-200 text-slate-700 border-slate-300 hover:bg-slate-300'
@@ -76,24 +92,24 @@ export default function AccessibilityBar({
             {isAudioEnabled ? (
               <>
                 <Volume2 className="w-4 h-4 text-amber-200 animate-pulse shrink-0" />
-                <span>Loa: BẬT</span>
+                <span className="truncate">Loa: BẬT</span>
               </>
             ) : (
               <>
                 <VolumeX className="w-4 h-4 text-slate-500 shrink-0" />
-                <span>Loa: TẮT</span>
+                <span className="truncate">Loa: TẮT</span>
               </>
             )}
           </button>
 
-          {/* Hotline 1900 9095 */}
+          {/* Hotline 1900 9095 (50% trên mobile, bằng chiều cao nút Loa) */}
           <a
             href="tel:19009095"
-            className="h-9 px-3.5 text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 rounded-xl bg-[#1E3A8A] text-white hover:bg-blue-900 border border-blue-950 transition-all shadow-2xs whitespace-nowrap"
+            className="h-9 sm:h-9.5 px-3 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 rounded-xl bg-[#1E3A8A] text-white hover:bg-blue-900 border border-blue-950 transition-all shadow-2xs"
             title="Gọi tổng đài hỗ trợ thủ tục hành chính công"
           >
             <PhoneCall className="w-4 h-4 text-amber-300 shrink-0" />
-            <span>Tổng đài: 1900 9095</span>
+            <span className="truncate">Tổng đài: 1900 9095</span>
           </a>
 
           {/* Nút xóa dữ liệu bảo mật nếu có */}
@@ -101,16 +117,16 @@ export default function AccessibilityBar({
             <button
               type="button"
               onClick={clearSecurityData}
-              className="h-9 px-3 text-xs font-bold inline-flex items-center gap-1 rounded-xl bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200 transition-all whitespace-nowrap shadow-2xs"
+              className="col-span-2 sm:col-span-1 h-9 sm:h-9.5 px-3 text-xs font-bold flex items-center justify-center gap-1 rounded-xl bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200 transition-all shadow-2xs"
               title="Xóa thông tin cá nhân khỏi máy"
             >
               <Trash2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-              <span className="hidden sm:inline">Xóa Dữ Liệu</span>
+              <span>Xóa Dữ Liệu</span>
             </button>
           )}
         </div>
 
       </div>
-    </div>
+    </aside>
   );
 }

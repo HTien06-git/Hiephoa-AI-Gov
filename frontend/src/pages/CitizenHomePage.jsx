@@ -282,8 +282,10 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
           {/* Cột 1: Đơn vị hành chính */}
           <div className="space-y-2.5">
-            <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider leading-snug">
-              Ủy Ban Nhân Dân Xã Hiệp Hòa — Tỉnh Tây Ninh
+            <div className="text-amber-300 font-black text-xs sm:text-base uppercase tracking-wider leading-snug">
+              <span className="block sm:inline">Ủy Ban Nhân Dân Xã Hiệp Hòa</span>
+              <span className="hidden sm:inline"> — </span>
+              <span className="block sm:inline text-amber-200 sm:text-amber-300">Tỉnh Tây Ninh</span>
             </div>
             <p className="text-xs sm:text-sm text-amber-100/90 leading-relaxed">
               <strong>Trung tâm Phục vụ Hành chính công xã Hiệp Hòa</strong><br />

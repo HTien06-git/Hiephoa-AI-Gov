@@ -201,9 +201,9 @@ export default function RagChatDrawer({
           {activeProc && (
             <div className="bg-gradient-to-r from-[#7F1D1D] via-[#991B1B] to-amber-700 p-4 sm:p-5 rounded-3xl shadow-lg border-2 border-amber-300 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
-                <div className="text-xs uppercase font-extrabold text-amber-300 tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
-                  <Sparkles className="w-4 h-4 text-amber-300 animate-spin" />
-                  <span>BIỂU MẪU ĐIỀN ĐƠN TỰ ĐỘNG & XUẤT FILE WORD</span>
+                <div className="text-[9.5px] xs:text-[10.5px] sm:text-xs uppercase font-extrabold text-amber-300 tracking-wider flex items-center justify-center sm:justify-start gap-1.5 whitespace-nowrap overflow-hidden text-ellipsis">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 animate-spin shrink-0" />
+                  <span className="truncate">BIỂU MẪU ĐIỀN ĐƠN TỰ ĐỘNG & XUẤT FILE WORD</span>
                 </div>
                 <h4 className="text-base sm:text-lg font-black mt-1 text-white">
                   {activeProc.title}

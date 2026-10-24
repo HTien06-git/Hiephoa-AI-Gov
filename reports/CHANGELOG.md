@@ -4,6 +4,25 @@ Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phư
 
 Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
 
+## [2026-10-24 20:55] - Phiên Bản V6.5: Đại Tu Chống Nhảy Chữ Xuống Dòng Toàn Nền Tảng Mobile & Tiêu Đề Chính Liền 1 Hàng Tự Cân Đối
+- **Loại tác vụ**: Giải quyết triệt để lỗi nhảy chữ rớt dòng trên giao diện điện thoại theo 5 ảnh chụp thực tế của người dùng: bắt buộc tiêu đề chính `TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA` liền đúng 1 hàng không ngắt dòng nhờ fluid clamp co giãn tự động theo khung, khắc phục toàn bộ các huy hiệu (badges) bị rớt chữ đơn lẻ ("HIỆP HÒA", "XÃ", "TÂY NINH", "WORD") và chuẩn hóa tiêu đề Footer hai dòng cân xứng trên di động (Version 6.5 Polish).
+- **Tác vụ thực hiện**:
+  1. **Tiêu đề chính Header liền đúng 1 hàng (`Header.jsx` - Hình 1)**:
+     - Ứng dụng `style={{ fontSize: 'clamp(9.5px, 3.2vw, 22px)' }}` kết hợp `whitespace-nowrap tracking-tight font-black leading-tight`.
+     - Tiêu đề `TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA` luôn luôn nằm trên đúng 1 dòng duy nhất trên mọi màn hình từ 320px đến máy tính bảng/desktop, không bao giờ bị nhảy chữ xuống dòng thứ 2.
+     - Dòng 1 cơ quan chủ quản và dòng 3 tên nền tảng được bổ sung `whitespace-nowrap truncate` giữ tính trang nghiêm.
+  2. **Bổ sung breakpoint `xs: '380px'` trong `tailwind.config.js`**: Hỗ trợ căn chỉnh kích thước vi mô cho điện thoại phổ thông tại Việt Nam.
+  3. **Khắc phục triệt để lỗi rớt chữ tại các huy hiệu (Hình 1 - 4)**:
+     - `HeroVoiceStation.jsx` (Hình 1): `TRỢ LÝ HÀNH CHÍNH CÔNG & PHÁP LUẬT XÃ HIỆP HÒA` co giãn `text-[9.5px] xs:text-[10.5px] sm:text-xs font-black whitespace-nowrap`, không còn bị rớt "HIỆP HÒA".
+     - `CategoryGrid.jsx` (Hình 2): `DANH MỤC DỊCH VỤ CÔNG CHUẨN HÓA CẤP XÃ` co giãn `text-[9.5px] xs:text-[10.5px] sm:text-xs font-bold whitespace-nowrap`, không còn bị rớt chữ "XÃ".
+     - `DvcGuideSection.jsx` (Hình 3): `KẾT NỐI CHUYỂN ĐỔI SỐ QUỐC GIA & TỈNH TÂY NINH` co giãn `text-[9.5px] xs:text-[10.5px] sm:text-xs font-black whitespace-nowrap`, không còn rớt "TÂY NINH".
+     - `RagChatDrawer.jsx` (Hình 4): `BIỂU MẪU ĐIỀN ĐƠN TỰ ĐỘNG & XUẤT FILE WORD` co giãn `text-[9.5px] xs:text-[10.5px] sm:text-xs whitespace-nowrap`, không còn rớt chữ "WORD".
+     - Đồng bộ chuẩn hóa trên `VoiceMicButton.jsx` và `KTechEcosystemSteps.jsx`.
+  4. **Tái cấu trúc tiêu đề Footer đơn vị hành chính (`CitizenHomePage.jsx` - Hình 5)**:
+     - Phân định rõ ràng: Mobile hiển thị 2 dòng trang trọng cân xứng (`Ủy Ban Nhân Dân Xã Hiệp Hòa` và `Tỉnh Tây Ninh`), Desktop tự động nối thành 1 hàng gạch nối thanh lịch (`—`). Tránh hoàn toàn việc rớt lẻ loi từ "NINH".
+  5. **Kiểm thử xây dựng**: `npm run build` hoàn tất 100% trong 4.64 giây, 0 lỗi.
+- **Báo cáo chi tiết**: Xem [2026-10-24_2055_v6_5_fix_mobile_text_wrapping_single_line_header.md](./2026-10-24_2055_v6_5_fix_mobile_text_wrapping_single_line_header.md)
+
 ---
 
 ## [2026-10-24 20:15] - Phiên Bản V6.4: Đại Tu Dock Chức Năng Nhanh Badges Đa Sắc, Chống Nhảy Chữ Mobile, Nút Nộp Hồ Sơ Trực Tuyến QR, Tra Cứu Giọng Nói & Nút "Đã Nhận Thông Tin & Thoát" Làm Sạch Dữ Liệu

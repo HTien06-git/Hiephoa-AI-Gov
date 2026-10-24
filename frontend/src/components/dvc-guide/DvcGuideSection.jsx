@@ -55,9 +55,9 @@ export default function DvcGuideSection({ speakText }) {
       {/* Top Banner */}
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-amber-500/30 pb-6 mb-8">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400 text-[#7F1D1D] text-xs font-extrabold uppercase mb-2 shadow-xs">
-            <Sparkles className="w-4 h-4 text-[#7F1D1D]" />
-            <span>KẾT NỐI CHUYỂN ĐỔI SỐ QUỐC GIA & TỈNH TÂY NINH</span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-amber-400 text-[#7F1D1D] text-[9.5px] xs:text-[10.5px] sm:text-xs font-black uppercase mb-2 shadow-xs whitespace-nowrap max-w-full overflow-hidden text-ellipsis">
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#7F1D1D] shrink-0" />
+            <span className="truncate">KẾT NỐI CHUYỂN ĐỔI SỐ QUỐC GIA & TỈNH TÂY NINH</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Cổng Dịch Vụ Công Trực Tuyến & Cẩm Nang VNeID

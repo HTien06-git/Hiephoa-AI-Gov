@@ -17,6 +17,9 @@ export default {
           bg: '#F8FAFC'
         }
       },
+      screens: {
+        'xs': '380px',
+      },
       fontFamily: {
         sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
       }

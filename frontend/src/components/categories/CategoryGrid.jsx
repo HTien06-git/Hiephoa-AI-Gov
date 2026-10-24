@@ -65,9 +65,9 @@ export default function CategoryGrid({
       {/* Tiêu đề mục Danh mục dịch vụ công chuẩn hóa */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100/80 text-[#991B1B] text-xs font-bold uppercase tracking-wider border border-red-200">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>DANH MỤC DỊCH VỤ CÔNG CHUẨN HÓA CẤP XÃ</span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-red-100/80 text-[#991B1B] text-[9.5px] xs:text-[10.5px] sm:text-xs font-bold uppercase tracking-wider border border-red-200 whitespace-nowrap max-w-full overflow-hidden text-ellipsis">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span className="truncate">DANH MỤC DỊCH VỤ CÔNG CHUẨN HÓA CẤP XÃ</span>
           </div>
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight mt-1.5">
             08 Thủ Tục Hành Chính Trực Tuyến & Tư Vấn Pháp Luật

@@ -36,9 +36,9 @@ export default function KTechEcosystemSteps() {
     <section className="my-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-3.5">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-[#991B1B] text-xs font-black uppercase shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>QUY TRÌNH TINH GỌN HIỆN ĐẠI</span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-red-100 text-[#991B1B] text-[9.5px] xs:text-[10.5px] sm:text-xs font-black uppercase shadow-2xs whitespace-nowrap max-w-full overflow-hidden text-ellipsis">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span className="truncate">QUY TRÌNH TINH GỌN HIỆN ĐẠI</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
             Hệ Sinh Thái 03 Bước Tự Động Hóa Hồ Sơ

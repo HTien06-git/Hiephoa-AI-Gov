@@ -56,30 +56,29 @@ export default function Header({ currentMode, setCurrentMode }) {
               </div>
             </div>
 
-            {/* CỤM TIÊU ĐỀ CHÍNH QUYỀN 3 DÒNG CHUẨN MỰC HÌNH 7 (TUYỆT ĐỐI KHÔNG BỊ TRÀN VIỀN MÀN HÌNH ĐIỆN THOẠI) */}
-            <div className="text-left min-w-0 flex-1">
+            {/* CỤM TIÊU ĐỀ CHÍNH QUYỀN 3 DÒNG CHUẨN MỰC HÌNH 7 */}
+            <div className="text-left min-w-0 flex-1 overflow-hidden">
               {/* Dòng 1: Đơn vị chủ quản (Chữ vàng kim in hoa thanh lịch) */}
-              <div className="text-amber-300 font-extrabold text-[10px] sm:text-xs md:text-sm tracking-wide sm:tracking-wider uppercase drop-shadow-xs leading-tight">
-                ỦY BAN NHÂN DÂN XÃ&nbsp;HIỆP&nbsp;HÒA — TỈNH&nbsp;TÂY&nbsp;NINH
+              <div className="text-amber-300 font-extrabold text-[9px] xs:text-[10px] sm:text-xs md:text-sm tracking-wide sm:tracking-wider uppercase drop-shadow-xs leading-tight whitespace-nowrap truncate">
+                ỦY BAN NHÂN DÂN XÃ HIỆP HÒA — TỈNH TÂY NINH
               </div>
 
-              {/* Dòng 2: Tiêu đề lớn màu trắng uy nghiêm (Tự ngắt nhịp cân đối: Trung tâm một dòng, Xã Hiệp Hòa một dòng) */}
-              <h1 className="text-white font-black text-xs sm:text-lg md:text-xl lg:text-[22px] tracking-tight leading-tight sm:leading-snug drop-shadow-md mt-0.5">
-                TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG <span className="inline sm:inline-block">XÃ&nbsp;HIỆP&nbsp;HÒA</span>
+              {/* Dòng 2: Tiêu đề lớn màu trắng uy nghiêm (LIỀN 1 HÀNG KHÔNG XUỐNG DÒNG) */}
+              <h1
+                style={{ fontSize: 'clamp(9.5px, 3.2vw, 22px)' }}
+                className="text-white font-black tracking-tight whitespace-nowrap leading-tight drop-shadow-md mt-0.5"
+              >
+                TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA
               </h1>
 
               {/* Dòng 3: Huy hiệu Nền tảng Vàng Kim & Mô tả chuyên viên AI */}
-              <div className="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
-                <span className="shrink-0 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-[#6B0F12] font-black text-[9px] sm:text-xs px-2 sm:px-2.5 py-0.5 rounded-md uppercase shadow-sm tracking-wide border border-amber-200/60 inline-flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#6B0F12]" />
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-1 flex-nowrap overflow-hidden">
+                <span className="shrink-0 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-[#6B0F12] font-black text-[8.5px] xs:text-[9.5px] sm:text-xs px-1.5 sm:px-2.5 py-0.5 rounded-md uppercase shadow-sm tracking-wide border border-amber-200/60 inline-flex items-center gap-1 whitespace-nowrap">
+                  <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#6B0F12]" />
                   <span>HIỆP HÒA AI-GOV</span>
                 </span>
-                <span className="text-amber-100/90 text-[10px] sm:text-xs md:text-sm font-medium">
+                <span className="text-amber-100/90 text-[8.5px] xs:text-[10px] sm:text-xs md:text-sm font-medium whitespace-nowrap truncate">
                   Chuyên viên Hành chính công AI Đa phương thức 24/7
-                </span>
-                <span className="hidden 2xl:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-400/40 text-emerald-300 text-[10px] font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Trực tuyến</span>
                 </span>
               </div>
             </div>

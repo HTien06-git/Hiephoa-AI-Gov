@@ -65,9 +65,9 @@ export default function VoiceMicButton({ onQuerySubmit, isSpeaking, stopSpeaking
         
         {/* CỘT TRÁI (Mobile: Trên) - Thông tin giới thiệu & Câu hỏi gợi ý nhanh */}
         <div className="lg:col-span-6 text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-[#991B1B] text-xs font-black uppercase mb-2.5 shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-red-100 text-[#991B1B] text-[9.5px] xs:text-[10.5px] sm:text-xs font-black uppercase mb-2.5 shadow-2xs whitespace-nowrap max-w-full overflow-hidden text-ellipsis">
             <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>CHUYÊN VIÊN HÀNH CHÍNH CÔNG AI 24/7</span>
+            <span className="truncate">CHUYÊN VIÊN HÀNH CHÍNH CÔNG AI 24/7</span>
           </div>
 
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-snug">

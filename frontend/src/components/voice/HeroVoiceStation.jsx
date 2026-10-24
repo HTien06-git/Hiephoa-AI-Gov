@@ -116,9 +116,9 @@ export default function HeroVoiceStation({
         <div className="lg:col-span-7 text-left space-y-3.5">
           
           {/* Huy hiệu nhỏ */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-[#991B1B] text-xs font-black uppercase shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-red-100 text-[#991B1B] text-[9.5px] xs:text-[10.5px] sm:text-xs font-black uppercase shadow-2xs whitespace-nowrap max-w-full overflow-hidden text-ellipsis">
             <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>TRỢ LÝ HÀNH CHÍNH CÔNG & PHÁP LUẬT XÃ HIỆP HÒA</span>
+            <span className="truncate">TRỢ LÝ HÀNH CHÍNH CÔNG & PHÁP LUẬT XÃ HIỆP HÒA</span>
           </div>
 
           {/* Tiêu đề */}

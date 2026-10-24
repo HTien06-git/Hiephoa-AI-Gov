@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Send, Sparkles, Volume2, VolumeX, MessageSquare, Check, CheckCircle2 } from 'lucide-react';
-import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import { useSpeechRecognition, deduplicateSpeechText } from '../../hooks/useSpeechRecognition';
 import TrongDongOrnament from '../common/TrongDongOrnament';
 
 export default function HeroVoiceStation({
@@ -57,7 +57,7 @@ export default function HeroVoiceStation({
     toggleListening
   } = useSpeechRecognition({
     onResult: (finalText) => {
-      const cleaned = finalText ? finalText.trim() : '';
+      const cleaned = finalText ? deduplicateSpeechText(finalText.trim()) : '';
       if (cleaned.length > 1 && cleaned !== lastSubmittedQueryRef.current) {
         lastSubmittedQueryRef.current = cleaned;
         setTextInput('');
@@ -267,7 +267,7 @@ export default function HeroVoiceStation({
           {(transcript || interimTranscript) && (
             <div className="mb-3 px-3.5 py-2 bg-amber-50 rounded-xl border border-amber-300 text-slate-900 text-xs sm:text-sm font-bold w-full max-w-sm shadow-2xs animate-fade-in text-left">
               <span className="text-amber-800 text-[10px] uppercase block font-black">Lời nói của bà con:</span>
-              "{transcript || interimTranscript}"
+              "{deduplicateSpeechText(transcript || interimTranscript)}"
             </div>
           )}
 

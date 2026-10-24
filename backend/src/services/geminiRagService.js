@@ -95,36 +95,37 @@ class GeminiRagService {
     ];
     const isGreeting = greetingPatterns.some(p => cleanLower === p || cleanLower.startsWith(p + ' ') || cleanLower.endsWith(' ' + p));
 
-    // Nhóm B: Pháp luật đời sống, an ninh trật tự, tội phạm, chất cấm ma túy, mâu thuẫn, tranh chấp
-    const legalKeywords = [
-      'chat cam', 'ma tuy', 'mua ban chat cam', 'mua ban ma tuy', 'tang tru', 'van chuyen', 'su dung ma tuy', 'hut hit', 'co my', 'ke', 'da', 'heroin', 'bong cuoi', 'shisha',
-      'bi gi', 'bi phat gi', 'phat bao nhieu', 'o tu', 'phat tu', 'hinh su', 'khoi to', 'truy cuu', 'toi pham', 'vi pham', 'muc phat', 'xu phat',
-      'danh lon', 'danh nhau', 'chem nhau', 'danh nguoi', 'gay go', 'gay thuong tich',
-      'lan ranh', 'tranh chap dat', 'loi di chung', 'hang xom', 'giay tay', 'so do',
-      'ly hon', 'chia tai san', 'ngoai tinh', 'quyen nuoi con', 'thua ke', 'di chuc', 'chia thua ke',
-      'danh bac', 'so de', 'lo de', 'ca do', 'vay nang lai', 'tin dung den', 'tieng on', 'karaoke', 'loa keo',
-      'nong do con', 'uong ruou', 'uong bia', 'lai xe', 'vuot den do',
-      'xuc pham', 'boi nho', 'tren mang', 'facebook', 'zalo', 'bao luc gia dinh'
-    ];
-    const isLegalConsultation = legalKeywords.some(k => cleanLower.includes(k)) || 
-      cleanLower.includes('luat') || 
-      cleanLower.includes('phap luat') || 
-      cleanLower.includes('bi phat') || 
-      cleanLower.includes('bi gi') ||
-      cleanLower.includes('tinh huong') ||
-      cleanLower.includes('co pham toi') ||
-      cleanLower.includes('co vi pham');
-
-    // Nhóm C: Tìm kiếm thủ tục hành chính cụ thể
+    // Nhóm C (Ưu tiên): Tìm kiếm thủ tục hành chính cụ thể trước
     let matchedProcedure = null;
     if (options.procedureId) {
       matchedProcedure = vectorStore.getProcedureById(options.procedureId);
-    } else if (!isGreeting && !isLegalConsultation) {
+    } else if (!isGreeting) {
       const searchResults = vectorStore.search(trimmedMsg);
       if (searchResults.matchedProcedures.length > 0) {
         matchedProcedure = searchResults.matchedProcedures[0];
       }
     }
+
+    // Nhóm B: Pháp luật đời sống, an ninh trật tự, tội phạm, chất cấm ma túy, mâu thuẫn, tranh chấp
+    // CHÚ Ý: Tuyệt đối không dùng các từ 2 chữ như 'da', 'ke', 'so do' để tránh match nhầm "hướng dẫn", "đăng ký", "đất đai"!
+    const legalKeywords = [
+      'chat cam', 'ma tuy', 'mua ban chat cam', 'mua ban ma tuy', 'tang tru ma tuy', 'van chuyen ma tuy', 'su dung ma tuy', 'hut hit', 'co my', 'choi ke', 'ma tuy da', 'dap da', 'heroin', 'bong cuoi', 'shisha',
+      'bi phat gi', 'phat bao nhieu', 'o tu', 'phat tu', 'hinh su', 'khoi to', 'truy cuu', 'toi pham', 'vi pham phap luat', 'muc phat', 'xu phat',
+      'danh lon', 'danh nhau', 'chem nhau', 'danh nguoi', 'gay go', 'gay thuong tich',
+      'lan ranh', 'tranh chap dat', 'loi di chung', 'tranh chap',
+      'ly hon', 'chia tai san', 'ngoai tinh', 'quyen nuoi con',
+      'danh bac', 'so de', 'lo de', 'ca do', 'vay nang lai', 'tin dung den', 'tieng on', 'loa keo',
+      'nong do con', 'uong ruou lai xe', 'uong bia lai xe', 'vuot den do',
+      'xuc pham', 'boi nho', 'bao luc gia dinh'
+    ];
+    const isLegalConsultation = !matchedProcedure && (
+      legalKeywords.some(k => cleanLower.includes(k)) || 
+      cleanLower.includes('phap luat') || 
+      cleanLower.includes('bi phat') || 
+      cleanLower.includes('tinh huong') ||
+      cleanLower.includes('co pham toi') ||
+      cleanLower.includes('co vi pham')
+    );
 
     // Tra cứu nguồn Thư Viện Pháp Luật
     const webLegalFinding = legalWebSearchService.search(trimmedMsg);

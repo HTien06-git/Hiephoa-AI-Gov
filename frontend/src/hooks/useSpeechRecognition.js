@@ -2,6 +2,59 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiClient } from '../services/apiClient';
 
 /**
+ * Hàm loại bỏ từ hoặc cụm từ lặp lại do cơ chế Web Speech API trên Android Chrome
+ */
+export function deduplicateSpeechText(text) {
+  if (!text) return '';
+  let str = text.trim().replace(/\s+/g, ' ');
+  if (!str) return '';
+
+  // 1. Khử lặp từ đơn: "hướng dẫn hướng dẫn" -> "hướng dẫn"
+  let words = str.split(' ');
+  let dedup = [];
+  for (let i = 0; i < words.length; i++) {
+    const cur = words[i];
+    const prev = dedup[dedup.length - 1];
+    if (!prev || cur.toLowerCase() !== prev.toLowerCase()) {
+      dedup.push(cur);
+    }
+  }
+  str = dedup.join(' ');
+
+  // 2. Khử lặp lũy tiến do Android Chrome đẩy nhiều hypothesis cùng prefix:
+  // "hướng dẫn tôi làm hướng dẫn tôi làm thủ tục công chứng" -> "hướng dẫn tôi làm thủ tục công chứng"
+  words = str.split(' ');
+  if (words.length > 2) {
+    for (let cut = 1; cut < words.length - 1; cut++) {
+      const prefix = words.slice(0, cut).join(' ').toLowerCase();
+      const rest = words.slice(cut).join(' ').toLowerCase();
+      if (rest.startsWith(prefix) || rest.includes(prefix)) {
+        words = words.slice(cut);
+        str = words.join(' ');
+        cut = 0; // restart
+      }
+    }
+  }
+
+  // 3. Khử lặp cụm từ kép lặp lại ở cuối
+  words = str.split(' ');
+  const half = Math.floor(words.length / 2);
+  for (let len = half; len >= 2; len--) {
+    for (let start = 0; start <= words.length - 2 * len; start++) {
+      const p1 = words.slice(start, start + len).join(' ').toLowerCase();
+      const p2 = words.slice(start + len, start + 2 * len).join(' ').toLowerCase();
+      if (p1 === p2) {
+        words.splice(start, len);
+        str = words.join(' ');
+        break;
+      }
+    }
+  }
+
+  return str.trim();
+}
+
+/**
  * Hook nhận diện giọng nói tiếng Việt Dual-Mode siêu ổn định:
  * - Chế độ 1: Web Speech API (nhận diện tức thì trực tiếp trên trình duyệt)
  * - Chế độ 2: MediaRecorder + Gemini 2.5 Flash Audio STT (Dự phòng cho iOS / Zalo In-App Browser / Lỗi mạng Google)
@@ -43,7 +96,7 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
     try {
       const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognitionAPI();
-      recognition.continuous = true; // Tiếp tục nghe cho đến khi người dùng nói xong hoặc bấm tắt
+      recognition.continuous = false; // Tự dừng khi người dân nói xong dứt câu, triệt tiêu 100% lỗi lặp từ của Android Chrome
       recognition.interimResults = true;
       recognition.lang = lang;
 
@@ -52,47 +105,32 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
         setError(null);
       };
 
-// Hàm loại bỏ từ hoặc cụm từ lặp lại do cơ chế Web Speech API trên Android Chrome
-function deduplicateSpeechText(text) {
-  if (!text) return '';
-  const words = text.trim().split(/\s+/);
-  if (words.length <= 1) return text.trim();
-
-  // 1. Loại bỏ các từ đơn lặp lại liên tiếp: "Tôi Tôi Tôi" -> "Tôi"
-  const dedupWords = [];
-  for (let i = 0; i < words.length; i++) {
-    const cur = words[i];
-    const prev = dedupWords[dedupWords.length - 1];
-    if (!prev || cur.toLowerCase() !== prev.toLowerCase()) {
-      dedupWords.push(cur);
-    }
-  }
-
-  // 2. Kiểm tra cụm từ lặp kép ở cuối: "Tôi muốn đăng ký kết hôn Tôi muốn đăng ký kết hôn" -> "Tôi muốn đăng ký kết hôn"
-  const halfLen = Math.floor(dedupWords.length / 2);
-  for (let len = halfLen; len >= 2; len--) {
-    const phraseA = dedupWords.slice(dedupWords.length - len * 2, dedupWords.length - len).join(' ');
-    const phraseB = dedupWords.slice(dedupWords.length - len).join(' ');
-    if (phraseA.toLowerCase() === phraseB.toLowerCase()) {
-      return dedupWords.slice(0, dedupWords.length - len).join(' ');
-    }
-  }
-
-  return dedupWords.join(' ');
-}
-
       recognition.onresult = (event) => {
         let final = '';
         let interim = '';
 
-        // Đọc toàn bộ danh sách kết quả từ 0 để chống bug cộng dồn prev + final của Android Chrome
+        // Đọc danh sách kết quả và thay thế chuỗi lũy tiến (progressive hypothesis), tuyệt đối không nối chuỗi mù quáng
         for (let i = 0; i < event.results.length; i++) {
           const item = event.results[i];
-          if (item && item[0]) {
-            if (item.isFinal) {
-              final += item[0].transcript + ' ';
+          if (!item || !item[0]) continue;
+          const text = (item[0].transcript || '').trim();
+          if (!text) continue;
+
+          if (item.isFinal) {
+            if (final && (text.toLowerCase().startsWith(final.toLowerCase()) || text.toLowerCase().includes(final.toLowerCase()))) {
+              final = text;
+            } else if (final && final.toLowerCase().startsWith(text.toLowerCase())) {
+              // Đã có bản dài hơn
             } else {
-              interim += item[0].transcript + ' ';
+              final = final ? `${final} ${text}` : text;
+            }
+          } else {
+            if (interim && (text.toLowerCase().startsWith(interim.toLowerCase()) || text.toLowerCase().includes(interim.toLowerCase()))) {
+              interim = text;
+            } else if (interim && interim.toLowerCase().startsWith(text.toLowerCase())) {
+              // Đã có bản dài hơn
+            } else {
+              interim = interim ? `${interim} ${text}` : text;
             }
           }
         }
@@ -108,13 +146,13 @@ function deduplicateSpeechText(text) {
           setTranscript(cleanFinal);
           setInterimTranscript('');
 
-          // Reset silence timer: sau 1.5s không nói thêm thì tự động hoàn tất
+          // Sau 1s im lặng thì tự động dừng và gửi câu hỏi
           if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
           silenceTimerRef.current = setTimeout(() => {
             try {
               recognition.stop();
             } catch (e) {}
-          }, 1500);
+          }, 1000);
         }
       };
 

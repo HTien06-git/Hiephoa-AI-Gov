@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Mic, Send, Sparkles, Volume2, MessageSquare, ShieldCheck, HelpCircle } from 'lucide-react';
-import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import { useSpeechRecognition, deduplicateSpeechText } from '../../hooks/useSpeechRecognition';
 import TrongDongWatermark from '../common/TrongDongWatermark';
 
 export default function VoiceMicButton({ onQuerySubmit, isSpeaking, stopSpeaking }) {
@@ -15,7 +15,7 @@ export default function VoiceMicButton({ onQuerySubmit, isSpeaking, stopSpeaking
     toggleListening
   } = useSpeechRecognition({
     onResult: (finalText) => {
-      const cleaned = finalText ? finalText.trim() : '';
+      const cleaned = finalText ? deduplicateSpeechText(finalText.trim()) : '';
       if (cleaned.length > 1 && cleaned !== lastSubmittedQueryRef.current) {
         lastSubmittedQueryRef.current = cleaned;
         setTextInput('');

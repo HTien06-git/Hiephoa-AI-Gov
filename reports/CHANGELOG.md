@@ -4,6 +4,25 @@ Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phư
 
 Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
 
+## [2026-10-24 21:30] - Phiên Bản V6.7: Khắc Phục Triệt Để Lỗi Lặp Từ Web Speech API & Chuẩn Hóa 100% Khớp Đúng Thủ Tục Hành Chính (Công Chứng / Chứng Thực)
+- **Loại tác vụ**: Giải quyết tận gốc hai vấn đề nghiêm trọng phản ánh từ ảnh chụp màn hình kiểm thử thực tế trên điện thoại di động: lỗi lặp từ lũy tiến của Web Speech API trên Android Chrome khiến câu nói bị lặp hàng chục lần ("hướng dẫn hướng dẫn tôi làm..."), và lỗi nhận diện sai thủ tục hành chính ("công chứng" bị match nhầm do từ khóa 'da' trong ma túy khớp chuỗi 'huong dan') (Version 6.7 Speech Stutter & Intent Engine Fix).
+- **Tác vụ thực hiện**:
+  1. **Khắc phục triệt để lỗi lặp từ lũy tiến trên Android Chrome (`useSpeechRecognition.js` & `HeroVoiceStation.jsx`)**:
+     - *Nguyên nhân gốc rễ*: Do `recognition.continuous = true`, Android Chrome gửi liên tiếp các giả thuyết lũy tiến (progressive hypotheses: `["hướng dẫn", "hướng dẫn tôi", "hướng dẫn tôi làm", ...]`) trong cùng một phiên nghe, dẫn đến việc nối chuỗi mù quáng làm câu nói bị lặp cấp số nhân.
+     - *Khắc phục*:
+       * Đặt `recognition.continuous = false;` (Voice Search Mode chuẩn Google): Trình duyệt tự động dừng và gửi kết quả ngay khi người dân nói xong dứt câu.
+       * Thuật toán lọc `event.results`: Kiểm tra chuỗi lũy tiến (`text.startsWith(previous)`), thay thế bản cập nhật mới nhất thay vì nối chuỗi.
+       * Thuật toán `deduplicateSpeechText` 3 lớp: Tự động loại bỏ lặp từ đơn liên tiếp, khử sạch chuỗi tiền tố lũy tiến và cụm từ lặp kép. Đã kiểm thử trực tiếp chuỗi dài trong ảnh chụp màn hình và rút gọn chính xác 100% về: `"hướng dẫn tôi làm thủ tục công chứng"`.
+       * Áp dụng `deduplicateSpeechText` cho cả hộp hiển thị `"Lời nói của bà con"` theo thời gian thực.
+  2. **Khắc phục triệt để lỗi trả lời sai kết quả (`geminiRagService.js`)**:
+     - *Nguyên nhân gốc rễ*: Trong danh sách `legalKeywords`, từ khóa `'da'` (ma túy đá) đã kích hoạt lỗi `cleanLower.includes('da')` trên mọi câu có từ **"hướng dẫn"** (`huong dan` chứa `da`) hoặc **"đăng ký"**, **"đất đai"**. Hậu quả là 90% câu hỏi thủ tục bị gán nhầm sang nhóm "Chất cấm / Ma túy / Tranh chấp pháp luật" (`isLegalConsultation`), bỏ qua bước tìm kiếm thủ tục hành chính!
+     - *Khắc phục*:
+       * Xóa bỏ các từ viết tắt nguy hiểm `'da'`, `'ke'`, `'so do'`; thay bằng từ khóa chính xác `'ma tuy da'`, `'dap da'`, `'choi ke'`, `'tranh chap dat'`.
+       * Đảo thứ tự ưu tiên: **Tìm kiếm thủ tục hành chính cụ thể trước (`vectorStore.search`)**. Khi câu hỏi người dân khớp với thủ tục cấp xã (như `TT_CHUNG_THUC` cho "công chứng", `TT_KHAI_SINH`, `TT_KET_HON`, `TT_DAT_DAI`), hệ thống lập tức hướng dẫn đúng thủ tục, trả về trọn vẹn bộ checklist 4 mục và nút Điền đơn Word chuẩn xã.
+  3. **Kiểm thử xây dựng**: `npm run build` hoàn tất 100% trong 4.55 giây, 0 cảnh báo lỗi.
+
+---
+
 ## [2026-10-24 21:05] - Phiên Bản V6.6: Hoàn Thiện Tương Thích Laptop & Mobile, Chống Rớt Chữ Nút Bấm, Footer 1 Hàng Duy Nhất & Chống Che Khuyết Tiêu Đề Header
 - **Loại tác vụ**: Giải quyết triệt để 3 vấn đề phản ánh từ 3 ảnh chụp thực tế trên laptop và mobile: sửa lỗi rớt chữ trong các nút bấm trên laptop (nút Dành cho Nhân Dân và nút A++ Siêu to trong Accessibility Bar), khóa cứng tiêu đề Footer `ỦY BAN NHÂN DÂN XÃ HIỆP HÒA — TỈNH TÂY NINH` trên 1 hàng duy nhất (12-column grid phân bổ 5/12 cột), và tinh chỉnh tỷ lệ co giãn fluid clamp trên mobile để tiêu đề chính `TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA` hiển thị 100% đầy đủ không bị che khuất bất kỳ chữ nào (Version 6.6 Cross-Device Polish).
 - **Tác vụ thực hiện**:

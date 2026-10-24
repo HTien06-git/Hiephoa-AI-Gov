@@ -53,12 +53,15 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
                 // Đọc giọng nói nhắc nhở 1 lần khi có trạng thái mới
                 if (speakText && lastSpokenStatusRef.current[sub.submissionCode] !== sub.status) {
                   lastSpokenStatusRef.current[sub.submissionCode] = sub.status;
+                  const personName = sub.citizenName || sub.formData?.ho_ten || sub.formData?.ho_ten_nguoi_yeu_cau || sub.formData?.ho_ten_nguoi_khai || 'Bà con';
+
                   if (sub.status === 'COMPLETED') {
-                    speakText(`Thông báo từ UBND xã Hiệp Hòa: Hồ sơ ${sub.submissionCode} của bà con đã được xử lý xong. Kính mời bà con xem kết quả và bấm xác nhận đã nhận thông tin!`);
+                    speakText(`Kính gửi bà con ${personName}, hồ sơ thủ tục của bà con tại UBND xã Hiệp Hòa đã được cán bộ Một cửa xử lý xong. Kính mời bà con xem kết quả và bấm xác nhận đã nhận thông tin!`);
                   } else if (sub.status === 'PROCESSING') {
-                    speakText(`UBND xã Hiệp Hòa thông báo: Hồ sơ ${sub.submissionCode} của bà con đang được cán bộ một cửa thụ lý xử lý.`);
+                    speakText(`UBND xã Hiệp Hòa thông báo tới bà con ${personName}: Hồ sơ của bà con đang được cán bộ một cửa thụ lý xử lý tại quầy.`);
                   } else if (sub.status === 'NEEDS_SUPPLEMENT') {
-                    speakText(`UBND xã Hiệp Hòa thông báo: Hồ sơ ${sub.submissionCode} cần bổ sung giấy tờ theo ghi chú của cán bộ.`);
+                    const noteText = sub.officerNote ? `: ${sub.officerNote}` : '';
+                    speakText(`UBND xã Hiệp Hòa thông báo tới bà con ${personName}: Cán bộ yêu cầu bổ sung giấy tờ${noteText}. Kính mời bà con xem chi tiết trên màn hình!`);
                   }
                 }
                 break; // Ưu tiên hiển thị thông báo hồ sơ tìm thấy đầu tiên
@@ -193,30 +196,43 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
 
           {/* Nội dung thông báo */}
           <div className="flex-1 min-w-0 pr-1 text-left">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 border border-white/25">
-                UBND XÃ HIỆP HÒA NHẮC BÁO
-              </span>
-              <span className="text-[10px] font-bold text-amber-300 font-mono">
-                {activeAlert.submissionCode}
-              </span>
-            </div>
+            {(() => {
+              const citizenDisplayName = activeAlert.citizenName || activeAlert.formData?.ho_ten || activeAlert.formData?.ho_ten_nguoi_yeu_cau || activeAlert.formData?.ho_ten_nguoi_khai || 'Bà con';
+              return (
+                <>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 border border-white/25">
+                      UBND XÃ HIỆP HÒA NHẮC BÁO
+                    </span>
+                    <span className="text-[11px] font-black text-amber-300">
+                      Bà con: {citizenDisplayName}
+                    </span>
+                  </div>
 
-            <h4 className="text-xs sm:text-sm font-black mt-1 leading-snug">
-              {isCompleted ? (
-                <span>🎉 Hồ sơ đã được xử lý xong! Mời bà con xem kết quả</span>
-              ) : isProcessing ? (
-                <span>⏱️ Cán bộ đang xử lý & in ấn tờ khai tại quầy Một cửa</span>
-              ) : isNeedsSupplement ? (
-                <span>⚠️ Cán bộ yêu cầu bổ sung giấy tờ</span>
-              ) : (
-                <span>🔔 Hồ sơ đang trong hàng đợi tiếp nhận trực tuyến</span>
-              )}
-            </h4>
+                  <h4 className="text-xs sm:text-sm font-black mt-1 leading-snug">
+                    {isCompleted ? (
+                      <span>🎉 Kính gửi bà con {citizenDisplayName}: Hồ sơ đã được xử lý xong! Mời bà con xem kết quả</span>
+                    ) : isProcessing ? (
+                      <span>⏱️ Kính gửi bà con {citizenDisplayName}: Cán bộ đang xử lý & in tờ khai tại quầy</span>
+                    ) : isNeedsSupplement ? (
+                      <span>⚠️ Kính gửi bà con {citizenDisplayName}: Cán bộ yêu cầu bổ sung giấy tờ</span>
+                    ) : (
+                      <span>🔔 Kính gửi bà con {citizenDisplayName}: Hồ sơ đang trong hàng đợi tiếp nhận trực tuyến</span>
+                    )}
+                  </h4>
 
-            <p className="text-[11px] text-amber-100/90 mt-0.5 line-clamp-1">
-              Thủ tục: <strong>{activeAlert.procedureTitle}</strong>
-            </p>
+                  {activeAlert.officerNote && (
+                    <div className="mt-1.5 p-1.5 bg-black/30 border border-amber-300/40 rounded-lg text-amber-200 text-[11px] font-medium leading-tight">
+                      <strong>Yêu cầu từ cán bộ:</strong> {activeAlert.officerNote}
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-amber-100/90 mt-1 line-clamp-1">
+                    Thủ tục: <strong>{activeAlert.procedureTitle}</strong>
+                  </p>
+                </>
+              );
+            })()}
 
             {/* Hàng nút tác vụ thông báo */}
             <div className="mt-2.5 flex items-center gap-2 flex-wrap">

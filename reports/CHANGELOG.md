@@ -4,6 +4,31 @@ Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phư
 
 Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
 
+## [2026-10-24 22:15] - Phiên Bản V6.9: Soạn & In Giấy Hẹn Times New Roman, Cá Nhân Hóa Tên Người Dân, Tự Động Đọc Yêu Cầu Mới & Loại Bỏ Giao Diện Đen
+- **Loại tác vụ**: Triển khai trọn vẹn 5 yêu cầu cải tiến nghiệp vụ và giao diện từ phản ánh thực tế của người dùng: (1) Bỏ nút nộp hồ sơ dư thừa trong popup mã QR; (2) Tự động đọc to bằng giọng nói TTS khi cán bộ thay đổi trạng thái hoặc ghi chú yêu cầu trên màn hình; (3) Loại bỏ triệt để card màu đen trong phần tư vấn pháp luật và sửa lỗi sọc vàng viền trái trên điện thoại di động; (4) Tích hợp tính năng soạn thảo và in ấn "Giấy tiếp nhận hồ sơ và hẹn trả kết quả" theo quy định hành chính chuẩn phông chữ **Times New Roman**; (5) Thay thế toàn bộ mã hồ sơ trong thông báo bằng họ tên người đi làm thủ tục để gần gũi, rõ ràng cho bà con.
+- **Tác vụ thực hiện**:
+  1. **Bỏ nút nộp hồ sơ trùng lặp trong Modal QR (`CitizenQrModal.jsx`)**:
+     - Loại bỏ nút bấm `[🚀 BẤM NỘP HỒ SƠ TRỰC TUYẾN TỚI CÁN BỘ MỘT CỬA]` bên trong modal QR vì hồ sơ đã được người dân nộp và hệ thống đã tự động đẩy trực tuyến vào hàng đợi máy cán bộ ngay từ đầu.
+     - Thay bằng biểu tượng trạng thái kết nối trực tiếp màu xanh ngọc: `Hồ sơ đã được gửi trực tuyến tới màn hình Cán bộ Một cửa`.
+  2. **Tự động đọc to thông báo mới của cán bộ khi yêu cầu trên màn hình thay đổi (`CitizenQrModal.jsx`)**:
+     - Theo dõi cả trạng thái (`status`) và ghi chú (`officerNote`) trong chu kỳ polling 3 giây.
+     - Bất cứ khi nào cán bộ nhập thêm ghi chú yêu cầu mới (ví dụ: *"Cần bổ sung giấy khai sinh"*), hệ thống tự động phát âm thanh giọng nói: *"Kính gửi bà con [Tên], Cán bộ Một cửa vừa có yêu cầu mới: [Nội dung]. Kính mời bà con chú ý thực hiện ạ!"*.
+  3. **Cá nhân hóa thông báo bằng Tên người làm thủ tục (`CitizenDeviceNotificationToast.jsx` & `CitizenLookupModal.jsx`)**:
+     - Thay thế mã số hồ sơ khô khan (`HH-1025`) bằng họ tên chính xác của người dân (`Bà con: Nguyễn Thị Mai`).
+     - Nội dung thông báo và giọng nói xưng hô trang trọng, ấm áp: *"Kính gửi bà con [Tên], hồ sơ thủ tục của bà con tại UBND xã Hiệp Hòa đã được cán bộ xử lý xong..."*.
+  4. **Loại bỏ giao diện đen & sửa lỗi hiển thị trên điện thoại (`RagChatDrawer.jsx`)**:
+     - Thay thế khối màu đen (`bg-stone-900`) của phần Trợ giúp pháp luật bằng giao diện đỏ cờ - vàng đồng truyền thống (`bg-gradient-to-br from-[#7F1D1D] via-[#991B1B] to-[#690F12]`, viền vàng `border-amber-300`).
+     - Bỏ đường viền sọc vàng bên trái `border-l-4` trên điện thoại di động (`border-l-0 sm:border-l-4 sm:border-amber-400`), làm mép màn hình điện thoại phẳng đẹp 100%.
+     - Tinh chỉnh đồng bộ nút Hotline và nút Đóng ở thanh công cụ dưới đáy.
+  5. **Tích hợp tính năng Soạn & In Giấy Hẹn chuẩn Times New Roman (`AppointmentSlipModal.jsx` & `OfficerScanPage.jsx`)**:
+     - Xây dựng component `AppointmentSlipModal.jsx` theo chuẩn Mẫu số 01 - Nghị định 61/2018/NĐ-CP và Thông tư 01/2018/TT-VPCP.
+     - Bắt buộc chuẩn phông chữ **Times New Roman** (`font-family: 'Times New Roman', Times, serif;`) từ quốc hiệu, tiêu ngữ, thông tin tiếp nhận, bảng danh mục giấy tờ đến chữ ký.
+     - Cho phép cán bộ tùy ý soạn thảo, điều chỉnh ngày giờ hẹn trả kết quả, thêm/bớt giấy tờ đã tiếp nhận, chỉnh sửa thông tin trước khi in.
+     - Bổ sung nút `[ 📄 Soạn & In Giấy Hẹn (Times New Roman) ]` trực tiếp trên danh sách xử lý hồ sơ và Tab 3 của Cán bộ.
+  6. **Kiểm thử xây dựng**: `npm run build` thành công 100% trong 4.63 giây, không có lỗi.
+
+---
+
 ## [2026-10-24 21:45] - Phiên Bản V6.8: Ẩn Dock Nhanh Khi Mở Kết Quả & Khắc Phục Lỗi Tràn Viền Nút Gửi Chat
 - **Loại tác vụ**: Giải quyết 2 yêu cầu tinh chỉnh giao diện từ ảnh chụp thực tế màn hình trả kết quả trên điện thoại di động: tự động ẩn thanh nút điều hướng nhanh Quick Action Dock khi mở phần trả kết quả (không để dock che khuất Action Bar), và sửa lỗi nút Gửi bị tràn ra ngoài viền phải trong khung chat trả lời câu hỏi của người dân (Version 6.8 Drawer Layout Polish).
 - **Tác vụ thực hiện**:

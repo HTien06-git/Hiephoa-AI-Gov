@@ -134,7 +134,8 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
             COMPLETED: 'Hồ sơ đã được xử lý xong, kính mời bà con đến quầy ký xác nhận và nhận kết quả.',
             NEEDS_SUPPLEMENT: `Hồ sơ cần bổ sung: ${res.submission.officerNote || 'thêm giấy tờ theo yêu cầu của cán bộ'}.`
           };
-          speakText(`Mã hồ sơ ${res.submission.submissionCode}: ${statusMap[res.submission.status] || ''}`);
+          const personName = res.submission.citizenName || res.submission.formData?.ho_ten || 'Bà con';
+          speakText(`Kính gửi bà con ${personName}: ${statusMap[res.submission.status] || ''}`);
         }
       } else {
         setErrorMsg('Không tìm thấy hồ sơ với thông tin này. Bà con vui lòng kiểm tra lại số Căn cước công dân hoặc Mã hồ sơ (Ví dụ: 072096001234, HH-1021).');

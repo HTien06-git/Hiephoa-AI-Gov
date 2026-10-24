@@ -30,26 +30,11 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
-  const [isSubmittedConfirmed, setIsSubmittedConfirmed] = useState(false);
   const previousStatusRef = useRef(submission.status);
-  const hasAnnouncedRef = useRef(false);
+  const previousNoteRef = useRef(submission.officerNote || '');
 
-  const handleExplicitSubmit = () => {
-    setIsSubmittedConfirmed(true);
-    try {
-      sessionStorage.removeItem('hh_dismiss_all_notifications');
-      const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
-      const targetCode = submission.submissionCode;
-      if (targetCode && !tracked.includes(targetCode)) {
-        tracked.unshift(targetCode);
-        localStorage.setItem('hh_tracked_submissions', JSON.stringify(tracked.slice(0, 10)));
-      }
-    } catch (e) {}
-
-    if (speakText) {
-      speakText(`Hồ sơ mã số ${submission.submissionCode} đã được nộp trực tuyến vào hàng đợi của cán bộ Một cửa xã Hiệp Hòa. Thiết bị của bà con sẽ tự động nhận thông báo khi cán bộ xử lý xong ạ!`);
-    }
-  };
+  // Tên người nộp thủ tục để thông báo trực tiếp tới bà con
+  const citizenDisplayName = submission.citizenName || submission.formData?.ho_ten || submission.formData?.ho_ten_nguoi_yeu_cau || submission.formData?.ho_ten_nam || 'Bà con';
 
   // Gửi hồ sơ lên backend ngay khi mở Modal nếu chưa có code thực
   useEffect(() => {
@@ -67,6 +52,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
         if (isMounted && res && res.submission) {
           setSubmission(res.submission);
           previousStatusRef.current = res.submission.status;
+          previousNoteRef.current = res.submission.officerNote || '';
 
           // Lưu mã hồ sơ vào thiết bị để tự động hiển thị thông báo kết quả từ cán bộ
           try {
@@ -92,7 +78,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
     };
   }, []);
 
-  // TỰ ĐỘNG POLLING TRỰC TUYẾN MỖI 3 GIÂY ĐỂ ĐỒNG BỘ TRẠNG THÁI TỪ CÁN BỘ
+  // TỰ ĐỘNG POLLING TRỰC TUYẾN MỖI 3 GIÂY & TỰ ĐỘNG ĐỌC THÔNG BÁO MỚI KHI CÁN BỘ CẬP NHẬT TRẠNG THÁI HOẶC GHI CHÚ
   useEffect(() => {
     const code = submission.submissionCode;
     if (!code) return;
@@ -101,24 +87,43 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
       try {
         const res = await apiClient.getSubmission(code);
         if (res && res.success && res.submission) {
-          const newStatus = res.submission.status;
+          const currentSub = res.submission;
+          const newStatus = currentSub.status;
           const oldStatus = previousStatusRef.current;
+          const newNote = currentSub.officerNote || '';
+          const oldNote = previousNoteRef.current;
 
-          // Nếu trạng thái thay đổi sang PROCESSING hoặc COMPLETED, phát thông báo giọng nói
-          if (newStatus !== oldStatus && !hasAnnouncedRef.current) {
+          const personName = currentSub.citizenName || currentSub.formData?.ho_ten || currentSub.formData?.ho_ten_nguoi_yeu_cau || citizenDisplayName;
+
+          // 1. Kiểm tra nếu có ghi chú yêu cầu mới từ cán bộ thay đổi trên màn hình
+          if (newNote && newNote !== oldNote) {
+            previousNoteRef.current = newNote;
+            setSubmission(currentSub);
+            if (speakText) {
+              speakText(`Kính gửi bà con ${personName}, Cán bộ Một cửa vừa có yêu cầu mới: ${newNote}. Kính mời bà con chú ý thực hiện ạ!`);
+            }
+          }
+          // 2. Kiểm tra nếu trạng thái hồ sơ thay đổi (ví dụ: TIẾP NHẬN, HOÀN TẤT, BỔ SUNG)
+          else if (newStatus !== oldStatus) {
             previousStatusRef.current = newStatus;
-            setSubmission(res.submission);
+            setSubmission(currentSub);
 
-            if (newStatus === 'COMPLETED' || newStatus === 'PROCESSING') {
-              hasAnnouncedRef.current = true;
-              const voiceMsg = `Thông báo từ Trung tâm Phục vụ hành chính công xã Hiệp Hòa: Hồ sơ mã số ${code} của bà con đã được cán bộ tiếp nhận và in xong, mời bà con đến quầy ký xác nhận!`;
-              if (speakText) speakText(voiceMsg);
-            } else if (newStatus === 'NEEDS_SUPPLEMENT' && res.submission.officerNote) {
-              const voiceMsg = `Thông báo từ cán bộ Một cửa: Hồ sơ mã số ${code} cần bổ sung: ${res.submission.officerNote}. Bà con lưu ý bổ sung nhé!`;
-              if (speakText) speakText(voiceMsg);
+            if (newStatus === 'COMPLETED') {
+              if (speakText) {
+                speakText(`Thông báo từ Trung tâm Phục vụ Hành chính công xã Hiệp Hòa: Kính gửi bà con ${personName}, hồ sơ thủ tục của bà con đã được cán bộ tiếp nhận và in xong. Kính mời bà con đến quầy ký nhận kết quả!`);
+              }
+            } else if (newStatus === 'PROCESSING') {
+              if (speakText) {
+                speakText(`Kính gửi bà con ${personName}, Cán bộ Một cửa đã tiếp nhận hồ sơ và đang tiến hành xử lý in tờ khai tại quầy!`);
+              }
+            } else if (newStatus === 'NEEDS_SUPPLEMENT') {
+              if (speakText) {
+                const noteDetail = currentSub.officerNote ? `yêu cầu bổ sung: ${currentSub.officerNote}` : 'yêu cầu bà con bổ sung thêm giấy tờ, kính mời bà con kiểm tra hướng dẫn trên màn hình';
+                speakText(`Kính gửi bà con ${personName}, Cán bộ Một cửa ${noteDetail}.`);
+              }
             }
           } else {
-            setSubmission(res.submission);
+            setSubmission(currentSub);
           }
         }
       } catch (err) {
@@ -127,7 +132,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [submission.submissionCode, speakText]);
+  }, [submission.submissionCode, speakText, citizenDisplayName]);
 
   const rawString = JSON.stringify({
     code: submission.submissionCode,
@@ -219,32 +224,10 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
           />
         </div>
 
-        {/* NÚT XÁC NHẬN NỘP HỒ SƠ TRỰC TUYẾN TỚI CÁN BỘ MỘT CỬA */}
-        <div className="my-3 text-center">
-          <button
-            type="button"
-            onClick={handleExplicitSubmit}
-            className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs sm:text-sm md:text-base flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 ${
-              isSubmittedConfirmed
-                ? 'bg-emerald-700 text-white ring-4 ring-emerald-300'
-                : 'bg-gradient-to-r from-[#991B1B] via-red-700 to-[#7F1D1D] text-amber-300 hover:from-red-800 hover:to-red-950 ring-2 ring-amber-400'
-            }`}
-          >
-            {isSubmittedConfirmed ? (
-              <>
-                <CheckCircle2 className="w-5 h-5 text-white" />
-                <span>✅ ĐÃ NỘP HỒ SƠ VÀO HÀNG ĐỢI CỦA CÁN BỘ MỘT CỬA!</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 text-amber-300 animate-spin" />
-                <span>🚀 BẤM NỘP HỒ SƠ TRỰC TUYẾN TỚI CÁN BỘ MỘT CỬA</span>
-              </>
-            )}
-          </button>
-          <p className="text-[11px] text-slate-500 mt-1 font-medium">
-            (Bấm nút trên để gửi hồ sơ vào hàng đợi. Cán bộ Một cửa sẽ nhận được ngay và thiết bị của bà con sẽ tự động báo kết quả)
-          </p>
+        {/* TRẠNG THÁI KẾT NỐI TỰ ĐỘNG ĐẾN CÁN BỘ MỘT CỬA */}
+        <div className="my-3 p-3 bg-emerald-50/90 border border-emerald-300 rounded-2xl flex items-center justify-center gap-2 text-emerald-950 text-xs sm:text-sm font-bold shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>Hồ sơ đã được gửi trực tuyến tới màn hình Cán bộ Một cửa</span>
         </div>
 
         {/* Hướng dẫn bà con */}

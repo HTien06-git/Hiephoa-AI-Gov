@@ -37,6 +37,7 @@ import { apiClient } from '../services/apiClient';
 import TrongDongWatermark from '../components/common/TrongDongWatermark';
 import DongSonBorder from '../components/common/DongSonBorder';
 import AdminDeviceManager from '../components/admin/AdminDeviceManager';
+import AppointmentSlipModal from '../components/officer/AppointmentSlipModal';
 
 export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authToken, onLogout }) {
   const user = currentUser || JSON.parse(localStorage.getItem('hiephoa_user') || sessionStorage.getItem('hiephoa_user') || '{}');
@@ -60,6 +61,8 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   const [officerNoteInput, setOfficerNoteInput] = useState('');
   const [actionNotification, setActionNotification] = useState('');
   const [receiptRecord, setReceiptRecord] = useState(null);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [appointmentSubmission, setAppointmentSubmission] = useState(null);
 
   // Polling hàng đợi thời gian thực mỗi 3 giây
   const fetchLiveQueue = async () => {
@@ -708,13 +711,14 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                       <button
                         type="button"
                         onClick={() => {
-                          setReceiptRecord(selectedSubmission);
-                          setActiveTab('receipt_print');
+                          setAppointmentSubmission(selectedSubmission);
+                          setIsAppointmentModalOpen(true);
                         }}
-                        className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-black text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm active:scale-95"
+                        className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-black text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm active:scale-95 ring-2 ring-amber-400"
+                        title="Soạn thảo & In giấy tiếp nhận hồ sơ và hẹn trả kết quả theo chuẩn phông chữ Times New Roman"
                       >
                         <Printer className="w-4 h-4 text-amber-300" />
-                        <span>In Giấy Tiếp Nhận & Hẹn Trả</span>
+                        <span>Soạn & In Giấy Hẹn (Times New Roman)</span>
                       </button>
                     </div>
 
@@ -753,59 +757,114 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
           )}
 
           {/* ======================================================== */}
-          {/* TAB 3: IN BIÊN NHẬN HẸN TRẢ A4                           */}
+          {/* TAB 3: IN BIÊN NHẬN HẸN TRẢ A4 (TIMES NEW ROMAN)         */}
           {/* ======================================================== */}
           {activeTab === 'receipt_print' && receiptRecord && (
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm max-w-3xl mx-auto space-y-4">
               <div className="flex items-center justify-between pb-4 border-b">
-                <div className="text-base font-black text-slate-900">
-                  Bản In Giấy Tiếp Nhận Hồ Sơ & Hẹn Trả Kết Quả
+                <div>
+                  <div className="text-base font-black text-slate-900">
+                    Bản In Giấy Tiếp Nhận Hồ Sơ & Hẹn Trả Kết Quả
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Phông chữ chuẩn hành chính: <strong>Times New Roman</strong>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="px-4 py-2 rounded-xl bg-[#991B1B] hover:bg-red-800 text-white font-bold text-xs flex items-center gap-1.5"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>In Khổ A4</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAppointmentSubmission(receiptRecord);
+                      setIsAppointmentModalOpen(true);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-black text-white font-bold text-xs flex items-center gap-1.5"
+                  >
+                    <Edit3 className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Soạn / Chỉnh Sửa Giấy Hẹn</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-4 py-2 rounded-xl bg-[#991B1B] hover:bg-red-800 text-white font-bold text-xs flex items-center gap-1.5"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span>In Khổ A4</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Giấy hẹn khổ A4 */}
-              <div className="p-6 bg-slate-50 rounded-2xl border text-xs text-slate-800 font-serif leading-relaxed space-y-3">
-                <div className="text-center font-sans space-y-0.5">
-                  <div className="text-[11px] uppercase font-bold text-slate-600">ỦY BAN NHÂN DÂN XÃ HIỆP HÒA</div>
-                  <div className="text-sm font-black uppercase text-[#991B1B]">TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG</div>
-                  <div className="text-[10px] italic">Số tiếp nhận: {receiptRecord.submissionCode} / HiepHao-DVC</div>
+              {/* Giấy hẹn khổ A4 chuẩn font Times New Roman */}
+              <div
+                style={{ fontFamily: "'Times New Roman', Times, serif" }}
+                className="p-8 bg-white rounded-2xl border text-sm text-black leading-relaxed space-y-4 shadow-xs"
+              >
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '12px' }}>
+                  <tbody>
+                    <tr style={{ verticalAlign: 'top' }}>
+                      <td style={{ width: '45%', textAlign: 'center' }}>
+                        <div style={{ fontSize: '11pt', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                          ỦY BAN NHÂN DÂN XÃ HIỆP HÒA
+                        </div>
+                        <div style={{ fontSize: '11pt', fontWeight: 'bold', textTransform: 'uppercase', textDecoration: 'underline' }}>
+                          BỘ PHẬN TIẾP NHẬN VÀ TRẢ KẾT QUẢ
+                        </div>
+                        <div style={{ fontSize: '10pt', marginTop: '4px' }}>
+                          Số: {receiptRecord.submissionCode}/TNHH-HH
+                        </div>
+                      </td>
+                      <td style={{ width: '55%', textAlign: 'center' }}>
+                        <div style={{ fontSize: '11pt', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                          CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+                        </div>
+                        <div style={{ fontSize: '12pt', fontWeight: 'bold' }}>
+                          Độc lập - Tự do - Hạnh phúc
+                        </div>
+                        <div style={{ fontSize: '10pt', margin: '4px auto 6px auto', borderBottom: '1px solid black', width: '120px' }} />
+                        <div style={{ fontSize: '11pt', fontStyle: 'italic' }}>
+                          Hiệp Hòa, ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div style={{ textAlign: 'center', marginTop: '12px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '14pt', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                    GIẤY TIẾP NHẬN HỒ SƠ VÀ HẸN TRẢ KẾT QUẢ
+                  </div>
+                  <div style={{ fontSize: '11pt', fontStyle: 'italic', marginTop: '4px' }}>
+                    Mã hồ sơ: <strong>{receiptRecord.submissionCode}</strong>
+                  </div>
                 </div>
 
-                <div className="text-center text-sm font-black uppercase pt-2 font-sans">
-                  GIẤY TIẾP NHẬN HỒ SƠ VÀ HẸN TRẢ KẾT QUẢ
-                </div>
-
-                <div className="space-y-1.5 pt-2">
+                <div style={{ fontSize: '12pt', lineHeight: '1.6' }} className="space-y-1.5">
                   <div>• <strong>Người nộp hồ sơ:</strong> {receiptRecord.citizenName}</div>
-                  <div>• <strong>Số CCCD:</strong> {receiptRecord.citizenCccd || 'Đã đối chiếu'}</div>
-                  <div>• <strong>Địa chỉ:</strong> {receiptRecord.hamlet || 'Ấp Văn Hiệp, xã Hiệp Hòa, tỉnh Tây Ninh'}</div>
-                  <div>• <strong>Tên thủ tục:</strong> {receiptRecord.procedureTitle}</div>
+                  <div>• <strong>Số CCCD/Định danh:</strong> {receiptRecord.citizenCccd || '072096001234'}</div>
+                  <div>• <strong>Địa chỉ thường trú:</strong> {receiptRecord.hamlet || 'Xã Hiệp Hòa, tỉnh Tây Ninh'}</div>
+                  <div>• <strong>Nội dung yêu cầu giải quyết:</strong> {receiptRecord.procedureTitle}</div>
                   <div>• <strong>Thời gian tiếp nhận:</strong> {new Date(receiptRecord.createdAt).toLocaleString('vi-VN')}</div>
-                  <div>• <strong>Cán bộ thụ lý:</strong> {receiptRecord.assignedOfficer || 'Cán bộ Một cửa'}</div>
+                  <div>• <strong>Thời gian hẹn trả kết quả:</strong> <span style={{ textDecoration: 'underline', fontWeight: 'bold' }}>{new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('vi-VN')}</span></div>
+                  <div>• <strong>Cán bộ thụ lý:</strong> {receiptRecord.assignedOfficer || user?.name || 'Trần Văn Hòa'}</div>
                 </div>
 
-                <div className="pt-6 grid grid-cols-2 text-center font-sans">
-                  <div>
-                    <div className="font-bold">NGƯỜI NỘP HỒ SƠ</div>
-                    <div className="text-[10px] italic">(Ký và ghi rõ họ tên)</div>
-                    <div className="h-14" />
-                    <div className="font-bold">{receiptRecord.citizenName}</div>
-                  </div>
-                  <div>
-                    <div className="font-bold">CÁN BỘ TIẾP NHẬN</div>
-                    <div className="text-[10px] italic">(Ký và đóng dấu)</div>
-                    <div className="h-14" />
-                    <div className="font-bold">{user?.name || 'Trần Văn Hòa'}</div>
-                  </div>
-                </div>
+                <table style={{ width: '100%', marginTop: '30px', borderCollapse: 'collapse' }}>
+                  <tbody>
+                    <tr style={{ verticalAlign: 'top', textAlign: 'center' }}>
+                      <td style={{ width: '50%' }}>
+                        <div style={{ fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase' }}>NGƯỜI NỘP HỒ SƠ</div>
+                        <div style={{ fontSize: '10pt', fontStyle: 'italic' }}>(Ký và ghi rõ họ tên)</div>
+                        <div style={{ height: '60px' }} />
+                        <div style={{ fontSize: '12pt', fontWeight: 'bold' }}>{receiptRecord.citizenName}</div>
+                      </td>
+                      <td style={{ width: '50%' }}>
+                        <div style={{ fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase' }}>CÁN BỘ TIẾP NHẬN</div>
+                        <div style={{ fontSize: '10pt', fontStyle: 'italic' }}>(Ký, đóng dấu hoặc xác thực)</div>
+                        <div style={{ height: '60px' }} />
+                        <div style={{ fontSize: '12pt', fontWeight: 'bold' }}>{user?.name || 'Trần Văn Hòa'}</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -830,6 +889,18 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
       <footer className="bg-slate-900 text-slate-400 py-4 text-center text-xs border-t border-slate-800">
         © 2026 HIỆP HÒA AI-GOV • Trung tâm Phục vụ Hành chính công UBND xã Hiệp Hòa, tỉnh Tây Ninh.
       </footer>
+
+      {/* MODAL SOẠN & IN GIẤY HẸN TRẢ KẾT QUẢ (TIMES NEW ROMAN) */}
+      {isAppointmentModalOpen && appointmentSubmission && (
+        <AppointmentSlipModal
+          submission={appointmentSubmission}
+          currentUser={user}
+          onClose={() => {
+            setIsAppointmentModalOpen(false);
+            setAppointmentSubmission(null);
+          }}
+        />
+      )}
     </div>
   );
 }

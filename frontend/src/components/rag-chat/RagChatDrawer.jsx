@@ -115,7 +115,7 @@ export default function RagChatDrawer({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex justify-end animate-fade-in">
-      <div className="w-full max-w-3xl bg-white h-full shadow-2xl flex flex-col overflow-hidden animate-slide-left border-l-4 border-amber-400">
+      <div className="w-full max-w-3xl bg-white h-full shadow-2xl flex flex-col overflow-hidden animate-slide-left border-l-0 sm:border-l-4 sm:border-amber-400">
         
         {/* Header Drawer */}
         <div className="bg-gradient-to-r from-[#7F1D1D] via-[#991B1B] to-[#6B1115] text-white p-4 sm:p-5 flex items-center justify-between border-b-2 border-amber-400 flex-shrink-0">
@@ -247,7 +247,7 @@ export default function RagChatDrawer({
 
           {/* KHỐI TƯ VẤN PHÁP LUẬT ĐỜI SỐNG (HIỂN THỊ KHI CÂU HỎI LÀ TƯ VẤN PHÁP LUẬT, KHÔNG LIÊN QUAN ĐẾN ĐƠN TỪ HÀNH CHÍNH) */}
           {!activeProc && (
-            <div className="bg-gradient-to-r from-[#1C1917] via-[#292524] to-[#1C1917] p-4 sm:p-5 rounded-3xl shadow-lg border-2 border-amber-400 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="bg-gradient-to-br from-[#7F1D1D] via-[#991B1B] to-[#690F12] p-5 sm:p-6 rounded-3xl shadow-xl border-2 border-amber-300 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
                 <div className="text-xs uppercase font-extrabold text-amber-300 tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
                   <Scale className="w-4 h-4 text-amber-300" />
@@ -256,7 +256,7 @@ export default function RagChatDrawer({
                 <h4 className="text-base sm:text-lg font-black mt-1 text-white">
                   Tư Vấn Quy Định Pháp Luật Đời Sống 24/7
                 </h4>
-                <p className="text-xs text-stone-300 mt-0.5">
+                <p className="text-xs text-amber-100/90 mt-1 leading-relaxed">
                   Nội dung được trích xuất tự động từ Thư Viện Pháp Luật & các văn bản quy phạm pháp luật hiện hành.
                 </p>
               </div>
@@ -264,7 +264,7 @@ export default function RagChatDrawer({
               <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto justify-center sm:justify-end">
                 <a
                   href="tel:19009095"
-                  className="flex-1 sm:flex-none h-10 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all whitespace-nowrap"
+                  className="flex-1 sm:flex-none h-11 px-5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-[#7F1D1D] font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all whitespace-nowrap active:scale-95 ring-2 ring-amber-300/80"
                 >
                   <span>📞 Tổng Đài Luật: 1900 9095</span>
                 </a>
@@ -453,17 +453,17 @@ export default function RagChatDrawer({
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-between w-full gap-2">
+            <div className="flex items-center justify-between w-full gap-2.5">
               <a
                 href="tel:19009095"
-                className="h-10 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs whitespace-nowrap"
+                className="h-11 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-[#991B1B] to-[#7F1D1D] hover:from-red-800 hover:to-red-900 text-amber-300 font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-sm ring-2 ring-amber-400/50 whitespace-nowrap active:scale-95 transition-all"
               >
                 <span>📞 Hotline Tư Vấn: 1900 9095</span>
               </a>
               <button
                 type="button"
                 onClick={onClose}
-                className="h-10 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs sm:text-sm"
+                className="h-11 px-5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm transition-all border border-slate-300 active:scale-95"
               >
                 Đóng
               </button>

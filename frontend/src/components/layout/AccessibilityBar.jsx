@@ -32,12 +32,12 @@ export default function AccessibilityBar({
             <span>Cỡ chữ:</span>
           </span>
 
-          <div className="grid grid-cols-3 flex-1 sm:flex-none sm:inline-grid sm:w-64 bg-white border border-amber-300 rounded-xl p-0.5 shadow-2xs gap-0.5">
+          <div className="grid grid-cols-3 flex-1 sm:flex-none sm:inline-grid sm:w-80 md:w-84 bg-white border border-amber-300 rounded-xl p-0.5 shadow-2xs gap-0.5">
             <button
               type="button"
               onClick={() => setFontScale('normal')}
               title="Cỡ chữ Vừa"
-              className={`h-9 sm:h-9.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center ${
+              className={`h-9 sm:h-9.5 px-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center whitespace-nowrap ${
                 fontScale === 'normal'
                   ? 'bg-[#991B1B] text-white font-black shadow-xs'
                   : 'text-slate-700 hover:bg-amber-50'
@@ -50,7 +50,7 @@ export default function AccessibilityBar({
               type="button"
               onClick={() => setFontScale('large')}
               title="Cỡ chữ To"
-              className={`h-9 sm:h-9.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center ${
+              className={`h-9 sm:h-9.5 px-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center whitespace-nowrap ${
                 fontScale === 'large'
                   ? 'bg-[#991B1B] text-white font-black shadow-xs'
                   : 'text-slate-700 hover:bg-amber-50'
@@ -63,7 +63,7 @@ export default function AccessibilityBar({
               type="button"
               onClick={() => setFontScale('xlarge')}
               title="Cỡ chữ Siêu to"
-              className={`h-9 sm:h-9.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center ${
+              className={`h-9 sm:h-9.5 px-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center whitespace-nowrap ${
                 fontScale === 'xlarge'
                   ? 'bg-[#991B1B] text-white font-black shadow-xs'
                   : 'text-slate-700 hover:bg-amber-50'
@@ -82,7 +82,7 @@ export default function AccessibilityBar({
           <button
             type="button"
             onClick={toggleAudio}
-            className={`h-9 sm:h-9.5 px-3 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 rounded-xl border transition-all shadow-2xs ${
+            className={`h-9 sm:h-9.5 px-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 rounded-xl border transition-all shadow-2xs whitespace-nowrap ${
               isAudioEnabled
                 ? 'bg-emerald-700 text-white border-emerald-800 hover:bg-emerald-800'
                 : 'bg-slate-200 text-slate-700 border-slate-300 hover:bg-slate-300'
@@ -92,12 +92,12 @@ export default function AccessibilityBar({
             {isAudioEnabled ? (
               <>
                 <Volume2 className="w-4 h-4 text-amber-200 animate-pulse shrink-0" />
-                <span className="truncate">Loa: BẬT</span>
+                <span className="whitespace-nowrap">Loa: BẬT</span>
               </>
             ) : (
               <>
                 <VolumeX className="w-4 h-4 text-slate-500 shrink-0" />
-                <span className="truncate">Loa: TẮT</span>
+                <span className="whitespace-nowrap">Loa: TẮT</span>
               </>
             )}
           </button>
@@ -105,11 +105,11 @@ export default function AccessibilityBar({
           {/* Hotline 1900 9095 (50% trên mobile, bằng chiều cao nút Loa) */}
           <a
             href="tel:19009095"
-            className="h-9 sm:h-9.5 px-3 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 rounded-xl bg-[#1E3A8A] text-white hover:bg-blue-900 border border-blue-950 transition-all shadow-2xs"
+            className="h-9 sm:h-9.5 px-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 rounded-xl bg-[#1E3A8A] text-white hover:bg-blue-900 border border-blue-950 transition-all shadow-2xs whitespace-nowrap"
             title="Gọi tổng đài hỗ trợ thủ tục hành chính công"
           >
             <PhoneCall className="w-4 h-4 text-amber-300 shrink-0" />
-            <span className="truncate">Tổng đài: 1900 9095</span>
+            <span className="whitespace-nowrap">Tổng đài: 1900 9095</span>
           </a>
 
           {/* Nút xóa dữ liệu bảo mật nếu có */}

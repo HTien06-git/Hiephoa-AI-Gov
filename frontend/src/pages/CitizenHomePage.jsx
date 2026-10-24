@@ -279,13 +279,11 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
           <TrongDongOrnament size={288} color="#FBBF24" />
         </div>
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-          {/* Cột 1: Đơn vị hành chính */}
-          <div className="space-y-2.5">
-            <div className="text-amber-300 font-black text-xs sm:text-base uppercase tracking-wider leading-snug">
-              <span className="block sm:inline">Ủy Ban Nhân Dân Xã Hiệp Hòa</span>
-              <span className="hidden sm:inline"> — </span>
-              <span className="block sm:inline text-amber-200 sm:text-amber-300">Tỉnh Tây Ninh</span>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 relative z-10">
+          {/* Cột 1: Đơn vị hành chính (Chiếm 5/12 cột để tiêu đề nằm trọn 1 dòng) */}
+          <div className="md:col-span-5 space-y-2.5">
+            <div className="text-amber-300 font-black text-xs sm:text-sm lg:text-[15px] uppercase tracking-normal sm:tracking-tight md:tracking-wide leading-tight whitespace-nowrap">
+              Ủy Ban Nhân Dân Xã Hiệp Hòa — Tỉnh Tây Ninh
             </div>
             <p className="text-xs sm:text-sm text-amber-100/90 leading-relaxed">
               <strong>Trung tâm Phục vụ Hành chính công xã Hiệp Hòa</strong><br />
@@ -296,15 +294,15 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
             </p>
           </div>
 
-          {/* Cột 2: Đường dây nóng Dịch vụ công */}
-          <div className="space-y-2.5">
-            <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider leading-snug">
+          {/* Cột 2: Đường dây nóng Dịch vụ công (Chiếm 3/12 cột) */}
+          <div className="md:col-span-3 space-y-2.5">
+            <div className="text-amber-300 font-extrabold text-xs sm:text-sm lg:text-[15px] uppercase tracking-wider leading-tight whitespace-nowrap">
               Đường Dây Nóng Hỗ Trợ
             </div>
             <div className="space-y-2 text-xs sm:text-sm">
               <p className="text-white flex items-center gap-1.5 flex-wrap">
                 <span>📞</span>
-                <strong>Tổng đài Dịch vụ công Quốc gia:</strong>{' '}
+                <strong>Tổng đài DVC:</strong>{' '}
                 <a href="tel:18001096" className="text-amber-300 font-extrabold hover:underline text-sm sm:text-base">1800 1096</a>
               </p>
               <p className="text-amber-100/80 text-xs leading-relaxed">
@@ -313,8 +311,8 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
             </div>
           </div>
 
-          {/* Cột 3: Bảo mật & Bản quyền */}
-          <div className="space-y-2.5">
+          {/* Cột 3: Bảo mật & Bản quyền (Chiếm 4/12 cột) */}
+          <div className="md:col-span-4 space-y-2.5">
             <div className="text-amber-300 font-extrabold text-sm sm:text-base uppercase tracking-wider leading-snug">
               Bảo Mật Quyền Riêng Tư & Trợ Năng
             </div>

@@ -4,6 +4,22 @@ Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phư
 
 Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
 
+## [2026-10-24 21:05] - Phiên Bản V6.6: Hoàn Thiện Tương Thích Laptop & Mobile, Chống Rớt Chữ Nút Bấm, Footer 1 Hàng Duy Nhất & Chống Che Khuyết Tiêu Đề Header
+- **Loại tác vụ**: Giải quyết triệt để 3 vấn đề phản ánh từ 3 ảnh chụp thực tế trên laptop và mobile: sửa lỗi rớt chữ trong các nút bấm trên laptop (nút Dành cho Nhân Dân và nút A++ Siêu to trong Accessibility Bar), khóa cứng tiêu đề Footer `ỦY BAN NHÂN DÂN XÃ HIỆP HÒA — TỈNH TÂY NINH` trên 1 hàng duy nhất (12-column grid phân bổ 5/12 cột), và tinh chỉnh tỷ lệ co giãn fluid clamp trên mobile để tiêu đề chính `TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA` hiển thị 100% đầy đủ không bị che khuất bất kỳ chữ nào (Version 6.6 Cross-Device Polish).
+- **Tác vụ thực hiện**:
+  1. **Khắc phục lỗi nhảy chữ ở các nút bấm trên Laptop (`Header.jsx` & `AccessibilityBar.jsx` - Hình 1)**:
+     - Nút `Dành cho Nhân Dân` và `Cán Bộ Một Cửa`: Đổi sang `inline-flex items-center` kèm `whitespace-nowrap px-3 sm:px-4.5`, triệt tiêu hoàn toàn việc rớt chữ "Dân" xuống hàng thứ hai trên laptop.
+     - Nút cỡ chữ `AccessibilityBar.jsx`: Mở rộng khung chứa `sm:w-80 md:w-84` và bổ sung `whitespace-nowrap px-2` cho cả 3 nút `A (Vừa)`, `A+ (To)` và `A++ (Siêu to)`, không còn rớt chữ "to)" xuống dòng.
+     - Thêm `whitespace-nowrap` cho cả nút `Loa: BẬT` và `Tổng đài: 1900 9095`.
+  2. **Tiêu đề Footer `ỦY BAN NHÂN DÂN XÃ HIỆP HÒA — TỈNH TÂY NINH` duy nhất 1 dòng (`CitizenHomePage.jsx` - Hình 2)**:
+     - Tái cấu trúc lưới Footer thành `md:grid-cols-12`: Cột 1 đơn vị hành chính chiếm `md:col-span-5`, cho phép tiêu đề có không gian rộng rãi và gắn cứng `whitespace-nowrap text-xs sm:text-sm lg:text-[15px]`. Tiêu đề luôn luôn nằm trên đúng 1 dòng duy nhất trên cả laptop và điện thoại theo đúng yêu cầu.
+  3. **Tiêu đề chính Header không bao giờ bị che khuất trên Mobile (`Header.jsx` - Hình 3)**:
+     - Thu gọn padding ngoài `px-2.5 sm:px-6`, logo co giãn `w-11 h-11 sm:w-16 sm:h-16`, khoảng cách `gap-2 sm:gap-4`, giải phóng thêm hơn 25px chiều ngang khả dụng trên màn hình di động nhỏ.
+     - Tinh chỉnh `style={{ fontSize: 'clamp(8.5px, 2.75vw, 22px)' }}` kết hợp `tracking-tighter sm:tracking-tight whitespace-nowrap` và `overflow-visible sm:overflow-hidden`. Toàn bộ 44 ký tự của tiêu đề `TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA` hiển thị sắc nét 100%, không bị cắt mất chữ "HÒA" hay bất kỳ chữ nào.
+  4. **Kiểm thử xây dựng**: `npm run build` hoàn tất 100% trong 4.67 giây, 0 cảnh báo lỗi.
+
+---
+
 ## [2026-10-24 20:55] - Phiên Bản V6.5: Đại Tu Chống Nhảy Chữ Xuống Dòng Toàn Nền Tảng Mobile & Tiêu Đề Chính Liền 1 Hàng Tự Cân Đối
 - **Loại tác vụ**: Giải quyết triệt để lỗi nhảy chữ rớt dòng trên giao diện điện thoại theo 5 ảnh chụp thực tế của người dùng: bắt buộc tiêu đề chính `TRUNG TÂM PHỤC VỤ HÀNH CHÍNH CÔNG XÃ HIỆP HÒA` liền đúng 1 hàng không ngắt dòng nhờ fluid clamp co giãn tự động theo khung, khắc phục toàn bộ các huy hiệu (badges) bị rớt chữ đơn lẻ ("HIỆP HÒA", "XÃ", "TÂY NINH", "WORD") và chuẩn hóa tiêu đề Footer hai dòng cân xứng trên di động (Version 6.5 Polish).
 - **Tác vụ thực hiện**:

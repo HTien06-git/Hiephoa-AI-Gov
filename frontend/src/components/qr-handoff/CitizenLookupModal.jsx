@@ -118,6 +118,7 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
 
         // Lưu vào thiết bị để tự động hiển thị thông báo tiến độ
         try {
+          sessionStorage.removeItem('hh_dismiss_all_notifications');
           const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
           const targetCode = res.submission?.submissionCode;
           if (targetCode && !tracked.includes(targetCode)) {

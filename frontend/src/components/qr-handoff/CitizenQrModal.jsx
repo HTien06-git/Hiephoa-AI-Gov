@@ -37,6 +37,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
   const handleExplicitSubmit = () => {
     setIsSubmittedConfirmed(true);
     try {
+      sessionStorage.removeItem('hh_dismiss_all_notifications');
       const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
       const targetCode = submission.submissionCode;
       if (targetCode && !tracked.includes(targetCode)) {
@@ -69,6 +70,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
 
           // Lưu mã hồ sơ vào thiết bị để tự động hiển thị thông báo kết quả từ cán bộ
           try {
+            sessionStorage.removeItem('hh_dismiss_all_notifications');
             const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
             const targetCode = res.submission.submissionCode;
             if (targetCode && !tracked.includes(targetCode)) {

@@ -17,6 +17,12 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
   useEffect(() => {
     const checkTrackedSubmissions = async () => {
       try {
+        // Nếu người dân đã bấm "Đã nhận thông tin & Thoát", tuyệt đối không thông báo nữa
+        if (sessionStorage.getItem('hh_dismiss_all_notifications') === 'true') {
+          setActiveAlert(null);
+          return;
+        }
+
         let codes = [];
         try {
           codes = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
@@ -24,8 +30,14 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
           codes = [];
         }
 
+        // Nếu người dân không có hồ sơ nào đang theo dõi, tuyệt đối không hiển thị thông báo
+        if (!codes || codes.length === 0) {
+          setActiveAlert(null);
+          return;
+        }
+
         // Lấy tối đa 5 mã hồ sơ gần nhất mà người dân đã tạo hoặc tra cứu
-        const codesToCheck = codes.length > 0 ? codes.slice(0, 5) : ['HH-1022'];
+        const codesToCheck = codes.slice(0, 5);
 
         for (const code of codesToCheck) {
           try {
@@ -35,7 +47,7 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
               const statusKey = `${sub.submissionCode}_${sub.status}_${sub.updatedAt}`;
 
               // Nếu trạng thái chưa bị người dân đóng
-              if (!dismissedMap[statusKey]) {
+              if (!dismissedMap[statusKey] && !dismissedMap[sub.submissionCode]) {
                 setActiveAlert(sub);
 
                 // Đọc giọng nói nhắc nhở 1 lần khi có trạng thái mới
@@ -61,8 +73,8 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
       }
     };
 
-    // Kiểm tra ngay sau 1.5 giây khi mở trang và sau đó lặp lại mỗi 3 giây để đồng bộ tức thì
-    const initialTimer = setTimeout(checkTrackedSubmissions, 1500);
+    // Kiểm tra ngay sau 1 giây khi mở trang và sau đó lặp lại mỗi 3 giây để đồng bộ tức thì
+    const initialTimer = setTimeout(checkTrackedSubmissions, 1000);
     const interval = setInterval(checkTrackedSubmissions, 3000);
 
     return () => {
@@ -74,37 +86,63 @@ export default function CitizenDeviceNotificationToast({ onOpenLookupWithCode, s
   if (!activeAlert) return null;
 
   const handleDismiss = () => {
-    const statusKey = `${activeAlert.submissionCode}_${activeAlert.status}_${activeAlert.updatedAt}`;
-    setDismissedMap(prev => ({ ...prev, [statusKey]: true }));
+    if (activeAlert) {
+      const statusKey = `${activeAlert.submissionCode}_${activeAlert.status}_${activeAlert.updatedAt}`;
+      setDismissedMap(prev => ({
+        ...prev,
+        [statusKey]: true,
+        [activeAlert.submissionCode]: true
+      }));
+    }
     setActiveAlert(null);
   };
 
-  // Hành động: Đã nhận thông tin & Thoát -> Làm sạch lịch sử thiết bị
+  // Hành động: Đã nhận thông tin & Thoát -> Làm sạch triệt để lịch sử thiết bị và chặn thông báo lặp
   const handleAcknowledgeAndExit = () => {
     try {
-      // 1. Xóa danh sách hồ sơ theo dõi
+      // 1. Đặt cờ chặn triệt để mọi thông báo trong phiên này
+      sessionStorage.setItem('hh_dismiss_all_notifications', 'true');
+
+      // 2. Xóa danh sách hồ sơ theo dõi
       localStorage.removeItem('hh_tracked_submissions');
-      // 2. Xóa phiên điền đơn trong sessionStorage
-      sessionStorage.clear();
-      // 3. Xóa các khóa lưu trữ nháp
+
+      // 3. Xóa các phiên điền đơn trong sessionStorage
+      sessionStorage.removeItem('hiep_hoa_form_v3_FORM_KHAI_SINH');
+      sessionStorage.removeItem('hiep_hoa_form_v3_FORM_KET_HON');
+      sessionStorage.removeItem('hiep_hoa_form_v3_FORM_TINH_TRANG_HON_NHAN');
+      sessionStorage.removeItem('hiep_hoa_form_v3_FORM_CHUNG_THUC');
+      sessionStorage.removeItem('hiep_hoa_form_v3_FORM_CU_TRU_HO_NGHEO');
+
+      // 4. Xóa các khóa lưu trữ nháp
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('hiep_hoa_') || k.startsWith('hh_'))) {
+        if (k && (k.startsWith('hiep_hoa_') || k.startsWith('hh_tracked'))) {
           keysToRemove.push(k);
         }
       }
       keysToRemove.forEach(k => localStorage.removeItem(k));
     } catch (e) {}
 
-    // 4. Phát sự kiện toàn cục để form và modal làm sạch trắng tinh
+    // 5. Ghi nhớ đã đóng mã này vào dismissedMap
+    if (activeAlert) {
+      const statusKey = `${activeAlert.submissionCode}_${activeAlert.status}_${activeAlert.updatedAt}`;
+      setDismissedMap(prev => ({
+        ...prev,
+        [statusKey]: true,
+        [activeAlert.submissionCode]: true
+      }));
+    }
+
+    // 6. Tắt ngay alert
+    setActiveAlert(null);
+
+    // 7. Phát sự kiện toàn cục để form và modal làm sạch trắng tinh
     window.dispatchEvent(new CustomEvent('hh_clear_citizen_session'));
 
     if (speakText) {
       speakText('Bà con đã xác nhận nhận thông tin thành công. Toàn bộ lịch sử hồ sơ trên thiết bị đã được làm sạch để bà con an tâm nộp hồ sơ mới!');
     }
-
-    setActiveAlert(null);
   };
 
   const handleView = () => {

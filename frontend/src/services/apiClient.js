@@ -238,17 +238,24 @@ export const apiClient = {
   },
 
   /**
-   * Reset hàng đợi về 03 hồ sơ mẫu
+   * Reset làm sạch toàn bộ hàng đợi hồ sơ đã nộp trong hệ thống (Dành cho Admin)
    */
-  async resetDemoQueue() {
+  async resetAllSubmissions() {
     try {
-      const res = await fetch(`${API_BASE}/submissions/reset-demo`, {
+      const res = await fetch(`${API_BASE}/submissions/reset-all`, {
         method: 'POST'
       });
       return await res.json();
     } catch (err) {
       return { success: false, error: err.message };
     }
+  },
+
+  /**
+   * Reset hàng đợi hồ sơ (tương thích ngược)
+   */
+  async resetDemoQueue() {
+    return this.resetAllSubmissions();
   },
 
   /**

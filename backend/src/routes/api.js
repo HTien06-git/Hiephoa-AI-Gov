@@ -48,6 +48,7 @@ const {
   handleGetSubmission,
   handleUpdateSubmission,
   handleResetDemoQueue,
+  handleResetAllSubmissions,
   handleGetRealtimeStats
 } = require('../controllers/submissionController');
 
@@ -72,6 +73,7 @@ router.post('/submissions', handleCreateSubmission);
 router.get('/submissions/live', handleGetLiveQueue);
 router.get('/submissions/:code', handleGetSubmission);
 router.put('/submissions/:code', handleUpdateSubmission);
+router.post('/submissions/reset-all', handleResetAllSubmissions);
 router.post('/submissions/reset-demo', handleResetDemoQueue);
 router.get('/stats/realtime', handleGetRealtimeStats);
 

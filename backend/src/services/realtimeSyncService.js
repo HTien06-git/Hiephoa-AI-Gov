@@ -393,15 +393,33 @@ class RealtimeSyncService {
     }
   }
 
-  // Reset về lại 03 hồ sơ demo khi cần biểu diễn
-  resetDemoData() {
+  // Reset toàn bộ hồ sơ đã nộp về trạng thái trắng sạch cho triển khai vận hành thật
+  resetAllSubmissions() {
     const store = globalThis.__HIEPHOA_REALTIME_STORE__;
-    store.submissions = JSON.parse(JSON.stringify(INITIAL_DEMO_SUBMISSIONS));
-    store.counter = 1024;
-    store.stats = { ...INITIAL_STATS };
-    store.activityFeed = JSON.parse(JSON.stringify(INITIAL_ACTIVITY));
+    store.submissions = [];
+    store.counter = 1001;
+    store.stats = {
+      totalVisits: 0,
+      aiVoiceConsultations: 0,
+      autoFormsCreated: 0,
+      preCheckDocs: 0,
+      completedSubmissions: 0
+    };
+    store.activityFeed = [
+      {
+        id: `act-${Date.now()}`,
+        text: 'Quản trị viên đã làm sạch toàn bộ hàng đợi hồ sơ để sẵn sàng vận hành thực tế.',
+        time: 'Vừa xong',
+        type: 'admin'
+      }
+    ];
     this.saveStore();
     return store.submissions;
+  }
+
+  // Khôi phục hồ sơ
+  resetDemoData() {
+    return this.resetAllSubmissions();
   }
 }
 

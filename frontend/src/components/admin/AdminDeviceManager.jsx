@@ -47,6 +47,10 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
   const [newOfficerPassword, setNewOfficerPassword] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
+  // Tab Reset toàn bộ dữ liệu hồ sơ hệ thống
+  const [resetSubmissionsInput, setResetSubmissionsInput] = useState('');
+  const [isResettingSubmissions, setIsResettingSubmissions] = useState(false);
+
   const token = authToken || localStorage.getItem('hiephoa_auth_token') || sessionStorage.getItem('hiephoa_auth_token');
 
   // Tải danh sách thiết bị
@@ -320,6 +324,19 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
                 {totalLocked}
               </span>
             )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubTab('SYSTEM_RESET')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all ${
+              subTab === 'SYSTEM_RESET'
+                ? 'bg-rose-700 text-white shadow-sm font-black ring-2 ring-rose-300'
+                : 'text-rose-700 hover:text-rose-900 hover:bg-rose-50'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <span>Reset Dữ Liệu Hồ Sơ</span>
           </button>
         </div>
       </div>
@@ -650,6 +667,106 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* SUBTAB 3: RESET & LÀM SẠCH TOÀN BỘ HỒ SƠ THỦ TỤC ĐÃ NỘP     */}
+      {/* ======================================================== */}
+      {subTab === 'SYSTEM_RESET' && (
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-rose-300 shadow-sm max-w-2xl mx-auto space-y-5 animate-fade-in">
+          <div className="flex items-center gap-3 border-b border-rose-100 pb-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-7 h-7 text-rose-600 animate-pulse" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-black text-rose-700 tracking-wider">
+                CHỨC NĂNG DÀNH RIÊNG CHO QUẢN TRỊ VIÊN
+              </span>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900">
+                Làm Sạch & Reset Toàn Bộ Hồ Sơ Thủ Tục Đã Nộp
+              </h3>
+            </div>
+          </div>
+
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs sm:text-sm text-rose-950 space-y-2">
+            <div className="font-bold flex items-center gap-1.5 text-rose-900">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>LƯU Ý QUAN TRỌNG KHI TRIỂN KHAI VẬN HÀNH THẬT:</span>
+            </div>
+            <ul className="space-y-1 text-xs text-rose-900/90 list-disc list-inside leading-relaxed">
+              <li>Lệnh này sẽ <strong>xóa vĩnh viễn toàn bộ hồ sơ</strong> mà người dân đã nộp thử nghiệm trong hệ thống.</li>
+              <li>Hàng đợi trực tuyến của Cán bộ Một cửa sẽ trở về <strong>0 hồ sơ</strong>, sẵn sàng đón nhận bà con thực tế.</li>
+              <li>Bộ đếm và số liệu thử nghiệm sẽ được làm sạch đồng bộ.</li>
+            </ul>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-xs font-black text-slate-800 uppercase">
+              Xác nhận xóa: Nhập chữ <span className="text-rose-600 font-mono text-sm underline">RESET</span> vào ô bên dưới
+            </label>
+            <input
+              type="text"
+              value={resetSubmissionsInput}
+              onChange={(e) => setResetSubmissionsInput(e.target.value)}
+              placeholder="Nhập RESET..."
+              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-sm font-mono font-bold text-rose-600 outline-none focus:border-rose-600 focus:bg-white"
+            />
+          </div>
+
+          <div className="pt-2 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setResetSubmissionsInput('');
+                setSubTab('OFFICERS');
+              }}
+              className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
+            >
+              Quay Lại
+            </button>
+
+            <button
+              type="button"
+              disabled={resetSubmissionsInput.trim().toUpperCase() !== 'RESET' || isResettingSubmissions}
+              onClick={async () => {
+                if (resetSubmissionsInput.trim().toUpperCase() !== 'RESET') return;
+                setIsResettingSubmissions(true);
+                try {
+                  const res = await apiClient.resetAllSubmissions();
+                  if (res && res.success) {
+                    setActionMessage({
+                      type: 'success',
+                      text: '✅ Đã xóa sạch toàn bộ hồ sơ trong hệ thống thành công! Sẵn sàng vận hành thực tế.'
+                    });
+                    setResetSubmissionsInput('');
+                    setSubTab('OFFICERS');
+                  } else {
+                    setActionMessage({ type: 'error', text: res.error || 'Lỗi khi reset hồ sơ' });
+                  }
+                } catch (e) {
+                  setActionMessage({ type: 'error', text: 'Lỗi mạng khi reset.' });
+                } finally {
+                  setIsResettingSubmissions(false);
+                }
+                setTimeout(() => setActionMessage(null), 5000);
+              }}
+              className={`px-5 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 shadow-md transition-all ${
+                resetSubmissionsInput.trim().toUpperCase() === 'RESET' && !isResettingSubmissions
+                  ? 'bg-rose-700 hover:bg-rose-800 text-white cursor-pointer active:scale-95 ring-2 ring-rose-400'
+                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+              }`}
+            >
+              {isResettingSubmissions ? (
+                <span>Đang xử lý làm sạch...</span>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 text-amber-300" />
+                  <span>Xác Nhận Xóa Toàn Bộ Hồ Sơ</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}

@@ -63,6 +63,9 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   const [receiptRecord, setReceiptRecord] = useState(null);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [appointmentSubmission, setAppointmentSubmission] = useState(null);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
+  const [resetConfirmInput, setResetConfirmInput] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
 
   // Polling hàng đợi thời gian thực mỗi 3 giây
   const fetchLiveQueue = async () => {
@@ -235,17 +238,43 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
     setTimeout(() => setActionNotification(''), 3500);
   };
 
-  // Khôi phục 03 hồ sơ mẫu
-  const handleResetDemoData = async () => {
-    if (!window.confirm('Khôi phục hàng đợi về 03 hồ sơ mẫu thử nghiệm?')) return;
+  // Xuất Sổ theo dõi và danh sách hồ sơ trong ngày sang file Word (.docx) chuẩn Times New Roman
+  const handleExportDailyDocx = () => {
     try {
-      await apiClient.resetDemoQueue();
-      fetchLiveQueue();
-      setActionNotification('Đã khôi phục 03 hồ sơ mẫu thành công!');
+      docxExportService.exportDailySubmissionsWord(liveQueue, user);
+      setActionNotification('Đã tải về Sổ theo dõi hồ sơ trong ngày (.docx) phông Times New Roman thành công!');
     } catch (e) {
-      alert('Lỗi khôi phục hồ sơ mẫu.');
+      alert('Không thể xuất file Word: ' + e.message);
     }
     setTimeout(() => setActionNotification(''), 3500);
+  };
+
+  // Thực hiện Reset toàn bộ hồ sơ trong hệ thống (Chỉ dành cho Admin)
+  const handleExecuteResetAll = async () => {
+    if (resetConfirmInput.trim().toUpperCase() !== 'RESET') {
+      alert('Vui lòng nhập đúng chữ RESET vào ô xác nhận để thực hiện.');
+      return;
+    }
+    setIsResetting(true);
+    try {
+      const res = await apiClient.resetAllSubmissions();
+      if (res && res.success) {
+        setLiveQueue([]);
+        setSelectedSubmission(null);
+        setReceiptRecord(null);
+        setShowResetConfirmModal(false);
+        setResetConfirmInput('');
+        setActionNotification('Đã xóa và làm sạch toàn bộ hồ sơ trong hệ thống thành công! Sẵn sàng vận hành thực tế.');
+        fetchLiveQueue();
+      } else {
+        alert('Lỗi: ' + (res.error || 'Không thể reset hồ sơ'));
+      }
+    } catch (err) {
+      alert('Lỗi kết nối máy chủ khi reset.');
+    } finally {
+      setIsResetting(false);
+    }
+    setTimeout(() => setActionNotification(''), 4000);
   };
 
   // Tìm kiếm trong hàng đợi
@@ -458,19 +487,38 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {/* NÚT LƯU DANH SÁCH HỒ SƠ TRONG NGÀY SANG FILE WORD (TIMES NEW ROMAN) */}
                       <button
                         type="button"
-                        onClick={handleResetDemoData}
-                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold"
-                        title="Khôi phục 03 hồ sơ mẫu"
+                        onClick={handleExportDailyDocx}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-black flex items-center gap-1 shadow-2xs active:scale-95 transition-all"
+                        title="Lưu danh sách hồ sơ đã nộp và xử lý trong ngày sang file Word (.docx) chuẩn phông chữ Times New Roman"
                       >
-                        Khôi phục mẫu
+                        <Download className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Xuất Sổ Word (.docx)</span>
                       </button>
+
+                      {/* NÚT RESET TOÀN BỘ HỒ SƠ (CHỈ HIỂN THỊ VỚI QUẢN TRỊ VIÊN) */}
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setResetConfirmInput('');
+                            setShowResetConfirmModal(true);
+                          }}
+                          className="px-2 py-1 rounded-lg bg-rose-700 hover:bg-rose-800 text-white text-[11px] font-bold flex items-center gap-1 shadow-2xs active:scale-95 transition-all"
+                          title="Làm sạch toàn bộ hồ sơ thủ tục đã nộp trong hệ thống để sẵn sàng vận hành thực tế"
+                        >
+                          <AlertTriangle className="w-3 h-3 text-amber-300" />
+                          <span>Reset Hồ Sơ</span>
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={fetchLiveQueue}
-                        className="p-1 rounded-lg hover:bg-slate-100 text-slate-600"
+                        className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
                         title="Đồng bộ ngay"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />
@@ -889,6 +937,94 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
       <footer className="bg-slate-900 text-slate-400 py-4 text-center text-xs border-t border-slate-800">
         © 2026 HIỆP HÒA AI-GOV • Trung tâm Phục vụ Hành chính công UBND xã Hiệp Hòa, tỉnh Tây Ninh.
       </footer>
+
+      {/* MODAL CẢNH BÁO QUAN TRỌNG: RESET TOÀN BỘ HỒ SƠ THỦ TỤC ĐÃ NỘP (DÀNH CHO ADMIN) */}
+      {showResetConfirmModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border-2 border-rose-500 overflow-hidden flex flex-col my-auto animate-scale-up">
+            
+            {/* Header cảnh báo đỏ */}
+            <div className="bg-gradient-to-r from-red-700 via-rose-700 to-red-800 text-white p-4 sm:p-5 flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-6 h-6 text-amber-300 animate-bounce" />
+              </div>
+              <div className="flex-1">
+                <div className="text-[10px] font-black uppercase text-amber-300 tracking-wider">
+                  CẢNH BÁO NGUY HIỂM — QUẢN TRỊ VIÊN
+                </div>
+                <h3 className="text-base sm:text-lg font-black leading-snug">
+                  Xác Nhận Reset Toàn Bộ Hồ Sơ Đã Nộp
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowResetConfirmModal(false)}
+                className="w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Nội dung lưu ý quan trọng */}
+            <div className="p-5 sm:p-6 space-y-4 text-xs sm:text-sm text-slate-700">
+              <div className="p-3.5 bg-rose-50 rounded-2xl border border-rose-200 text-rose-950 space-y-2">
+                <div className="font-black text-rose-900 flex items-center gap-1.5 text-xs sm:text-sm">
+                  <span>⚠️ LƯU Ý ĐẶC BIỆT KHI BẤM RESET:</span>
+                </div>
+                <ul className="space-y-1.5 text-xs text-rose-900/90 list-disc list-inside">
+                  <li>Hành động này sẽ <strong>XÓA SẠCH TOÀN BỘ</strong> tất cả hồ sơ thủ tục hành chính mà người dân đã nộp trên hệ thống.</li>
+                  <li>Hàng đợi trực tuyến của Cán bộ Một cửa sẽ được đưa về trạng thái trắng sạch ban đầu (0 hồ sơ) để <strong>sẵn sàng tiếp nhận hồ sơ thực tế</strong>.</li>
+                  <li>Mọi thông tin người dân đã khai báo trước đây <strong>sẽ không thể khôi phục lại</strong>.</li>
+                </ul>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-800 uppercase mb-1">
+                  Nhập chữ <span className="text-red-600 font-mono text-sm underline">RESET</span> vào ô dưới đây để xác nhận:
+                </label>
+                <input
+                  type="text"
+                  value={resetConfirmInput}
+                  onChange={(e) => setResetConfirmInput(e.target.value)}
+                  placeholder="Gõ chữ RESET để mở khóa nút xóa..."
+                  className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border-2 border-slate-300 rounded-xl font-mono font-bold text-red-600 outline-none focus:border-red-600 focus:bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Hàng nút bấm */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowResetConfirmModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs"
+              >
+                Hủy bỏ (Giữ nguyên)
+              </button>
+              <button
+                type="button"
+                disabled={resetConfirmInput.trim().toUpperCase() !== 'RESET' || isResetting}
+                onClick={handleExecuteResetAll}
+                className={`px-5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 shadow-md transition-all ${
+                  resetConfirmInput.trim().toUpperCase() === 'RESET' && !isResetting
+                    ? 'bg-red-700 hover:bg-red-800 text-white cursor-pointer active:scale-95 ring-2 ring-red-400'
+                    : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                }`}
+              >
+                {isResetting ? (
+                  <span>Đang xóa toàn bộ dữ liệu...</span>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Xác Nhận Xóa Toàn Bộ Hồ Sơ</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* MODAL SOẠN & IN GIẤY HẸN TRẢ KẾT QUẢ (TIMES NEW ROMAN) */}
       {isAppointmentModalOpen && appointmentSubmission && (

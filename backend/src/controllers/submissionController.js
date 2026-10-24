@@ -99,20 +99,25 @@ function handleUpdateSubmission(req, res) {
   }
 }
 
-// POST /api/submissions/reset-demo: Reset về 03 hồ sơ mẫu
-function handleResetDemoQueue(req, res) {
+// POST /api/submissions/reset-all: Reset xóa toàn bộ hồ sơ đã nộp để đưa vào vận hành thật
+function handleResetAllSubmissions(req, res) {
   try {
-    const list = realtimeSyncService.resetDemoData();
+    const list = realtimeSyncService.resetAllSubmissions();
     return res.json({
       success: true,
-      message: 'Đã thiết lập lại 03 hồ sơ mẫu trực tuyến thành công!',
+      message: 'Đã xóa và làm sạch toàn bộ hồ sơ đã nộp trong hệ thống thành công!',
       submissions: list,
       data: list
     });
   } catch (err) {
-    console.error('[submissionController] resetDemo error:', err);
+    console.error('[submissionController] resetAll error:', err);
     return res.status(500).json({ success: false, error: err.message });
   }
+}
+
+// POST /api/submissions/reset-demo: Reset hồ sơ (tương thích ngược)
+function handleResetDemoQueue(req, res) {
+  return handleResetAllSubmissions(req, res);
 }
 
 // GET /api/stats/realtime: Thống kê tổng hợp trực tuyến
@@ -136,5 +141,6 @@ module.exports = {
   handleGetSubmission,
   handleUpdateSubmission,
   handleResetDemoQueue,
+  handleResetAllSubmissions,
   handleGetRealtimeStats
 };

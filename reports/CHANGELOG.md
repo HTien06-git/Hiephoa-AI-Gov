@@ -4,6 +4,27 @@ Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phư
 
 Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
 
+## [2026-10-24 22:30] - Phiên Bản V7.0: Xuất Sổ Hồ Sơ Trong Ngày (.docx) Times New Roman, Nút Reset Dữ Liệu Admin Kèm Cảnh Báo An Toàn & Chuẩn Hóa Triển Khai Thực Tế
+- **Loại tác vụ**: Triển khai 3 tính năng cốt lõi phục vụ vận hành thực tế chính thức: (1) Thêm nút Reset toàn bộ dữ liệu hồ sơ thủ tục bên Admin kèm cảnh báo xác nhận nguy hiểm và yêu cầu nhập chữ 'RESET'; (2) Tích hợp nút Lưu/Xuất Sổ theo dõi và danh sách hồ sơ đã nộp và xử lý trong ngày sang file Word (.docx) chuẩn phông chữ **Times New Roman** khổ ngang A4; (3) Loại bỏ toàn bộ các tính năng/dữ liệu demo cũ, tối ưu hóa logic và làm sạch mã nguồn sẵn sàng đưa vào vận hành thực tế.
+- **Tác vụ thực hiện**:
+  1. **Nút Reset Dữ Liệu Hồ Sơ Phía Admin Kèm Hộp Thoại Cảnh Báo (`OfficerScanPage.jsx` & `AdminDeviceManager.jsx`)**:
+     - Bổ sung nút `[ ⚠️ Reset Hồ Sơ ]` nổi bật trên thanh công cụ hàng đợi dành riêng cho Quản trị viên (Admin) và tab `Reset Dữ Liệu Hồ Sơ` trong Trung tâm Quản trị.
+     - Hộp thoại cảnh báo bảo mật nguy hiểm: Nêu rõ lưu ý hành động này sẽ xóa vĩnh viễn toàn bộ các hồ sơ người dân đã nộp và làm sạch hàng đợi về trạng thái 0 hồ sơ ban đầu.
+     - Cơ chế chống bấm nhầm: Bắt buộc người dùng phải gõ chính xác chữ `RESET` vào ô xác thực mới mở khóa nút thực hiện.
+     - Endpoint backend: `POST /api/submissions/reset-all` làm sạch hoàn toàn cơ sở dữ liệu `submissions = []`, khởi tạo lại bộ đếm tiếp nhận.
+  2. **Xuất Sổ Theo Dõi Hồ Sơ Trong Ngày Sang File Word (.docx) Times New Roman (`docxExportService.js` & `OfficerScanPage.jsx`)**:
+     - Tích hợp phương thức `exportDailySubmissionsWord(liveQueue, user)` xuất file Word bảng khổ ngang A4 (Landscape).
+     - Thiết kế theo chuẩn công tác văn thư lưu trữ Nghị định 30/2020/NĐ-CP: Quốc hiệu, Tiêu ngữ, Tên cơ quan, Tiêu đề *"SỔ THEO DÕI VÀ DANH SÁCH HỒ SƠ TIẾP NHẬN, XỬ LÝ TRONG NGÀY"*, bảng tóm tắt số liệu xử lý trong ngày.
+     - Bảng dữ liệu đầy đủ 10 cột: STT, Mã hồ sơ, Tên thủ tục, Họ tên người nộp, CCCD/SĐT, Ấp cư trú, Giờ nhận, Trạng thái xử lý, Cán bộ thụ lý, Ghi chú yêu cầu.
+     - Ba khối chữ ký phân công trách nhiệm: Người lập biểu, Cán bộ tiếp nhận & trả kết quả, Xác nhận của Lãnh đạo UBND xã.
+     - Bắt buộc phông chữ **Times New Roman** 100% xuyên suốt toàn bộ văn bản và tải về tức thì dưới dạng file `.docx`.
+  3. **Loại Bỏ Các Tính Năng Demo & Tối Ưu Logic Vận Hành Thực Tế**:
+     - Gỡ bỏ nút "Khôi phục 03 hồ sơ mẫu" trên thanh hàng đợi tiếp nhận cán bộ.
+     - Loại bỏ hàm điền dữ liệu mẫu `handleFillDemoData` dư thừa trong `SmartAutoFormModal.jsx`.
+     - Kiểm tra toàn bộ mã nguồn frontend và backend: Cú pháp node check 0 lỗi, `npm run build` hoàn tất 100% trong 4.64s.
+
+---
+
 ## [2026-10-24 22:15] - Phiên Bản V6.9: Soạn & In Giấy Hẹn Times New Roman, Cá Nhân Hóa Tên Người Dân, Tự Động Đọc Yêu Cầu Mới & Loại Bỏ Giao Diện Đen
 - **Loại tác vụ**: Triển khai trọn vẹn 5 yêu cầu cải tiến nghiệp vụ và giao diện từ phản ánh thực tế của người dùng: (1) Bỏ nút nộp hồ sơ dư thừa trong popup mã QR; (2) Tự động đọc to bằng giọng nói TTS khi cán bộ thay đổi trạng thái hoặc ghi chú yêu cầu trên màn hình; (3) Loại bỏ triệt để card màu đen trong phần tư vấn pháp luật và sửa lỗi sọc vàng viền trái trên điện thoại di động; (4) Tích hợp tính năng soạn thảo và in ấn "Giấy tiếp nhận hồ sơ và hẹn trả kết quả" theo quy định hành chính chuẩn phông chữ **Times New Roman**; (5) Thay thế toàn bộ mã hồ sơ trong thông báo bằng họ tên người đi làm thủ tục để gần gũi, rõ ràng cho bà con.
 - **Tác vụ thực hiện**:

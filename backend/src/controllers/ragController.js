@@ -15,6 +15,14 @@ async function handleChatQuery(req, res) {
       history
     });
 
+    // Cập nhật bộ đếm và nhật ký trực tuyến thời gian thực
+    try {
+      const realtimeSyncService = require('../services/realtimeSyncService');
+      realtimeSyncService.recordChatEvent(message);
+    } catch (e) {
+      // Non-blocking
+    }
+
     return res.json({
       success: true,
       data: result

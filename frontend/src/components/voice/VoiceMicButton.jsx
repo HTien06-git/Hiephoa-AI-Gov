@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mic, Send, Sparkles, Volume2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Mic, Send, Sparkles, Volume2, MessageSquare, ShieldCheck, HelpCircle } from 'lucide-react';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import TrongDongWatermark from '../common/TrongDongWatermark';
 
@@ -11,18 +11,14 @@ export default function VoiceMicButton({ onQuerySubmit, isSpeaking, stopSpeaking
     isListening,
     transcript,
     interimTranscript,
-    rawTranscript,
     error,
-    toggleListening,
-    stopListening,
-    resetTranscript
+    toggleListening
   } = useSpeechRecognition({
     onResult: (finalText) => {
       const cleaned = finalText ? finalText.trim() : '';
       if (cleaned.length > 1 && cleaned !== lastSubmittedQueryRef.current) {
         lastSubmittedQueryRef.current = cleaned;
         setTextInput('');
-        resetTranscript();
         onQuerySubmit(cleaned);
       }
     }
@@ -35,47 +31,85 @@ export default function VoiceMicButton({ onQuerySubmit, isSpeaking, stopSpeaking
       lastSubmittedQueryRef.current = query;
       onQuerySubmit(query);
       setTextInput('');
-      resetTranscript();
     }
   };
 
   const handleMicClick = () => {
-    if (isSpeaking) stopSpeaking();
+    if (isSpeaking && stopSpeaking) stopSpeaking();
     toggleListening();
   };
 
+  const handleQuickQuestion = (q) => {
+    lastSubmittedQueryRef.current = q;
+    onQuerySubmit(q);
+  };
+
+  const quickChips = [
+    'Làm khai sinh cho con cần giấy tờ gì?',
+    'Đăng ký kết hôn tại xã Hiệp Hòa',
+    'Thủ tục tặng cho đất đai',
+    'Xác nhận tình trạng hôn nhân (Độc thân)'
+  ];
+
   return (
-    <div className="bg-white rounded-3xl shadow-xl border-2 border-amber-300/80 p-5 md:p-7 my-6 text-center relative overflow-hidden">
-      {/* Vị trí 2: Họa tiết Trống Đồng Đông Sơn chìm ở nền trung tâm */}
-      <div className="absolute -top-16 -right-16 w-80 h-80 pointer-events-none opacity-[0.09]">
-        <TrongDongWatermark size={320} color="#D97706" />
+    <section className="bg-gradient-to-br from-white via-amber-50/40 to-red-50/30 rounded-3xl shadow-sm border border-amber-200/90 p-4 sm:p-6 lg:p-8 my-4 relative overflow-hidden">
+      {/* Họa tiết Trống Đồng Đông Sơn chìm tinh tế ở 2 góc */}
+      <div className="absolute -top-16 -right-16 w-72 h-72 pointer-events-none opacity-[0.07]">
+        <TrongDongWatermark size={290} color="#D97706" />
       </div>
-      <div className="absolute -bottom-16 -left-16 w-80 h-80 pointer-events-none opacity-[0.09]">
-        <TrongDongWatermark size={320} color="#D97706" />
+      <div className="absolute -bottom-16 -left-16 w-72 h-72 pointer-events-none opacity-[0.06]">
+        <TrongDongWatermark size={290} color="#991B1B" />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-100 text-[#991B1B] text-xs sm:text-sm font-extrabold mb-3 shadow-2xs">
-          <Sparkles className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />
-          <span className="uppercase tracking-wide">TRỢ LÝ TRÒ CHUYỆN TRỰC TIẾP (VOICE-FIRST)</span>
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        
+        {/* CỘT TRÁI (Mobile: Trên) - Thông tin giới thiệu & Câu hỏi gợi ý nhanh */}
+        <div className="lg:col-span-6 text-left">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-[#991B1B] text-xs font-black uppercase mb-2.5 shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span>CHUYÊN VIÊN HÀNH CHÍNH CÔNG AI 24/7</span>
+          </div>
+
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-snug">
+            Trung Tâm Tư Vấn Thủ Tục & Pháp Luật Xã Hiệp Hòa
+          </h1>
+
+          <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed font-medium">
+            Bà con chạm vào nút Micro màu đỏ để <strong>nói chuyện trực tiếp</strong>, hoặc chọn câu hỏi nhanh bên dưới. AI sẽ tự động đọc to lời hướng dẫn chi tiết từng bước cho bà con!
+          </p>
+
+          {/* Quick Chips gợi ý câu hỏi */}
+          <div className="mt-4">
+            <div className="text-[11px] font-bold text-amber-900 uppercase tracking-wide flex items-center gap-1 mb-2">
+              <MessageSquare className="w-3 h-3 text-amber-700" />
+              <span>Gợi ý câu hỏi phổ biến của bà con:</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {quickChips.map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleQuickQuestion(chip)}
+                  className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-red-50 text-slate-700 hover:text-[#991B1B] text-xs font-semibold border border-slate-200 hover:border-red-300 transition-all text-left shadow-2xs active:scale-95"
+                >
+                  💬 {chip}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-snug">
-          Bà con chạm vào nút Micro màu đỏ rồi nói chuyện trực tiếp!
-        </h2>
-        <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl mx-auto leading-relaxed">
-          Ví dụ: <span className="font-bold text-[#991B1B]">"Làm giấy khai sinh cho con cần những gì?"</span> hoặc <span className="font-bold text-[#991B1B]">"Cha mẹ muốn tặng cho đất thì thủ tục ra sao?"</span>
-        </p>
-
-        {/* Nút Micro trung tâm cực lớn với VÒNG HOA VĂN TRỐNG ĐỒNG ĐỒNG TÂM bao quanh */}
-        <div className="my-6 flex flex-col items-center justify-center">
-          <div className="relative flex items-center justify-center w-44 h-44 sm:w-52 sm:h-52">
-            {/* Vòng Trống Đồng bao quanh nút Mic, xoay nhẹ và tỏa sáng khi đang lắng nghe */}
+        {/* CỘT PHẢI (Mobile: Dưới) - Trung tâm Chạm & Nói + Khung gõ câu hỏi 100% không tràn viền */}
+        <div className="lg:col-span-6 flex flex-col items-center justify-center text-center">
+          
+          {/* Nút Micro trung tâm cực lớn với Vòng hoa văn Trống Đồng */}
+          <div className="relative flex items-center justify-center w-36 h-36 sm:w-44 sm:h-44">
+            {/* Vòng Trống Đồng xoay nhẹ */}
             <div className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-500 ${
-              isListening ? 'opacity-90 scale-105' : 'opacity-40 hover:opacity-60'
+              isListening ? 'opacity-90 scale-105' : 'opacity-35 hover:opacity-50'
             }`}>
               <TrongDongWatermark
-                size={200}
+                size={165}
                 color={isListening ? "#DC2626" : "#D97706"}
                 opacity={isListening ? 0.75 : 0.45}
                 spin={true}
@@ -86,64 +120,68 @@ export default function VoiceMicButton({ onQuerySubmit, isSpeaking, stopSpeaking
             <button
               type="button"
               onClick={handleMicClick}
-              className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl relative select-none z-10 ${
+              className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl relative select-none z-10 active:scale-95 ${
                 isListening
                   ? 'bg-red-600 text-white animate-mic-pulse ring-8 ring-red-300'
-                  : 'bg-gradient-to-tr from-[#991B1B] to-rose-600 text-white hover:scale-105 active:scale-95 hover:shadow-red-500/50'
+                  : 'bg-gradient-to-tr from-[#991B1B] to-rose-600 text-white hover:scale-105 hover:shadow-red-500/40 ring-4 ring-amber-300/80'
               }`}
-              title={isListening ? 'Đang lắng nghe... Chạm lần nữa để gửi câu hỏi' : 'Chạm vào Micro để bắt đầu nói'}
+              title={isListening ? 'Đang lắng nghe... Chạm lần nữa để gửi' : 'Chạm vào Micro để bắt đầu nói'}
             >
-              <Mic className={`w-12 h-12 sm:w-14 sm:h-14 ${isListening ? 'animate-bounce' : ''}`} />
+              <Mic className={`w-10 h-10 sm:w-12 sm:h-12 ${isListening ? 'animate-bounce' : ''}`} />
             </button>
           </div>
 
-          {/* Nhãn trạng thái */}
-          <div className="mt-4">
+          {/* Nhãn trạng thái Micro */}
+          <div className="mt-2 mb-3">
             {isListening ? (
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 text-[#991B1B] font-black text-base sm:text-lg animate-pulse border border-red-300">
-                <span className="w-3.5 h-3.5 rounded-full bg-red-600 animate-ping flex-shrink-0" />
-                <span>Đang lắng nghe bà con nói... (Nói xong tự động trả lời)</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-[#991B1B] font-black text-xs sm:text-sm animate-pulse border border-red-300">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping shrink-0" />
+                <span>Đang lắng nghe... (Nói xong tự động trả lời)</span>
               </div>
             ) : (
-              <span className="text-sm sm:text-base font-bold text-slate-800 inline-flex items-center gap-1.5">
-                👉 Chạm vào Micro màu đỏ để BẮT ĐẦU TRÒ CHUYỆN
+              <span className="text-xs sm:text-sm font-bold text-slate-800 inline-flex items-center gap-1">
+                👉 Chạm vào Micro màu đỏ để <strong>NÓI CHUYỆN</strong>
               </span>
             )}
           </div>
 
-          {/* Chữ hiển thị thời gian thực khi đang nói */}
+          {/* Phiên âm trực tiếp nếu có */}
           {(transcript || interimTranscript) && (
-            <div className="mt-4 px-5 py-3 bg-amber-50 rounded-2xl border-2 border-amber-300 text-slate-900 text-base sm:text-lg font-bold max-w-xl mx-auto shadow-sm animate-fade-in">
-              <span className="text-amber-800 text-xs uppercase block font-black mb-1">Lời nói của bà con:</span>
+            <div className="mb-3 px-3.5 py-2 bg-amber-50 rounded-xl border border-amber-300 text-slate-900 text-xs sm:text-sm font-bold w-full max-w-md shadow-2xs animate-fade-in text-left">
+              <span className="text-amber-800 text-[10px] uppercase block font-black">Lời nói của bà con:</span>
               "{transcript || interimTranscript}"
             </div>
           )}
 
           {error && (
-            <p className="mt-3 text-sm font-semibold text-rose-600 bg-rose-50 px-4 py-1.5 rounded-xl border border-rose-200 inline-block">
+            <p className="mb-3 text-xs font-semibold text-rose-600 bg-rose-50 px-3 py-1 rounded-lg border border-rose-200">
               {error}
             </p>
           )}
+
+          {/* KHUNG NHẬP CÂU HỎI THỐNG NHẤT 100% CHỐNG TRÀN VIỀN THEO CHUẨN MỤC II.2 */}
+          <form onSubmit={handleManualSubmit} className="w-full max-w-md">
+            <div className="flex items-center w-full rounded-xl border border-slate-300 bg-white p-1.5 shadow-sm focus-within:border-red-700 focus-within:ring-2 focus-within:ring-red-700/20">
+              <input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Hoặc gõ câu hỏi vào đây..."
+                className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm sm:text-base outline-none text-slate-900 placeholder:text-slate-400"
+              />
+              <button
+                type="submit"
+                className="shrink-0 rounded-lg bg-red-700 hover:bg-red-800 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white flex items-center gap-1 shadow-sm transition-all active:scale-95"
+              >
+                <span>Gửi</span>
+                <Send className="w-3.5 h-3.5 shrink-0" />
+              </button>
+            </div>
+          </form>
+
         </div>
 
-        {/* Ô nhập liệu văn bản trực tiếp cho bà con muốn gõ phím */}
-        <form onSubmit={handleManualSubmit} className="max-w-2xl mx-auto flex items-center gap-2">
-          <input
-            type="text"
-            value={textInput}
-            onChange={(e) => setTextInput(e.target.value)}
-            placeholder="Hoặc bà con có thể gõ câu hỏi vào đây rồi bấm nút Gửi..."
-            className="flex-1 px-4 py-3 sm:py-3.5 text-base sm:text-lg rounded-2xl border-2 border-slate-300 focus:border-[#991B1B] focus:ring-2 focus:ring-red-200 outline-none transition-all shadow-inner bg-slate-50"
-          />
-          <button
-            type="submit"
-            className="h-full px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-[#991B1B] hover:bg-red-800 text-white font-extrabold text-base flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 flex-shrink-0"
-          >
-            <span>Gửi</span>
-            <Send className="w-5 h-5 flex-shrink-0" />
-          </button>
-        </form>
       </div>
-    </div>
+    </section>
   );
 }

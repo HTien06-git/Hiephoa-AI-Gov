@@ -6,6 +6,35 @@ Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và c�
 
 ---
 
+## [2026-10-24 17:05] - Đại Tu Giao Diện Mobile/Web (K-Tech + Hành Chính Công) & Đồng Bộ Thời Gian Thực Cho Cán Bộ Một Cửa (Version 5.0 - Production Pilot Ready)
+- **Loại tác vụ**: Đại tu toàn diện UI/UX Mobile-First, khắc phục triệt để 04 lỗi vỡ giao diện trên điện thoại, tái cấu trúc bố cục K-Tech & Hành chính công, triển khai phân hệ hàng đợi hồ sơ trực tuyến thời gian thực (3s Polling) kết nối người dân với Cán bộ Một cửa & Quản trị viên (Major Version 5.0 Overhaul).
+- **Tác vụ thực hiện**:
+  1. **Khắc phục triệt để 04 lỗi vỡ giao diện trên điện thoại di động (từ ảnh chụp thực tế)**:
+     - *Lỗi 1 (Ảnh 1)*: Thu gọn thẻ Lời chào thành **Compact Voice Greeting Bar** (cao 80px–100px), giới hạn kích thước avatar Chuyên viên AI `w-10 h-10` trong container cố định `shrink-0`, loại bỏ hoàn toàn việc SVG/ảnh phình to chiếm nửa màn hình.
+     - *Lỗi 2 (Ảnh 2)*: Đặt khung nhập câu hỏi vào một hộp thống nhất `<div className="flex items-center w-full rounded-xl border border-slate-300 bg-white p-1.5 shadow-sm focus-within:border-red-700">` với `<input className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm sm:text-base outline-none" />` và nút `<button className="shrink-0 rounded-lg bg-red-700 px-4 py-2.5 font-bold text-white">Gửi</button>`, 100% không tràn viền trên mọi điện thoại.
+     - *Lỗi 3 (Ảnh 3 & 4)*: Xóa bỏ `whitespace-nowrap` trên các câu văn dài; trình bày Cơ quan, Lệ phí và Thời hạn giải quyết trong **Khung thông tin 3 dòng tự động xuống dòng (`whitespace-normal break-words`)**; hộp câu hỏi mẫu vàng kem có `min-w-0 flex-1 break-words` tự xuống dòng không đâm thủng viền.
+     - *Lỗi 4 (Ảnh 1)*: Thu gọn Header trên điện thoại thành **Sticky Navbar cố định (60px–68px)** gồm Logo Trống Đồng Vàng + Tên thương hiệu `"HIỆP HÒA AI-GOV"` và cụm switch `Nhân Dân` | `Một Cửa`; dải **Compact Accessibility Bar** ngay dưới Topbar với 3 nút `A` | `A+` | `A++` bằng nhau, nút `Loa: BẬT` và `1900 9095`.
+  2. **Tái thiết kế giao diện theo phong cách Doanh nghiệp công nghệ K-Tech & Bản sắc Hành chính công**:
+     - *Khu vực 1*: Hero Section Voice-First Chạm & Nói (bố cục 2 cột desktop, 1 cột mobile, nút Micro viền hoa văn Trống Đồng Đông Sơn, chip gợi ý nhanh, thanh gõ câu hỏi không tràn viền).
+     - *Khu vực 2*: Dải 04 Chỉ số Hiệu quả Cải cách Hành chính (`KTechKpiStrip`: 5-10 Giây, 08+ Thủ Tục, 04 Định Dạng, 100% Bảo Mật).
+     - *Khu vực 3*: Hệ sinh thái 03 bước tự động hóa hồ sơ (`KTechEcosystemSteps`: Hỏi đáp giọng nói & luật -> Điền đơn tự động Word/CCCD -> Kiểm tra sơ bộ & Nhận mã QR).
+     - *Khu vực 4*: Danh mục Dịch vụ công có **Thanh Tab Lọc Ngang (`Filter Pills`)** cuộn mượt trên điện thoại (`Tất cả (8)`, `Hộ tịch – Cư trú (4)`, `Đất đai – Xây dựng (1)`, `Chứng thực (1)`, `Chính sách – Bảo trợ (1)`, `Tư vấn Luật (1)`), lưới thẻ 2 cột với 3 nút hành động chuẩn mực (`Điền Đơn & Mã QR`, `Xem Hồ Sơ & Hỏi AI`, `Kiểm Tra Giấy Tờ`).
+     - *Khu vực 5*: Thanh công cụ nổi thông minh trên điện thoại (`FloatingBottomNav` gồm 4 nút: `Trang chủ`, `Hỏi AI (Mic)`, `Tra cứu Hồ sơ`, `Cán bộ Một cửa`).
+  3. **Hệ thống Đồng bộ Trực tuyến Thời gian thực cho Cán bộ Một cửa & Quản trị viên (Real-Time Pilot Deployment)**:
+     - Tạo module `realtimeSyncService.js` và `submissionController.js` lưu trữ an toàn tại `/tmp/hiephoa_realtime_db.json` (Vercel) và `backend/src/data/hiephoa_realtime_db.json` (Local).
+     - Khởi tạo sẵn **03 Hồ sơ Demo mẫu thực tế**: `HH-1021` (Đăng ký khai sinh), `HH-1022` (Đăng ký kết hôn), `HH-1023` (Xác nhận tình trạng hôn nhân độc thân).
+     - Người dân tạo đơn / mã QR lập tức sinh mã hồ sơ (`HH-1024`, `HH-1025`...) và đồng bộ lên Hàng đợi tiếp nhận.
+     - Màn hình Cán bộ Một cửa (`/can-bo-mot-cua`): Tự động cập nhật mỗi **3 giây (Polling 3s)**, hiện hồ sơ mới lên đầu kèm hiệu ứng nhấp nháy `MỚI VỪA GỬI`.
+     - Cán bộ xem và chỉnh sửa trực tiếp các trường tờ khai trên màn hình, bấm **"Lưu Cập Nhật Tờ Khai"** và **"Xuất File Word (.docx) Chuẩn Xã"**.
+     - Cán bộ chuyển trạng thái hồ sơ (`PROCESSING` -> `COMPLETED` -> `NEEDS_SUPPLEMENT`); màn hình điện thoại người dân tự động cập nhật sau 3 giây và AI phát âm thanh thông báo mời lên quầy ký tên!
+     - Nâng cấp Trang Quản trị Admin: Quản lý danh sách cán bộ (`canbo1`, `canbo2`, `canbo3`...), trạng thái Online/Offline, đổi mật khẩu, tạm khóa/mở khóa tài khoản; Quản trị thiết bị bảo mật khóa cứng 5 lần sai và mở khóa 0/5.
+  4. **Kiểm thử & Đóng gói**:
+     - `vite build`: Thành công 100% trong 7.97s, 0 lỗi.
+     - Backend API & Script verification: Thành công 100%.
+- **Báo cáo chi tiết**: Xem [2026-10-24_1705_redesign_mobile_ktech_realtime_officer_v5.md](./2026-10-24_1705_redesign_mobile_ktech_realtime_officer_v5.md)
+
+---
+
 ## [2026-10-24 00:46] - Giải Quyết Triệt Để Lỗi Nhiều Giọng Đọc (Kiến Trúc Singleton Audio Tuyệt Đối) & Tự Động Đọc Lời Chào (Version 4.3)
 - **Loại tác vụ**: Giải quyết dứt điểm hiện tượng nhiều giọng đọc cùng lúc bằng thẻ Audio Singleton duy nhất toàn ứng dụng, Nguyên tử hóa token phiên (Atomic Session Token), Tự động phát lời chào khi truy cập kèm bắt sự kiện Capture-Phase (Permanent Singleton Audio & Auto-Greeting V4.3)
 - **Tác vụ thực hiện**:

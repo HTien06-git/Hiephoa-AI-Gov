@@ -165,5 +165,108 @@ export const apiClient = {
         }
       };
     }
+  },
+
+  /**
+   * Tạo hồ sơ trực tuyến mới / Nộp mã QR cho Cán bộ Một cửa
+   */
+  async createSubmission(payload) {
+    try {
+      const res = await fetch(`${API_BASE}/submissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    } catch (err) {
+      console.warn('[apiClient] createSubmission error, using fallback:', err.message);
+      const fallbackCode = `HH-${Math.floor(1024 + Math.random() * 50)}`;
+      return {
+        success: true,
+        submission: {
+          submissionCode: fallbackCode,
+          procedureTitle: payload.formTitle || payload.procedureTitle || 'Tờ khai hành chính',
+          citizenName: payload.formData?.ho_ten || payload.formData?.ho_ten_nguoi_yeu_cau || 'Bà con xã Hiệp Hòa',
+          status: 'WAITING',
+          formData: payload.formData || {},
+          createdAt: new Date().toISOString()
+        }
+      };
+    }
+  },
+
+  /**
+   * Lấy danh sách hàng đợi hồ sơ trực tuyến (Live Queue Polling 3s)
+   */
+  async getLiveQueue() {
+    try {
+      const res = await fetch(`${API_BASE}/submissions/live`);
+      if (!res.ok) throw new Error('Queue error');
+      return await res.json();
+    } catch (err) {
+      return { success: false, submissions: [], stats: {}, activityFeed: [] };
+    }
+  },
+
+  /**
+   * Tra cứu chi tiết hồ sơ theo mã (HH-XXXX)
+   */
+  async getSubmission(code) {
+    try {
+      const res = await fetch(`${API_BASE}/submissions/${encodeURIComponent(code)}`);
+      if (!res.ok) throw new Error('Not found');
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
+   * Cán bộ cập nhật thông tin tờ khai hoặc đổi trạng thái hồ sơ
+   */
+  async updateSubmission(code, updates) {
+    try {
+      const res = await fetch(`${API_BASE}/submissions/${encodeURIComponent(code)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
+   * Reset hàng đợi về 03 hồ sơ mẫu
+   */
+  async resetDemoQueue() {
+    try {
+      const res = await fetch(`${API_BASE}/submissions/reset-demo`, {
+        method: 'POST'
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
+   * Admin cập nhật tài khoản cán bộ (đổi mật khẩu, khóa/mở khóa)
+   */
+  async updateOfficer(username, updates, token) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/officers/${encodeURIComponent(username)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(updates)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   }
 };

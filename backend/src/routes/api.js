@@ -38,8 +38,18 @@ const {
   handleResetAllDevices,
   handleCreateDemoLock,
   handleGetAllOfficers,
-  handleCreateOfficer
+  handleCreateOfficer,
+  handleUpdateOfficer
 } = require('../controllers/adminController');
+
+const {
+  handleCreateSubmission,
+  handleGetLiveQueue,
+  handleGetSubmission,
+  handleUpdateSubmission,
+  handleResetDemoQueue,
+  handleGetRealtimeStats
+} = require('../controllers/submissionController');
 
 // 0. Authentication & Device Security
 router.post('/auth/login', handleLogin);
@@ -55,6 +65,15 @@ router.post('/admin/devices/demo-lock', verifyToken, requireAdmin, handleCreateD
 // 0c. Admin Officer Management
 router.get('/admin/officers', verifyToken, requireAdmin, handleGetAllOfficers);
 router.post('/admin/officers', verifyToken, requireAdmin, handleCreateOfficer);
+router.put('/admin/officers/:username', verifyToken, requireAdmin, handleUpdateOfficer);
+
+// 0d. Real-Time Online Submissions & Queue Sync
+router.post('/submissions', handleCreateSubmission);
+router.get('/submissions/live', handleGetLiveQueue);
+router.get('/submissions/:code', handleGetSubmission);
+router.put('/submissions/:code', handleUpdateSubmission);
+router.post('/submissions/reset-demo', handleResetDemoQueue);
+router.get('/stats/realtime', handleGetRealtimeStats);
 
 // 1. RAG AI Chat & Voice
 router.post('/chat', handleChatQuery);

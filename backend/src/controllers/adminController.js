@@ -107,11 +107,36 @@ function handleCreateOfficer(req, res) {
   }
 }
 
+// Cập nhật tài khoản cán bộ (đổi mật khẩu, tạm khóa / mở khóa)
+function handleUpdateOfficer(req, res) {
+  try {
+    const { username } = req.params;
+    const updates = req.body || {};
+    const updated = securityService.updateOfficer(username, updates);
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        error: `Không tìm thấy tài khoản cán bộ "${username}"`
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `Cập nhật tài khoản cán bộ "${username}" thành công!`,
+      officer: updated,
+      data: updated
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+}
+
 module.exports = {
   handleGetAllDevices,
   handleResetDevice,
   handleResetAllDevices,
   handleCreateDemoLock,
   handleGetAllOfficers,
-  handleCreateOfficer
+  handleCreateOfficer,
+  handleUpdateOfficer
 };

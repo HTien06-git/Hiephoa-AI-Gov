@@ -27,13 +27,43 @@ const DEFAULT_USERS = {
     password: process.env.ADMIN_PASSWORD || 'HiepHoa@2026',
     role: 'ADMIN',
     name: 'Quản Trị Viên Hệ Thống (Admin)',
+    status: 'ONLINE',
+    isLocked: false,
+    processedCount: 156,
+    department: 'Ban Quản Trị Trung Tâm',
     createdAt: new Date().toISOString()
   },
   canbo1: {
     username: 'canbo1',
     password: process.env.OFFICER_PASSWORD || 'MotCua@2026',
     role: 'OFFICER',
-    name: 'Trần Văn Hòa (Tư pháp - Hộ tịch)',
+    name: 'Trần Văn Hòa (Cán bộ Tư pháp - Hộ tịch)',
+    status: 'ONLINE',
+    isLocked: false,
+    processedCount: 42,
+    department: 'Tư pháp - Hộ tịch',
+    createdAt: new Date().toISOString()
+  },
+  canbo2: {
+    username: 'canbo2',
+    password: process.env.OFFICER_PASSWORD || 'MotCua@2026',
+    role: 'OFFICER',
+    name: 'Lê Quốc Hùng (Cán bộ Địa chính - Xây dựng)',
+    status: 'ONLINE',
+    isLocked: false,
+    processedCount: 28,
+    department: 'Địa chính - Xây dựng - Đất đai',
+    createdAt: new Date().toISOString()
+  },
+  canbo3: {
+    username: 'canbo3',
+    password: process.env.OFFICER_PASSWORD || 'MotCua@2026',
+    role: 'OFFICER',
+    name: 'Nguyễn Thị Bích (Cán bộ Văn phòng - Chứng thực)',
+    status: 'OFFLINE',
+    isLocked: false,
+    processedCount: 35,
+    department: 'Văn phòng - Thống kê - Chứng thực',
     createdAt: new Date().toISOString()
   }
 };
@@ -214,7 +244,7 @@ class SecurityService {
   }
 
   // Tạo mới tài khoản Cán bộ / Admin
-  createOfficer(username, password, name, role = 'OFFICER') {
+  createOfficer(username, password, name, role = 'OFFICER', department = 'Bộ phận Một cửa') {
     if (!username || !password) {
       throw new Error('Tên tài khoản và mật khẩu không được để trống.');
     }
@@ -230,6 +260,10 @@ class SecurityService {
       password: password,
       name: name ? name.trim() : (role === 'ADMIN' ? 'Quản Trị Viên' : 'Cán Bộ Một Cửa'),
       role: role === 'ADMIN' ? 'ADMIN' : 'OFFICER',
+      department: department || 'Bộ phận Một cửa',
+      status: 'ONLINE',
+      isLocked: false,
+      processedCount: 0,
       createdAt: new Date().toISOString()
     };
 
@@ -241,7 +275,45 @@ class SecurityService {
       username: newOfficer.username,
       name: newOfficer.name,
       role: newOfficer.role,
+      department: newOfficer.department,
+      status: newOfficer.status,
+      isLocked: newOfficer.isLocked,
+      processedCount: newOfficer.processedCount,
       createdAt: newOfficer.createdAt
+    };
+  }
+
+  // Cập nhật tài khoản cán bộ (đổi mật khẩu, khóa/mở khóa, cập nhật tên)
+  updateOfficer(username, updates = {}) {
+    if (!username) return null;
+    const cleanUser = username.trim().toLowerCase();
+    const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
+    const officer = officers[cleanUser] || (DEFAULT_USERS[cleanUser] ? { ...DEFAULT_USERS[cleanUser] } : null);
+
+    if (!officer) return null;
+
+    if (updates.password) officer.password = updates.password;
+    if (updates.name) officer.name = updates.name.trim();
+    if (updates.role) officer.role = updates.role;
+    if (updates.department) officer.department = updates.department;
+    if (typeof updates.isLocked === 'boolean') officer.isLocked = updates.isLocked;
+    if (updates.status) officer.status = updates.status;
+    if (typeof updates.processedCount === 'number') officer.processedCount = updates.processedCount;
+    officer.updatedAt = new Date().toISOString();
+
+    officers[cleanUser] = officer;
+    globalThis.__HIEPHOA_SECURITY_STORE__.officers = officers;
+    this.saveStore();
+
+    return {
+      username: officer.username,
+      name: officer.name,
+      role: officer.role,
+      department: officer.department,
+      status: officer.status,
+      isLocked: officer.isLocked,
+      processedCount: officer.processedCount,
+      updatedAt: officer.updatedAt
     };
   }
 
@@ -252,6 +324,10 @@ class SecurityService {
       username: o.username,
       name: o.name,
       role: o.role,
+      department: o.department || 'Bộ phận Một cửa',
+      status: o.status || 'ONLINE',
+      isLocked: Boolean(o.isLocked),
+      processedCount: o.processedCount || 0,
       createdAt: o.createdAt || new Date().toISOString()
     }));
   }

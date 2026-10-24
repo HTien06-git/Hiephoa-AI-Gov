@@ -19,6 +19,11 @@ import { apiClient } from '../services/apiClient';
 import proceduresData from '../data/procedures_demo.json';
 import localInfoData from '../data/local_info.json';
 
+import KTechKpiStrip from '../components/common/KTechKpiStrip';
+import KTechEcosystemSteps from '../components/common/KTechEcosystemSteps';
+import FloatingBottomNav from '../components/layout/FloatingBottomNav';
+import CitizenLookupModal from '../components/qr-handoff/CitizenLookupModal';
+
 export default function CitizenHomePage({ onSwitchToOfficer }) {
   const { scale, setScale } = useFontScale();
   const { isSpeaking, isAudioEnabled, speak, stop, toggleAudio } = useSpeechSynthesis();
@@ -33,12 +38,28 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
   const [autoFormMode, setAutoFormMode] = useState('data_input');
   const [preCheckProc, setPreCheckProc] = useState(null);
   const [qrPayload, setQrPayload] = useState(null);
+  const [isLookupOpen, setIsLookupOpen] = useState(false);
 
   const handleOpenAutoForm = (proc, mode = 'data_input') => {
     setAutoFormMode(mode);
     setAutoFormProc(proc);
   };
   const [isQueryLoading, setIsQueryLoading] = useState(false);
+
+  // Cuộn mượt lên đầu trang
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Cuộn đến phần Micro
+  const handleActivateMic = () => {
+    const micSection = document.getElementById('voice-hero-section');
+    if (micSection) {
+      micSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 120, behavior: 'smooth' });
+    }
+  };
 
   // Handle Citizen Query (from Voice Mic or input box)
   const handleQuerySubmit = async (queryText) => {
@@ -64,7 +85,6 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
   // When a procedure is clicked from the list
   const handleSelectProcedure = (proc) => {
     setSelectedProcedure(proc);
-    // RagChatDrawer sẽ tự động đọc to và đầy đủ nội dung hướng dẫn + checklist khi mở
     setChatResult({
       answer: `### Hướng dẫn: ${proc.title}\n\n${proc.voice_answer}\n\n**Căn cứ pháp lý:** *${proc.legal_basis}*`,
       voice_text: proc.voice_answer,
@@ -79,12 +99,12 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-between overflow-x-hidden max-w-full">
+    <div className="min-h-screen bg-slate-100 flex flex-col justify-between overflow-x-hidden max-w-full pb-16 md:pb-0">
       <div>
-        {/* Header */}
+        {/* Header - Sticky 60px-68px */}
         <Header currentMode="citizen" setCurrentMode={(m) => m === 'officer' && onSwitchToOfficer()} />
 
-        {/* Fixed Accessibility Bar */}
+        {/* Compact Accessibility Bar - Sticky right below Header */}
         <AccessibilityBar
           fontScale={scale}
           setFontScale={setScale}
@@ -95,9 +115,9 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         />
 
         {/* Main Content Container */}
-        <main className="max-w-7xl mx-auto px-4 py-4 md:py-6 overflow-x-hidden">
+        <main className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-5 overflow-x-hidden">
           
-          {/* Auto Voice Onboarding Greeting */}
+          {/* Auto Voice Onboarding Greeting (Compact Bar) */}
           <AutoVoiceOnboarding
             speak={speak}
             stop={stop}
@@ -105,14 +125,22 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
             isAudioEnabled={isAudioEnabled}
           />
 
-          {/* Central Voice Mic Button (Chạm & Nói 2 Chiều) */}
-          <VoiceMicButton
-            onQuerySubmit={handleQuerySubmit}
-            isSpeaking={isSpeaking}
-            stopSpeaking={stop}
-          />
+          {/* Khu vực 1: Hero Section Voice-First Chạm & Nói */}
+          <div id="voice-hero-section">
+            <VoiceMicButton
+              onQuerySubmit={handleQuerySubmit}
+              isSpeaking={isSpeaking}
+              stopSpeaking={stop}
+            />
+          </div>
 
-          {/* 5 Categories & 8 Procedures Grid */}
+          {/* Khu vực 2: Dải 04 Chỉ Số Hiệu Quả Cải Cách Hành Chính (K-Tech Style KPI Counter Strip) */}
+          <KTechKpiStrip />
+
+          {/* Khu vực 3: Hệ Sinh Thái 03 Bước Tự Động Hóa Hồ Sơ (K-Tech Ecosystem Cards) */}
+          <KTechEcosystemSteps />
+
+          {/* Khu vực 4: Danh Mục Dịch Vụ Công Có Bộ Lọc Tab Ngang (K-Tech Filterable Portfolio Grid) */}
           <CategoryGrid
             categories={categories}
             procedures={procedures}
@@ -192,6 +220,22 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
           speakText={speak}
         />
       )}
+
+      {/* Tra cứu mã hồ sơ trực tuyến Modal */}
+      {isLookupOpen && (
+        <CitizenLookupModal
+          onClose={() => setIsLookupOpen(false)}
+          speakText={speak}
+        />
+      )}
+
+      {/* Floating Bottom Nav trên điện thoại (Mobile-only) */}
+      <FloatingBottomNav
+        onScrollToTop={handleScrollToTop}
+        onActivateMic={handleActivateMic}
+        onOpenLookup={() => setIsLookupOpen(true)}
+        onSwitchToOfficer={onSwitchToOfficer}
+      />
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-300 py-10 px-4 border-t-4 border-gov-gold mt-16">

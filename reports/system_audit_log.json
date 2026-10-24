@@ -1,5 +1,45 @@
 [
   {
+    "id": "audit_1792836354213_88wvg",
+    "timestamp": "2026-10-24T10:05:54.213Z",
+    "action": "SERVER_STARTUP",
+    "module": "CORE",
+    "details": {
+      "port": "5000",
+      "mode": "development"
+    },
+    "userType": "SYSTEM",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792778316533_a00m9",
+    "timestamp": "2026-10-23T17:58:36.533Z",
+    "action": "API_REQUEST",
+    "module": "download-docx",
+    "details": {
+      "method": "GET",
+      "path": "/api/download-docx/d50bwwaek5bmvl9x68k/HIEP_HOA_T_khai_ng_k_k_t_h_n_1792778314428.docx",
+      "statusCode": 200,
+      "durationMs": 3
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1792778316502_85nrv",
+    "timestamp": "2026-10-23T17:58:36.502Z",
+    "action": "API_REQUEST",
+    "module": "prepare-docx",
+    "details": {
+      "method": "POST",
+      "path": "/api/prepare-docx",
+      "statusCode": 200,
+      "durationMs": 246
+    },
+    "userType": "CITIZEN",
+    "status": "SUCCESS"
+  },
+  {
     "id": "audit_1792777611545_9o6lr",
     "timestamp": "2026-10-23T17:46:51.545Z",
     "action": "API_REQUEST",

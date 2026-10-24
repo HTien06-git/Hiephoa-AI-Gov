@@ -29,6 +29,14 @@ async function handlePreCheck(req, res) {
     }
 
     const result = await visionOcrService.preCheckDocuments(files, procedureId);
+
+    try {
+      const realtimeSyncService = require('../services/realtimeSyncService');
+      realtimeSyncService.recordPreCheckEvent(procedureId);
+    } catch (e) {
+      // Non-blocking
+    }
+
     return res.json(result);
   } catch (error) {
     console.error('[preCheckController] Error:', error);

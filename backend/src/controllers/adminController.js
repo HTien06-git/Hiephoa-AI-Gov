@@ -52,21 +52,6 @@ function handleResetAllDevices(req, res) {
   }
 }
 
-// Tạo thiết bị khóa mẫu để biểu diễn trước Ban Giám khảo
-function handleCreateDemoLock(req, res) {
-  try {
-    const demoDev = securityService.createDemoLockedDevice();
-    return res.json({
-      success: true,
-      message: `Đã tạo thành công thiết bị khóa mẫu ${demoDev.deviceId} (5/5) để biểu diễn mở khóa!`,
-      device: demoDev,
-      data: demoDev
-    });
-  } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
-  }
-}
-
 // Lấy danh sách toàn bộ cán bộ & admin
 function handleGetAllOfficers(req, res) {
   try {
@@ -135,7 +120,6 @@ module.exports = {
   handleGetAllDevices,
   handleResetDevice,
   handleResetAllDevices,
-  handleCreateDemoLock,
   handleGetAllOfficers,
   handleCreateOfficer,
   handleUpdateOfficer

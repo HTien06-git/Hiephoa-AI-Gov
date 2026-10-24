@@ -36,7 +36,6 @@ const {
   handleGetAllDevices,
   handleResetDevice,
   handleResetAllDevices,
-  handleCreateDemoLock,
   handleGetAllOfficers,
   handleCreateOfficer,
   handleUpdateOfficer
@@ -61,7 +60,6 @@ router.get('/auth/verify', handleVerify);
 router.get('/admin/devices', verifyToken, requireAdmin, handleGetAllDevices);
 router.post('/admin/devices/:deviceId/reset', verifyToken, requireAdmin, handleResetDevice);
 router.post('/admin/devices/reset-all', verifyToken, requireAdmin, handleResetAllDevices);
-router.post('/admin/devices/demo-lock', verifyToken, requireAdmin, handleCreateDemoLock);
 
 // 0c. Admin Officer Management
 router.get('/admin/officers', verifyToken, requireAdmin, handleGetAllOfficers);

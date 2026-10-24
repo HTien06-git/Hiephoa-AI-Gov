@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   X,
   Smartphone,
-  Info,
   Copy,
   Check
 } from 'lucide-react';
@@ -65,17 +64,6 @@ export default function OfficerLoginModal({ isOpen, onClose, onLoginSuccess }) {
     navigator.clipboard.writeText(deviceInfo.deviceId);
     setCopiedId(true);
     setTimeout(() => setCopiedId(false), 2000);
-  };
-
-  const handleFillDemo = (accType) => {
-    if (accType === 'officer') {
-      setUsername('canbo1');
-      setPassword('MotCua@2026');
-    } else if (accType === 'admin') {
-      setUsername('admin');
-      setPassword('HiepHoa@2026');
-    }
-    setErrorMessage('');
   };
 
   const handleSubmit = async (e) => {
@@ -352,48 +340,6 @@ export default function OfficerLoginModal({ isOpen, onClose, onLoginSuccess }) {
                   </>
                 )}
               </button>
-
-              {/* KHU VỰC GỢI Ý TÀI KHOẢN TEST CHO BAN GIÁM KHẢO */}
-              <div className="pt-3 border-t border-slate-200">
-                <div className="text-[11px] font-bold uppercase text-slate-500 mb-2 flex items-center gap-1.5">
-                  <Info className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Tài khoản Demo Hội thi (Click để điền nhanh):</span>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleFillDemo('officer')}
-                    className="p-2.5 rounded-xl border border-slate-200 hover:border-amber-400 bg-white hover:bg-amber-50/50 text-left transition-all"
-                  >
-                    <div className="text-xs font-black text-red-800 flex items-center gap-1">
-                      <span>Cán bộ Một cửa</span>
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      User: <strong className="text-slate-800">canbo1</strong>
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Quyền: Tiếp nhận & in hồ sơ
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleFillDemo('admin')}
-                    className="p-2.5 rounded-xl border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50/50 text-left transition-all"
-                  >
-                    <div className="text-xs font-black text-red-900 flex items-center gap-1">
-                      <span>Quản Trị Viên (Admin)</span>
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      User: <strong className="text-slate-800">admin</strong>
-                    </div>
-                    <div className="text-[10px] text-slate-400">
-                      Quyền: Mở khóa thiết bị 5 lần
-                    </div>
-                  </button>
-                </div>
-              </div>
 
             </form>
           )}

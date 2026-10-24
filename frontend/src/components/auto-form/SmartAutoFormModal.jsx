@@ -717,16 +717,6 @@ export default function SmartAutoFormModal({
                       <Camera className="w-3.5 h-3.5 text-amber-300" />
                       <span>{isOcrLoading ? 'Đang quét...' : 'Quét Thẻ CCCD'}</span>
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={handleFillDemoData}
-                      className="h-9 px-3 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-bold border border-amber-300 flex items-center gap-1.5 transition-all cursor-pointer"
-                      title="Điền nhanh dữ liệu mẫu để kiểm tra hiển thị đơn"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                      <span>Điền Thử Nghiệm</span>
-                    </button>
                   </div>
 
                   <button

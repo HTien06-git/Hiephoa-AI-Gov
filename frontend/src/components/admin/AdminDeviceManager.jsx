@@ -142,30 +142,6 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
     setTimeout(() => setActionMessage(null), 4000);
   };
 
-  // Tạo thiết bị khóa mẫu để biểu diễn tính năng trước Ban Giám khảo
-  const handleCreateDemoLock = async () => {
-    try {
-      const res = await fetch('/api/admin/devices/demo-lock', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setActionMessage({
-          type: 'success',
-          text: `🎯 Đã tạo thành công thiết bị giả lập bị khóa 5/5: [${data.device?.deviceId || 'HH-DEV-DEMO'}]`
-        });
-        fetchDevices();
-      }
-    } catch (err) {
-      setActionMessage({ type: 'error', text: 'Không thể tạo thiết bị khóa mẫu.' });
-    }
-    setTimeout(() => setActionMessage(null), 4000);
-  };
-
   // Tạo tài khoản cán bộ mới
   const handleCreateOfficerSubmit = async (e) => {
     e.preventDefault();
@@ -548,16 +524,6 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleCreateDemoLock}
-                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1 shadow-2xs"
-                title="Tạo 1 thiết bị khóa mẫu để biểu diễn tính năng mở khóa"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Tạo máy mẫu khóa 5/5</span>
-              </button>
-
               <button
                 type="button"
                 onClick={handleResetAll}

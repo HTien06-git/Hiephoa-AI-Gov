@@ -214,24 +214,6 @@ class SecurityService {
     return count;
   }
 
-  // Tạo thiết bị khóa mẫu để biểu diễn tính năng mở khóa trước Ban Giám khảo
-  createDemoLockedDevice() {
-    const demoId = `HH-DEV-DEMO${Math.floor(100 + Math.random() * 900)}`;
-    const devices = globalThis.__HIEPHOA_SECURITY_STORE__.devices;
-    devices[demoId] = {
-      deviceId: demoId,
-      deviceName: 'iPhone 15 Pro (Safari iOS - Mẫu Test)',
-      ipAddress: '113.161.45.88',
-      lastUsername: 'hacker_test',
-      failedCount: 5,
-      isLocked: true,
-      lockedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    this.saveStore();
-    return devices[demoId];
-  }
-
   // Lấy toàn bộ danh sách thiết bị
   getAllDevices() {
     const devices = globalThis.__HIEPHOA_SECURITY_STORE__.devices;

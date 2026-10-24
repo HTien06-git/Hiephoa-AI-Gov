@@ -47,11 +47,11 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   const [activeTab, setActiveTab] = useState('live_queue');
   const [liveQueue, setLiveQueue] = useState([]);
   const [realtimeStats, setRealtimeStats] = useState({
-    totalVisits: 1420,
-    aiVoiceConsultations: 896,
-    autoFormsCreated: 352,
-    preCheckDocs: 228,
-    completedSubmissions: 194
+    totalVisits: 0,
+    aiVoiceConsultations: 0,
+    autoFormsCreated: 0,
+    preCheckDocs: 0,
+    completedSubmissions: 0
   });
   const [activityFeed, setActivityFeed] = useState([]);
   const [isQueueLoading, setIsQueueLoading] = useState(false);
@@ -239,9 +239,9 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   };
 
   // Xuất Sổ theo dõi và danh sách hồ sơ trong ngày sang file Word (.docx) chuẩn Times New Roman
-  const handleExportDailyDocx = () => {
+  const handleExportDailyDocx = async () => {
     try {
-      docxExportService.exportDailySubmissionsWord(liveQueue, user);
+      await docxExportService.exportDailySubmissionsWord(liveQueue, user);
       setActionNotification('Đã tải về Sổ theo dõi hồ sơ trong ngày (.docx) phông Times New Roman thành công!');
     } catch (e) {
       alert('Không thể xuất file Word: ' + e.message);

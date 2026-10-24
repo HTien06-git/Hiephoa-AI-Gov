@@ -7,146 +7,26 @@ const DB_FILE = isVercel
   ? path.join('/tmp', 'hiephoa_realtime_db.json')
   : path.resolve(__dirname, '../data/hiephoa_realtime_db.json');
 
-// Khởi tạo 03 Hồ sơ Demo thực tế tại UBND xã Hiệp Hòa
-const INITIAL_DEMO_SUBMISSIONS = [
-  {
-    submissionCode: 'HH-1021',
-    procedureId: 'PROC_KHAI_SINH',
-    procedureTitle: 'Đăng ký khai sinh thông thường',
-    citizenName: 'NGUYỄN VĂN AN',
-    citizenPhone: '0912345678',
-    citizenCccd: '072085012345',
-    hamlet: 'Ấp Văn Hiệp',
-    formData: {
-      ho_ten_nguoi_yeu_cau: 'NGUYỄN VĂN AN',
-      so_cccd: '072085012345',
-      ngay_cap_cccd: '12/04/2022',
-      noi_thuong_tru: 'Ấp Văn Hiệp, xã Hiệp Hòa, tỉnh Tây Ninh',
-      quan_he_voi_tre: 'Cha đẻ',
-      ho_ten_tre: 'NGUYỄN MINH KHÔI',
-      gioi_tinh_tre: 'Nam',
-      ngay_sinh_tre: '10/10/2026',
-      noi_sinh_tre: 'Trung tâm Y tế huyện Đức Hòa',
-      dan_toc_tre: 'Kinh',
-      quoc_tich_tre: 'Việt Nam',
-      ho_ten_cha: 'NGUYỄN VĂN AN',
-      ho_ten_me: 'LÊ THỊ MAI',
-      nam_sinh_me: '1988',
-      so_cccd_me: '072188004567'
-    },
-    preCheckResult: {
-      status: 'PASS',
-      score: 95,
-      voice_summary: 'Ảnh chụp CCCD và Giấy chứng sinh rõ nét, hợp lệ.'
-    },
-    status: 'WAITING', // WAITING | PROCESSING | COMPLETED | NEEDS_SUPPLEMENT
-    assignedOfficer: 'Chờ tiếp nhận',
-    officerNote: '',
-    createdAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 12 * 60 * 1000).toISOString()
-  },
-  {
-    submissionCode: 'HH-1022',
-    procedureId: 'PROC_KET_HON',
-    procedureTitle: 'Đăng ký kết hôn',
-    citizenName: 'TRẦN VĂN ĐỨC',
-    citizenPhone: '0933998877',
-    citizenCccd: '072093005678',
-    hamlet: 'Ấp Hòa Hiệp',
-    formData: {
-      ho_ten_nam: 'TRẦN VĂN ĐỨC',
-      ngay_sinh_nam: '12/03/1993',
-      so_cccd_nam: '072093005678',
-      noi_thuong_tru_nam: 'Ấp Văn Hiệp, xã Hiệp Hòa, tỉnh Tây Ninh',
-      ho_ten_nu: 'NGUYỄN THỊ HOA',
-      ngay_sinh_nu: '20/07/1996',
-      so_cccd_nu: '072196007890',
-      noi_thuong_tru_nu: 'Ấp Hòa Hiệp, xã Hiệp Hòa, tỉnh Tây Ninh',
-      lan_ket_hon_nam: 'Lần thứ nhất',
-      lan_ket_hon_nu: 'Lần thứ nhất'
-    },
-    preCheckResult: {
-      status: 'PASS',
-      score: 98,
-      voice_summary: 'Hồ sơ 2 bên nam nữ đầy đủ giấy tờ hợp lệ.'
-    },
-    status: 'PROCESSING',
-    assignedOfficer: 'Trần Văn Hòa (Tư pháp - Hộ tịch)',
-    officerNote: 'Cán bộ đang kiểm tra và in bản chính Giấy chứng nhận kết hôn.',
-    createdAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString()
-  },
-  {
-    submissionCode: 'HH-1023',
-    procedureId: 'PROC_TINH_TRANG_HON_NHAN',
-    procedureTitle: 'Xác nhận tình trạng hôn nhân (Độc thân)',
-    citizenName: 'LÊ HOÀNG NAM',
-    citizenPhone: '0977889900',
-    citizenCccd: '072096001234',
-    hamlet: 'Ấp Rừng Dầu',
-    formData: {
-      ho_ten: 'LÊ HOÀNG NAM',
-      gioi_tinh: 'Nam',
-      ngay_sinh: '15/06/1996',
-      dan_toc: 'Kinh',
-      quoc_tich: 'Việt Nam',
-      so_cccd: '072096001234',
-      noi_thuong_tru: 'Ấp Rừng Dầu, xã Hiệp Hòa, tỉnh Tây Ninh',
-      tinh_trang_hon_nhan: 'Chưa đăng ký kết hôn với ai bao giờ (Độc thân)',
-      muc_dich_su_dung: 'Để vay vốn phát triển kinh tế hộ gia đình',
-      so_luong_ban: '01'
-    },
-    preCheckResult: null,
-    status: 'NEEDS_SUPPLEMENT',
-    assignedOfficer: 'Nguyễn Thị Bích (Cán bộ Một cửa)',
-    officerNote: 'Bà con mang thêm CCCD của cha mẹ để đối chiếu thông tin cư trú cũ nhé.',
-    createdAt: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString()
-  }
-];
+// Khởi tạo hàng đợi hồ sơ thực tế tại UBND xã Hiệp Hòa (Trạng thái sạch, không dữ liệu ảo)
+const INITIAL_DEMO_SUBMISSIONS = [];
 
 const INITIAL_STATS = {
-  totalVisits: 1420,
-  aiVoiceConsultations: 896,
-  autoFormsCreated: 352,
-  preCheckDocs: 228,
-  completedSubmissions: 194
+  totalVisits: 0,
+  aiVoiceConsultations: 0,
+  autoFormsCreated: 0,
+  preCheckDocs: 0,
+  completedSubmissions: 0
 };
 
-const INITIAL_ACTIVITY = [
-  {
-    id: 'act-1',
-    text: 'Cán bộ Trần Văn Hòa đang tiếp nhận hồ sơ kết hôn mã HH-1022',
-    time: '5 phút trước',
-    type: 'officer'
-  },
-  {
-    id: 'act-2',
-    text: 'Người dân tại Ấp Văn Hiệp vừa tạo mã QR Đăng ký khai sinh HH-1021',
-    time: '12 phút trước',
-    type: 'submission'
-  },
-  {
-    id: 'act-3',
-    text: 'Bà con hỏi AI về quy trình tặng cho quyền sử dụng đất nông nghiệp',
-    time: '18 phút trước',
-    type: 'chat'
-  },
-  {
-    id: 'act-4',
-    text: 'AI Vision hoàn tất kiểm tra sơ bộ ảnh CCCD & Tờ khai hợp lệ 98%',
-    time: '24 phút trước',
-    type: 'precheck'
-  }
-];
+const INITIAL_ACTIVITY = [];
 
 // Khởi tạo global memory store để giữ trạng thái trên Vercel Serverless
 if (!globalThis.__HIEPHOA_REALTIME_STORE__) {
   globalThis.__HIEPHOA_REALTIME_STORE__ = {
-    counter: 1024,
-    submissions: [...INITIAL_DEMO_SUBMISSIONS],
+    counter: 1000,
+    submissions: [],
     stats: { ...INITIAL_STATS },
-    activityFeed: [...INITIAL_ACTIVITY]
+    activityFeed: []
   };
 }
 

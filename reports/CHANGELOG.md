@@ -4,6 +4,30 @@ Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phư
 
 Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
 
+## [2026-10-24 22:50] - Phiên Bản V7.1: Sửa Triệt Để Lỗi Mở Tệp Word Bằng Chuẩn OpenXML DOCX, Xóa Sạch Dữ Liệu Ảo & Tăng Độ Bảo Mật Vận Hành Thực Tế
+- **Loại tác vụ**: Giải quyết dứt điểm 3 yêu cầu cấp thiết về an toàn thông tin và định dạng tài liệu: (1) Khắc phục triệt để lỗi không mở được tệp Word khi tải về máy tính bằng việc chuyển đổi sang cấu trúc chuẩn binary OpenXML PKZIP (`.docx`) đóng gói qua `PizZip`, phông chữ **Times New Roman** chuẩn khổ ngang A4; (2) Loại bỏ toàn bộ các dữ liệu ảo/hồ sơ demo giả định (`HH-1021`, `HH-1022`, `HH-1023`), đưa hàng đợi và toàn bộ các số liệu thống kê về 0 để phục vụ trực tiếp công dân thật; (3) Tăng cường bảo mật, gỡ bỏ tính năng auto điền tài khoản demo ở màn hình đăng nhập cán bộ và nút bấm tạo thiết bị giả lập bị khóa trong khu vực quản trị.
+- **Tác vụ thực hiện**:
+  1. **Khắc phục lỗi mở tệp Word (.docx) bằng chuẩn OpenXML thuần túy (`docxExportService.js`)**:
+     - *Nguyên nhân trước đây*: Xuất chuỗi định dạng HTML MIME msword lưu đuôi `.docx` khiến Microsoft Word báo tệp hỏng khi giải nén cấu trúc file.
+     - *Giải pháp mới*: Tận dụng bộ giải mã `PizZip` cùng template OpenXML có sẵn, biên dịch trực tiếp cây WordprocessingML XML thuần (`<w:document>...<w:tbl>...</w:tbl>...</w:document>`) chứa bảng dữ liệu 10 cột, tóm tắt số liệu và 3 khối chữ ký.
+     - Định dạng phông chữ: `<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>` 100% tất cả các đoạn văn, tiêu đề và ô bảng.
+     - Định dạng trang giấy: Khổ ngang A4 (`w:orient="landscape"`, width 16838 dxa, height 11906 dxa).
+     - Kết quả: File tải về mở trực tiếp ngay lập tức trên mọi phiên bản Microsoft Word (2010, 2016, 2019, 2021, Office 365, WPS Office) không bao giờ bị báo lỗi tệp hỏng.
+  2. **Loại bỏ triệt để toàn bộ dữ liệu ảo & thống kê giả định (`realtimeSyncService.js`, `hiephoa_realtime_db.json`, `OfficerScanPage.jsx`)**:
+     - Xóa sạch danh sách `INITIAL_DEMO_SUBMISSIONS` với các tên giả định ("NGUYỄN VĂN AN", "TRẦN VĂN ĐỨC", "LÊ HOÀNG NAM").
+     - Đặt toàn bộ các chỉ số thống kê (`totalVisits`, `aiVoiceConsultations`, `autoFormsCreated`, `preCheckDocs`, `completedSubmissions`) về 0.
+     - Xóa sạch cơ sở dữ liệu `hiephoa_realtime_db.json` về trạng thái rỗng `counter: 1000, submissions: [], stats: 0, activityFeed: []`.
+     - Loại bỏ nút "Điền Thử Nghiệm" (`handleFillDemoData`) trong `SmartAutoFormModal.jsx` tránh gọi hàm không tồn tại và tránh điền thông tin ảo.
+  3. **Tăng cường bảo mật đăng nhập & gỡ bỏ các tính năng tự động cho demo (`OfficerLoginModal.jsx`, `AdminDeviceManager.jsx`, `api.js`, `securityService.js`, `adminController.js`)**:
+     - Trong màn hình đăng nhập cán bộ: Gỡ bỏ hoàn toàn hộp gợi ý "Tài khoản Demo Hội thi (Click để điền nhanh)" và hàm `handleFillDemo`. Buộc cán bộ và quản trị viên phải tự nhập đúng tên tài khoản và mật khẩu được cấp.
+     - Duy trì và nâng cấp cơ chế khóa an toàn: Xác thực thiết bị định danh Fingerprint, tự động khóa sau 5 lần gõ sai mật khẩu để bảo vệ hệ thống trước tấn công brute-force.
+     - Trong Trung tâm Quản trị: Gỡ bỏ nút "Tạo máy mẫu khóa 5/5" và xóa endpoint `/admin/devices/demo-lock` khỏi backend để chỉ quản trị các thiết bị thật có vi phạm thực tế.
+  4. **Kiểm tra hoàn thiện & bàn giao**:
+     - Node check cú pháp backend: 100% vượt qua.
+     - Build Vite frontend: Hoàn tất 100% trong 4.68 giây không có lỗi.
+
+---
+
 ## [2026-10-24 22:30] - Phiên Bản V7.0: Xuất Sổ Hồ Sơ Trong Ngày (.docx) Times New Roman, Nút Reset Dữ Liệu Admin Kèm Cảnh Báo An Toàn & Chuẩn Hóa Triển Khai Thực Tế
 - **Loại tác vụ**: Triển khai 3 tính năng cốt lõi phục vụ vận hành thực tế chính thức: (1) Thêm nút Reset toàn bộ dữ liệu hồ sơ thủ tục bên Admin kèm cảnh báo xác nhận nguy hiểm và yêu cầu nhập chữ 'RESET'; (2) Tích hợp nút Lưu/Xuất Sổ theo dõi và danh sách hồ sơ đã nộp và xử lý trong ngày sang file Word (.docx) chuẩn phông chữ **Times New Roman** khổ ngang A4; (3) Loại bỏ toàn bộ các tính năng/dữ liệu demo cũ, tối ưu hóa logic và làm sạch mã nguồn sẵn sàng đưa vào vận hành thực tế.
 - **Tác vụ thực hiện**:

@@ -43,7 +43,10 @@ Quy tắc:
 - Tuyệt đối không thêm dấu ngoặc kép, không thêm lời chào, không giải thích gì khác.
 `;
 
-        const result = await model.generateContent([prompt, audioPart]);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Voice STT timeout 2500ms')), 2500)
+        );
+        const result = await Promise.race([model.generateContent([prompt, audioPart]), timeoutPromise]);
         const transcribedText = result.response.text().trim();
 
         return res.json({

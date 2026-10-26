@@ -38,7 +38,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
   const [qrPayload, setQrPayload] = useState(null);
   const [isLookupOpen, setIsLookupOpen] = useState(false);
   const [lookupInitialQuery, setLookupInitialQuery] = useState('');
-  const [, setIsQueryLoading] = useState(false);
+  const [isQueryLoading, setIsQueryLoading] = useState(false);
 
   const handleOpenAutoForm = (proc, mode = 'data_input') => {
     setAutoFormMode(mode);
@@ -148,6 +148,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
             stopSpeaking={stop}
             speak={speak}
             isAudioEnabled={isAudioEnabled}
+            isQueryLoading={isQueryLoading}
           />
 
           {/* KHU VỰC 2: DANH MỤC 08 THỦ TỤC HÀNH CHÍNH (Sạch sẽ, 2 nút chuẩn mực) */}
@@ -253,6 +254,21 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         }}
         speakText={speak}
       />
+
+      {/* Loading Modal phản hồi tức thì khi người dân đặt câu hỏi */}
+      {isQueryLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs p-4 animate-fade-in pointer-events-auto">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border-2 border-amber-400 flex flex-col items-center text-center">
+            <div className="w-12 h-12 border-4 border-[#991B1B] border-t-amber-400 rounded-full animate-spin mb-3.5" />
+            <h3 className="text-base font-black text-slate-900 mb-1">
+              Chuyên viên AI đang tra cứu...
+            </h3>
+            <p className="text-xs text-slate-600 font-medium leading-relaxed">
+              Hệ thống đang đối chiếu dữ liệu UBND xã Hiệp Hòa &amp; Thư Viện Pháp Luật
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ======================================================== */}
       {/* THANH NÚT CHỨC NĂNG NHANH CỐ ĐỊNH PHÍA DƯỚI MÀN HÌNH     */}

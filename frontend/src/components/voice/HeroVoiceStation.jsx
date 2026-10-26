@@ -9,7 +9,8 @@ export default function HeroVoiceStation({
   isSpeaking,
   stopSpeaking,
   speak,
-  isAudioEnabled
+  isAudioEnabled,
+  isQueryLoading = false
 }) {
   const [textInput, setTextInput] = useState('');
   const lastSubmittedQueryRef = useRef('');
@@ -68,8 +69,9 @@ export default function HeroVoiceStation({
   });
 
   const handleManualSubmit = (e) => {
-    e.preventDefault();
-    const query = textInput.trim();
+    e?.preventDefault?.();
+    const speechText = (transcript || interimTranscript) ? deduplicateSpeechText(transcript || interimTranscript).trim() : '';
+    const query = textInput.trim() || speechText;
     if (query) {
       lastSubmittedQueryRef.current = query;
       onQuerySubmit(query);
@@ -265,9 +267,38 @@ export default function HeroVoiceStation({
 
           {/* Hiển thị câu nói của bà con theo thời gian thực */}
           {(transcript || interimTranscript) && (
-            <div className="mb-3 px-3.5 py-2 bg-amber-50 rounded-xl border border-amber-300 text-slate-900 text-xs sm:text-sm font-bold w-full max-w-sm shadow-2xs animate-fade-in text-left">
-              <span className="text-amber-800 text-[10px] uppercase block font-black">Lời nói của bà con:</span>
-              "{deduplicateSpeechText(transcript || interimTranscript)}"
+            <div className="mb-3 p-3 bg-amber-50 rounded-xl border border-amber-300 text-slate-900 text-xs sm:text-sm font-bold w-full max-w-sm shadow-md animate-fade-in text-left">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-amber-800 text-[10.5px] uppercase font-black tracking-wider flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping inline-block" />
+                  Lời nói của bà con:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = deduplicateSpeechText(transcript || interimTranscript).trim();
+                    if (text) {
+                      lastSubmittedQueryRef.current = text;
+                      onQuerySubmit(text);
+                    }
+                  }}
+                  disabled={isQueryLoading}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#991B1B] hover:bg-red-800 disabled:bg-slate-400 text-white text-xs font-black shadow-xs active:scale-95 transition-all cursor-pointer"
+                >
+                  <span>🚀 Tra cứu ngay</span>
+                </button>
+              </div>
+              <p className="text-slate-900 font-bold italic line-clamp-3 bg-white/80 p-2 rounded-lg border border-amber-200">
+                "{deduplicateSpeechText(transcript || interimTranscript)}"
+              </p>
+            </div>
+          )}
+
+          {/* Huy hiệu hiển thị khi AI đang tra cứu */}
+          {isQueryLoading && (
+            <div className="mb-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 text-amber-900 font-black text-xs animate-pulse border border-amber-300 shadow-xs">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-600 animate-ping shrink-0" />
+              <span>Chuyên viên AI đang tra cứu câu trả lời...</span>
             </div>
           )}
 
@@ -285,13 +316,15 @@ export default function HeroVoiceStation({
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 placeholder="Hoặc bà con gõ câu hỏi vào đây..."
+                disabled={isQueryLoading}
                 className="min-w-0 flex-1 bg-transparent px-3 py-2 text-xs sm:text-sm outline-none text-slate-900 placeholder:text-slate-400"
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-lg bg-[#991B1B] hover:bg-red-800 px-3.5 sm:px-4 py-2 sm:py-2 text-xs font-bold text-white flex items-center gap-1 shadow-xs transition-all active:scale-95"
+                disabled={isQueryLoading}
+                className="shrink-0 rounded-lg bg-[#991B1B] hover:bg-red-800 disabled:bg-slate-400 px-3.5 sm:px-4 py-2 sm:py-2 text-xs font-bold text-white flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer"
               >
-                <span>Gửi</span>
+                <span>{isQueryLoading ? 'Đang gửi...' : 'Gửi'}</span>
                 <Send className="w-3.5 h-3.5 shrink-0" />
               </button>
             </div>

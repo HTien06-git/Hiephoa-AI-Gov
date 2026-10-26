@@ -1,5 +1,7 @@
 import { getSnapshotHeaders, saveClientSnapshot } from './persistentBackup';
 
+import proceduresData from '../data/procedures_demo.json';
+
 const API_BASE = '/api';
 
 export const apiClient = {
@@ -8,16 +10,47 @@ export const apiClient = {
    */
   async chatQuery(message, procedureId = null, categoryId = null, history = []) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
       const response = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getSnapshotHeaders() },
-        body: JSON.stringify({ message, procedureId, categoryId, history })
+        body: JSON.stringify({ message, procedureId, categoryId, history }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       if (!response.ok) throw new Error('API server error');
       return await response.json();
     } catch (err) {
-      console.warn('[apiClient] Lỗi kết nối backend /api/chat:', err.message);
-      // Fallback response
+      console.warn('[apiClient] Lỗi kết nối hoặc quá thời gian backend /api/chat (' + err.message + ') -> Sử dụng bộ tri thức chuẩn địa phương');
+      
+      const rawLower = (message || '').toLowerCase();
+      const matched = (proceduresData.procedures || []).find(p => {
+        return (p.keywords || []).some(k => rawLower.includes(k.toLowerCase())) ||
+               rawLower.includes(p.title.toLowerCase()) ||
+               (p.id && rawLower.includes(p.id));
+      });
+
+      if (matched) {
+        return {
+          success: true,
+          data: {
+            answer: `### Hướng dẫn thực hiện: ${matched.title}\n\n${matched.voice_answer}\n\n**Căn cứ pháp lý:** *${matched.legal_basis}*`,
+            voice_text: matched.voice_answer,
+            checklist: matched.checklist,
+            matchedProcedure: matched,
+            legal_basis: matched.legal_basis,
+            intentType: 'PROCEDURE_GUIDE',
+            sources: [
+              { title: "Thư Viện Pháp Luật", url: "https://thuvienphapluat.vn/" },
+              { title: "Cổng DVC Quốc Gia", url: matched.dvc_url || "https://dichvucong.gov.vn/" }
+            ]
+          }
+        };
+      }
+
+      // Fallback response chung
       return {
         success: true,
         data: {

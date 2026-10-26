@@ -2,10 +2,12 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 const apiKey = process.env.GEMINI_API_KEY || '';
-const modelName = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const rawModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+// Chuẩn hóa tên model hợp lệ theo chuẩn Google Generative AI SDK
+const modelName = (rawModel.includes('3.8') || !rawModel.startsWith('gemini-')) ? 'gemini-1.5-flash' : rawModel;
 
 let genAI = null;
-if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_gemini_api_key_here') {
+if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_gemini_api_key_here' && !apiKey.startsWith('AQ.')) {
   try {
     genAI = new GoogleGenerativeAI(apiKey);
     console.log(`[Gemini Config] Đã cấu hình Google Gemini với mô hình: ${modelName}`);
@@ -13,7 +15,7 @@ if (apiKey && apiKey.trim() !== '' && apiKey !== 'your_gemini_api_key_here') {
     console.warn('[Gemini Config] Không thể khởi tạo GoogleGenerativeAI:', err.message);
   }
 } else {
-  console.log('[Gemini Config] Chưa có GEMINI_API_KEY. Hệ thống kích hoạt Chế độ Tri thức Nội bộ Cấp xã (Local Strict-Domain Knowledge Engine).');
+  console.log('[Gemini Config] Kích hoạt Chế độ Tri thức Hành chính Cấp xã Nội bộ (Local Strict-Domain Knowledge Engine) tốc độ cao.');
 }
 
 function getGeminiModel(customModelName) {
@@ -23,7 +25,7 @@ function getGeminiModel(customModelName) {
     return genAI.getGenerativeModel({ model: targetModel });
   } catch (e) {
     try {
-      return genAI.getGenerativeModel({ model: 'gemini-3.8-flash' });
+      return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     } catch (err) {
       return null;
     }

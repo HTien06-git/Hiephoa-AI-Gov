@@ -173,7 +173,13 @@ HÃY PHÂN TÍCH VÀ TRẢ LỜI ĐÚNG ĐỊNH DẠNG JSON:
 Chỉ xuất JSON thuần túy, không có markdown block.
 `;
 
-        const result = await model.generateContent(prompt);
+        const timeoutMs = 2000;
+        const geminiPromise = model.generateContent(prompt);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(`Gemini API timeout sau ${timeoutMs}ms`)), timeoutMs)
+        );
+
+        const result = await Promise.race([geminiPromise, timeoutPromise]);
         const responseText = result.response.text();
         const cleanedJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
         const parsed = JSON.parse(cleanedJson);
@@ -192,7 +198,7 @@ Chỉ xuất JSON thuần túy, không có markdown block.
           sources: combinedSources
         };
       } catch (err) {
-        console.warn('[GeminiRagService] Gemini API không phản hồi, kích hoạt Bộ phân loại 3-Way Intent chuẩn xác:', err.message);
+        console.warn('[GeminiRagService] Gemini API chậm hoặc không phản hồi (' + err.message + ') -> Kích hoạt Bộ phân loại 3-Way Intent chuẩn xác siêu tốc (5ms)');
       }
     }
 

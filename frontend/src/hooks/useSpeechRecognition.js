@@ -70,6 +70,7 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const silenceTimerRef = useRef(null);
+  const latestTextRef = useRef('');
 
   // Lưu onResult vào Ref để không bị re-trigger useEffect khi component cha re-render
   const onResultRef = useRef(onResult);
@@ -96,7 +97,7 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
     try {
       const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognitionAPI();
-      recognition.continuous = false; // Tự dừng khi người dân nói xong dứt câu, triệt tiêu 100% lỗi lặp từ của Android Chrome
+      recognition.continuous = false; // Tự dừng khi người dân nói xong dứt câu
       recognition.interimResults = true;
       recognition.lang = lang;
 
@@ -109,7 +110,7 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
         let final = '';
         let interim = '';
 
-        // Đọc danh sách kết quả và thay thế chuỗi lũy tiến (progressive hypothesis), tuyệt đối không nối chuỗi mù quáng
+        // Đọc danh sách kết quả và thay thế chuỗi lũy tiến
         for (let i = 0; i < event.results.length; i++) {
           const item = event.results[i];
           if (!item || !item[0]) continue;
@@ -137,6 +138,11 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
 
         const cleanFinal = deduplicateSpeechText(final);
         const cleanInterim = deduplicateSpeechText(interim);
+        const currentRecognized = cleanFinal || cleanInterim;
+
+        if (currentRecognized) {
+          latestTextRef.current = currentRecognized;
+        }
 
         if (cleanInterim) {
           setInterimTranscript(cleanInterim);
@@ -145,21 +151,23 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
         if (cleanFinal) {
           setTranscript(cleanFinal);
           setInterimTranscript('');
+        }
 
-          // Sau 1s im lặng thì tự động dừng và gửi câu hỏi
+        // Tự động phát hiện khoảng lặng 1.3s khi người dân ngừng nói để kết thúc và gửi câu hỏi
+        if (currentRecognized && currentRecognized.trim().length > 2) {
           if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
           silenceTimerRef.current = setTimeout(() => {
             try {
-              recognition.stop();
+              if (recognitionRef.current) recognitionRef.current.stop();
             } catch (e) {}
-          }, 1000);
+          }, 1300);
         }
       };
 
       recognition.onerror = async (e) => {
         console.warn('[useSpeechRecognition] Error:', e.error);
         if (e.error === 'no-speech') {
-          // Chưa nghe thấy tiếng nói, không báo lỗi nghiêm trọng
+          // Chưa nghe thấy tiếng nói
         } else if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
           setError('Bà con vui lòng bấm "Cho phép" sử dụng Micro trên trình duyệt để nói nhé.');
           setIsListening(false);
@@ -174,7 +182,14 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
 
       recognition.onend = () => {
         setIsListening(false);
-        setInterimTranscript('');
+        const textToSend = latestTextRef.current;
+        if (textToSend && textToSend.trim().length > 1 && mode === 'web_speech') {
+          setTranscript(textToSend.trim());
+          setInterimTranscript('');
+          if (onResultRef.current) {
+            onResultRef.current(textToSend.trim());
+          }
+        }
       };
 
       recognitionRef.current = recognition;
@@ -259,6 +274,7 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
       window.speechSynthesis.cancel();
     }
 
+    latestTextRef.current = '';
     setTranscript('');
     setInterimTranscript('');
     setError(null);
@@ -284,6 +300,7 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
   }, [mode]);
 
   const stopListening = useCallback(() => {
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     if (mode === 'media_recorder' || (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording')) {
       stopMediaRecorder();
     } else if (recognitionRef.current) {
@@ -292,7 +309,15 @@ export function useSpeechRecognition({ onResult, lang = 'vi-VN' } = {}) {
       } catch (e) {}
     }
     setIsListening(false);
-  }, [mode]);
+
+    // Kích hoạt gửi ngay lập tức nếu người dùng bấm dừng Micro
+    const textToSend = latestTextRef.current || transcript || interimTranscript;
+    if (textToSend && textToSend.trim().length > 1 && mode === 'web_speech') {
+      if (onResultRef.current) {
+        onResultRef.current(textToSend.trim());
+      }
+    }
+  }, [mode, transcript, interimTranscript]);
 
   const toggleListening = useCallback(() => {
     if (isListening) stopListening();

@@ -11,7 +11,8 @@ import CitizenQrModal from '../components/qr-handoff/CitizenQrModal';
 import CitizenLookupModal from '../components/qr-handoff/CitizenLookupModal';
 import QuickActionFloatingDock from '../components/layout/QuickActionFloatingDock';
 import CitizenDeviceNotificationToast from '../components/layout/CitizenDeviceNotificationToast';
-import TrongDongOrnament from '../components/common/TrongDongOrnament';
+import TrongDongMasterpiece from '../components/common/TrongDongMasterpiece';
+import DongSonBorder from '../components/common/DongSonBorder';
 
 import { useFontScale } from '../hooks/useFontScale';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
@@ -115,15 +116,17 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
       {/* ======================================================== */}
       {/* BIỂU TƯỢNG TRỐNG ĐỒNG TO MỜ MỜ KÈM HIỆU ỨNG ÁNH KIM LÀM NỀN */}
       {/* ======================================================== */}
+      {/* Nền Trống Đồng Masterpiece V7 - opacity cao hơn, rõ nét hơn */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center">
-        <div className="w-[850px] h-[850px] lg:w-[1050px] lg:h-[1050px] opacity-[0.035] text-amber-700 select-none">
-          <TrongDongOrnament size={1050} color="#D97706" spin={true} spinDuration={240} />
+        <div className="w-[850px] h-[850px] lg:w-[1050px] lg:h-[1050px]">
+          <TrongDongMasterpiece size={1050} color="#D97706" accentColor="#B45309" opacity={0.055} spin={true} spinDuration={240} />
         </div>
       </div>
 
       <div className="relative z-10">
-        {/* Header chuẩn Cổng Dịch vụ công Chính phủ với Trống Đồng Đông Sơn */}
+        {/* Header chuẩn Cổng Dịch vụ công Chính phủ với Trống Đồng Masterpiece V7 */}
         <Header currentMode="citizen" setCurrentMode={(m) => m === 'officer' && onSwitchToOfficer()} />
+        {/* Đường diềm Đông Sơn bên dưới footer phìến truy cập */}
 
         {/* Thanh Công Cụ Trợ Năng */}
         <AccessibilityBar
@@ -272,13 +275,16 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
       {/* FOOTER CHÍNH QUYỀN XÃ HIỆP HÒA (ĐỎ HOÀNG GIA - VÀNG ĐỒNG) */}
       {/* Không dùng màu đen, hoa văn Trống Đồng, chữ không bị nhảy dòng */}
       {/* ======================================================== */}
-      <footer className="bg-gradient-to-br from-[#690F12] via-[#851417] to-[#550A0C] text-amber-50/95 py-10 px-4 sm:px-6 border-t-2 border-amber-500/80 relative mt-16 overflow-hidden shadow-2xl z-10">
+      {/* ĐƯỜNG DIỀM ĐÔNG SƠN TRƯỚC FOOTER */}
+      <DongSonBorder />
+
+      <footer className="bg-gradient-to-br from-[#690F12] via-[#851417] to-[#550A0C] text-amber-50/95 py-10 px-4 sm:px-6 border-t-2 border-amber-500/80 relative mt-0 overflow-hidden shadow-2xl z-10">
         {/* Đường diềm Đông Sơn vàng kim */}
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-700 via-amber-300 to-amber-700" />
         
-        {/* Họa tiết Trống Đồng chìm góc Footer */}
-        <div className="absolute -right-16 -bottom-16 w-72 h-72 pointer-events-none opacity-[0.08] text-amber-300">
-          <TrongDongOrnament size={288} color="#FBBF24" />
+        {/* Họa tiết Trống Đồng Masterpiece V7 chìm góc Footer - rõ nét hơn */}
+        <div className="absolute -right-16 -bottom-16 w-72 h-72 pointer-events-none">
+          <TrongDongMasterpiece size={288} color="#FBBF24" accentColor="#F59E0B" opacity={0.15} />
         </div>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 relative z-10">

@@ -1,15 +1,18 @@
 const realtimeSyncService = require('../services/realtimeSyncService');
+const { buildClientSnapshot } = require('../utils/persistentStore');
 
 // POST /api/submissions: Người dân tạo hồ sơ / nộp mã QR
 function handleCreateSubmission(req, res) {
   try {
     const payload = req.body || {};
     const newSub = realtimeSyncService.createSubmission(payload);
+    const snapshot = buildClientSnapshot();
     return res.status(201).json({
       success: true,
       message: `Hồ sơ ${newSub.submissionCode} đã được tạo và gửi trực tuyến tới Bộ phận Một cửa xã Hiệp Hòa!`,
       submission: newSub,
-      data: newSub
+      data: newSub,
+      clientSnapshot: snapshot
     });
   } catch (err) {
     console.error('[submissionController] createSubmission error:', err);
@@ -87,11 +90,13 @@ function handleUpdateSubmission(req, res) {
         error: `Không tìm thấy hồ sơ có mã ${code} để cập nhật`
       });
     }
+    const snapshot = buildClientSnapshot();
     return res.json({
       success: true,
       message: `Cập nhật hồ sơ ${code} thành công!`,
       submission: updated,
-      data: updated
+      data: updated,
+      clientSnapshot: snapshot
     });
   } catch (err) {
     console.error('[submissionController] updateSubmission error:', err);
@@ -103,11 +108,13 @@ function handleUpdateSubmission(req, res) {
 function handleResetAllSubmissions(req, res) {
   try {
     const list = realtimeSyncService.resetAllSubmissions();
+    const snapshot = buildClientSnapshot();
     return res.json({
       success: true,
       message: 'Đã xóa và làm sạch toàn bộ hồ sơ đã nộp trong hệ thống thành công!',
       submissions: list,
-      data: list
+      data: list,
+      clientSnapshot: snapshot
     });
   } catch (err) {
     console.error('[submissionController] resetAll error:', err);

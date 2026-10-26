@@ -17,6 +17,7 @@ import {
   HelpCircle,
   FileSignature
 } from 'lucide-react';
+import TrongDongMasterpiece from '../common/TrongDongMasterpiece';
 
 // Map icon chuyên nghiệp cho từng thủ tục cụ thể
 const PROCEDURE_ICONS = {
@@ -116,9 +117,14 @@ export default function CategoryGrid({
           return (
             <div
               key={proc.id}
-              className="bg-white rounded-2xl border border-stone-200/90 hover:border-amber-500/80 shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between group"
+              className="bg-white rounded-2xl border border-stone-200/90 hover:border-amber-500 hover:ring-1 hover:ring-amber-400/40 shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between group relative overflow-hidden"
             >
-              <div className="space-y-3.5">
+              {/* Huy hiệu góc hình quạt Trống Đồng Đông Sơn (Vị trí 4 Hạng mục 6) */}
+              <div className="absolute -top-10 -right-10 w-28 h-28 pointer-events-none opacity-[0.25] group-hover:opacity-[0.40] transition-opacity">
+                <TrongDongMasterpiece size={112} color="#D97706" accentColor="#B45309" opacity={1} />
+              </div>
+
+              <div className="space-y-3.5 relative z-10">
                 {/* 1. Phần đầu thẻ: Icon trong huy hiệu Đỏ Son - Vàng Kim + Tên thủ tục + Nhãn trạng thái */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">

@@ -275,19 +275,19 @@ export const docxExportService = {
           <w:tcPr><w:tcW w:w="5500" w:type="dxa"/></w:tcPr>
           <w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>NGƯỜI LẬP BIỂU</w:t></w:r></w:p>
           <w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:i/><w:sz w:val="20"/></w:rPr><w:t>(Ký và ghi rõ họ tên)</w:t></w:r></w:p>
-          <w:p><w:pPr><w:spacing w:before="900"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>${escapeXml(officerName)}</w:t></w:r></w:p>
+          <w:p><w:pPr><w:spacing w:before="1800"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>${escapeXml(officerName)}</w:t></w:r></w:p>
         </w:tc>
         <w:tc>
           <w:tcPr><w:tcW w:w="5500" w:type="dxa"/></w:tcPr>
           <w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>CÁN BỘ TIẾP NHẬN &amp; TRẢ KQ</w:t></w:r></w:p>
           <w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:i/><w:sz w:val="20"/></w:rPr><w:t>(Ký và ghi rõ họ tên)</w:t></w:r></w:p>
-          <w:p><w:pPr><w:spacing w:before="900"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>${escapeXml(officerName)}</w:t></w:r></w:p>
+          <w:p><w:pPr><w:spacing w:before="1800"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>${escapeXml(officerName)}</w:t></w:r></w:p>
         </w:tc>
         <w:tc>
           <w:tcPr><w:tcW w:w="5500" w:type="dxa"/></w:tcPr>
           <w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>XÁC NHẬN CỦA LÃNH ĐẠO UBND XÃ</w:t></w:r></w:p>
           <w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:i/><w:sz w:val="20"/></w:rPr><w:t>(Ký, đóng dấu xác nhận)</w:t></w:r></w:p>
-          <w:p><w:pPr><w:spacing w:before="900"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>ỦY BAN NHÂN DÂN XÃ HIỆP HÒA</w:t></w:r></w:p>
+          <w:p><w:pPr><w:spacing w:before="1800"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="22"/></w:rPr><w:t>ỦY BAN NHÂN DÂN XÃ HIỆP HÒA</w:t></w:r></w:p>
         </w:tc>
       </w:tr>
     </w:tbl>

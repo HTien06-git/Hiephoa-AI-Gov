@@ -29,11 +29,16 @@ import {
   Edit3,
   Send,
   MessageSquare,
-  AlertTriangle
+  AlertTriangle,
+  Volume2,
+  BarChart2,
+  Filter,
+  Calendar
 } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { docxExportService } from '../services/docxExportService';
 import { apiClient } from '../services/apiClient';
+import { saveClientSnapshot } from '../services/persistentBackup';
 import TrongDongWatermark from '../components/common/TrongDongWatermark';
 import DongSonBorder from '../components/common/DongSonBorder';
 import AdminDeviceManager from '../components/admin/AdminDeviceManager';
@@ -66,6 +71,20 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
   const [resetConfirmInput, setResetConfirmInput] = useState('');
   const [isResetting, setIsResetting] = useState(false);
+
+  // Excel Export states (Hạng mục 5)
+  const [showExcelPanel, setShowExcelPanel] = useState(false);
+  const [excelFilter, setExcelFilter] = useState({
+    range: 'today',
+    startDate: '',
+    endDate: '',
+    status: 'ALL',
+    procedureId: 'ALL'
+  });
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Gọi Loa state (Hạng mục 8.2)
+  const [callingOutCode, setCallingOutCode] = useState(null);
 
   // Polling hàng đợi thời gian thực mỗi 3 giây
   const fetchLiveQueue = async () => {
@@ -247,6 +266,82 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
       alert('Không thể xuất file Word: ' + e.message);
     }
     setTimeout(() => setActionNotification(''), 3500);
+  };
+
+  // Xuất báo cáo Excel (.xlsx) theo mốc thời gian (Hạng mục 5)
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      // Tính startDate/endDate từ bộ lọc nhanh
+      const now = new Date();
+      let startDate = excelFilter.startDate;
+      let endDate = excelFilter.endDate;
+
+      if (excelFilter.range === 'today') {
+        startDate = now.toISOString().split('T')[0];
+        endDate = startDate;
+      } else if (excelFilter.range === '7days') {
+        const d = new Date(now);
+        d.setDate(d.getDate() - 6);
+        startDate = d.toISOString().split('T')[0];
+        endDate = now.toISOString().split('T')[0];
+      } else if (excelFilter.range === 'month') {
+        startDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+        endDate = now.toISOString().split('T')[0];
+      } else if (excelFilter.range === 'quarter') {
+        const q = Math.floor(now.getMonth() / 3);
+        startDate = `${now.getFullYear()}-${String(q*3+1).padStart(2,'0')}-01`;
+        endDate = now.toISOString().split('T')[0];
+      } else if (excelFilter.range === 'year') {
+        startDate = `${now.getFullYear()}-01-01`;
+        endDate = now.toISOString().split('T')[0];
+      }
+
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (excelFilter.status !== 'ALL') params.append('status', excelFilter.status);
+      if (excelFilter.procedureId !== 'ALL') params.append('procedureId', excelFilter.procedureId);
+
+      const url = `/api/submissions/export-excel?${params.toString()}`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Bao_Cao_Ho_So_Hiep_Hoa_AI_Gov.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setActionNotification('Đã xuất file báo cáo Excel (.xlsx) thành công!');
+    } catch (e) {
+      alert('Lỗi xuất Excel: ' + e.message);
+    } finally {
+      setIsExporting(false);
+    }
+    setTimeout(() => setActionNotification(''), 3500);
+  };
+
+  // Gọi Loa mời công dân lên quầy (Hạng mục 8.2)
+  const handleAnnounceCallout = (sub) => {
+    setCallingOutCode(sub.submissionCode);
+    const msg = `Trân trọng kính mời công dân ${sub.citizenName}, mã hồ sơ ${sub.submissionCode}, đến Quầy tiếp nhận Một cửa UBND xã Hiệp Hòa để đối chiếu bản chính và ký xác nhận tờ khai!`;
+
+    // Phát bằng TTS server
+    const audio = new Audio(`/api/tts?text=${encodeURIComponent(msg)}`);
+    audio.playsInline = true;
+    audio.play().catch(() => {
+      // Fallback Web Speech
+      if ('speechSynthesis' in window) {
+        const utt = new SpeechSynthesisUtterance(msg);
+        utt.lang = 'vi-VN';
+        utt.rate = 0.9;
+        window.speechSynthesis.speak(utt);
+      }
+    });
+
+    setActionNotification(`📢 Đã phát loa mời: ${sub.citizenName} (${sub.submissionCode})`);
+    setTimeout(() => {
+      setCallingOutCode(null);
+      setActionNotification('');
+    }, 4000);
   };
 
   // Thực hiện Reset toàn bộ hồ sơ trong hệ thống (Chỉ dành cho Admin)
@@ -499,6 +594,20 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                         <span>Xuất Sổ Word (.docx)</span>
                       </button>
 
+                      {/* NÚT MỞ PANEL THỐNG KÊ & XUẤT EXCEL (Hạng mục 5) */}
+                      <button
+                        type="button"
+                        onClick={() => setShowExcelPanel(prev => !prev)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-black flex items-center gap-1 shadow-2xs active:scale-95 transition-all
+                          ${showExcelPanel
+                            ? 'bg-green-700 text-white'
+                            : 'bg-green-600 hover:bg-green-700 text-white'}`}
+                        title="Thống kê và xuất báo cáo hồ sơ theo mốc thời gian ra Excel"
+                      >
+                        <BarChart2 className="w-3.5 h-3.5 text-lime-300" />
+                        <span>📊 Xuất Excel</span>
+                      </button>
+
                       {/* NÚT RESET TOÀN BỘ HỒ SƠ (CHỈ HIỂN THỊ VỚI QUẢN TRỊ VIÊN) */}
                       {isAdmin && (
                         <button
@@ -538,6 +647,88 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                     />
                   </div>
                 </div>
+
+                {/* PANEL THỐNG KÊ & XUẤT EXCEL (Hạng mục 5) */}
+                {showExcelPanel && (
+                  <div className="bg-green-50 border border-green-300 rounded-2xl p-4 space-y-3 animate-fade-in">
+                    <div className="flex items-center gap-2 text-green-900 font-black text-sm">
+                      <BarChart2 className="w-4 h-4 text-green-700" />
+                      <span>Thống Kê & Xuất Báo Cáo Hồ Sơ Ra Excel</span>
+                    </div>
+
+                    {/* Mốc thời gian nhanh */}
+                    <div>
+                      <div className="text-[11px] font-bold text-green-800 mb-1.5 uppercase tracking-wide">Khoảng thời gian:</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          { key: 'today', label: 'Hôm nay' },
+                          { key: '7days', label: '7 ngày qua' },
+                          { key: 'month', label: 'Tháng này' },
+                          { key: 'quarter', label: 'Quý này' },
+                          { key: 'year', label: 'Năm nay' },
+                          { key: 'custom', label: 'Tùy chọn' }
+                        ].map(r => (
+                          <button
+                            key={r.key}
+                            onClick={() => setExcelFilter(f => ({ ...f, range: r.key }))}
+                            className={`px-3 py-1 rounded-lg text-[11px] font-bold border transition-all
+                              ${excelFilter.range === r.key
+                                ? 'bg-green-700 text-white border-green-700'
+                                : 'bg-white text-green-800 border-green-300 hover:bg-green-100'}`}
+                          >
+                            {r.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Khoảng thời gian tùy chọn */}
+                    {excelFilter.range === 'custom' && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1">
+                          <label className="text-[11px] font-bold text-green-800">Từ:</label>
+                          <input type="date" value={excelFilter.startDate}
+                            onChange={e => setExcelFilter(f => ({ ...f, startDate: e.target.value }))}
+                            className="text-xs border border-green-300 rounded-lg px-2 py-1 bg-white text-green-900" />
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <label className="text-[11px] font-bold text-green-800">Đến:</label>
+                          <input type="date" value={excelFilter.endDate}
+                            onChange={e => setExcelFilter(f => ({ ...f, endDate: e.target.value }))}
+                            className="text-xs border border-green-300 rounded-lg px-2 py-1 bg-white text-green-900" />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Bộ lọc Trạng thái */}
+                    <div className="flex flex-wrap gap-2">
+                      <div className="flex items-center gap-1">
+                        <label className="text-[11px] font-bold text-green-800">Trạng thái:</label>
+                        <select value={excelFilter.status}
+                          onChange={e => setExcelFilter(f => ({ ...f, status: e.target.value }))}
+                          className="text-xs border border-green-300 rounded-lg px-2 py-1 bg-white text-green-900"
+                        >
+                          <option value="ALL">Tất cả</option>
+                          <option value="WAITING">Chờ tiếp nhận</option>
+                          <option value="PROCESSING">Đang xử lý</option>
+                          <option value="COMPLETED">Đã hoàn tất</option>
+                          <option value="NEEDS_SUPPLEMENT">Cần bổ sung</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Nút xuất */}
+                    <button
+                      type="button"
+                      onClick={handleExportExcel}
+                      disabled={isExporting}
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-green-700 to-emerald-700 hover:from-green-800 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+                    >
+                      <Download className="w-4 h-4 text-lime-300" />
+                      {isExporting ? '⏳ Đang tạo file...' : '📊 Xuất File Excel (.xlsx) — Báo Cáo Hành Chính Chính Thức'}
+                    </button>
+                  </div>
+                )}
 
                 {/* Danh sách items hàng đợi */}
                 <div className="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
@@ -609,6 +800,26 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                           <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
                             <span>Ấp: {sub.hamlet || 'Hiệp Hòa'}</span>
                             {sub.citizenPhone && <span>• ĐT: {sub.citizenPhone}</span>}
+                          </div>
+
+                          {/* Nút Gọi Loa mời công dân lên quầy (Hạng mục 8.2) */}
+                          <div className="mt-2 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAnnounceCallout(sub);
+                              }}
+                              disabled={callingOutCode === sub.submissionCode}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all active:scale-95 shadow-xs
+                                ${callingOutCode === sub.submissionCode
+                                  ? 'bg-amber-100 text-amber-700 cursor-wait animate-pulse'
+                                  : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'}`}
+                              title="Phát loa mời công dân lên quầy tiếp nhận"
+                            >
+                              <Volume2 className="w-3.5 h-3.5 shrink-0" />
+                              <span>{callingOutCode === sub.submissionCode ? '📢 Đang phát...' : '📢 Gọi Loa'}</span>
+                            </button>
                           </div>
                         </div>
                       );

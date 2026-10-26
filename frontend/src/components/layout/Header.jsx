@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck, UserCheck, Users, Sparkles } from 'lucide-react';
-import TrongDongOrnament from '../common/TrongDongOrnament';
+import TrongDongMasterpiece from '../common/TrongDongMasterpiece';
+import DongSonBorder from '../common/DongSonBorder';
 
 export default function Header({ currentMode, setCurrentMode }) {
   return (
@@ -17,14 +18,14 @@ export default function Header({ currentMode, setCurrentMode }) {
           }}
         />
 
-        {/* Họa tiết Trống Đồng lớn (480px) bên phải Header xoay chậm tạo chiều sâu nghệ thuật */}
-        <div className="absolute -right-20 -top-32 w-[480px] h-[480px] pointer-events-none opacity-[0.16] text-amber-400">
-          <TrongDongOrnament size={480} color="#FBBF24" spin={true} spinDuration={150} />
+        {/* Họa tiết Trống Đồng Masterpiece V7 lớn (420px) bên phải Header - opacity 0.42 rõ nét */}
+        <div className="absolute -right-16 -top-28 w-[420px] h-[420px] pointer-events-none opacity-[0.42] text-amber-400">
+          <TrongDongMasterpiece size={420} color="#FBBF24" accentColor="#F59E0B" opacity={1} spin={true} spinDuration={60} glow={false} />
         </div>
 
-        {/* Họa tiết Trống Đồng vừa (280px) tỏa sáng chìm phía sau logo góc trái */}
-        <div className="absolute -left-12 -top-14 w-[280px] h-[280px] pointer-events-none opacity-[0.12] text-amber-200">
-          <TrongDongOrnament size={280} color="#FDE68A" spin={true} spinDuration={100} />
+        {/* Họa tiết Trống Đồng Masterpiece vừa (260px) góc trái */}
+        <div className="absolute -left-10 -top-12 w-[260px] h-[260px] pointer-events-none opacity-[0.28] text-amber-200">
+          <TrongDongMasterpiece size={260} color="#FDE68A" accentColor="#FBBF24" opacity={1} spin={true} spinDuration={90} />
         </div>
 
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 py-2 sm:py-3.5 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-3 sm:gap-4">
@@ -37,9 +38,9 @@ export default function Header({ currentMode, setCurrentMode }) {
               {/* Vòng hào quang phát sáng nhẹ phía sau logo */}
               <div className="absolute inset-0 rounded-full bg-amber-400/25 blur-md animate-pulse pointer-events-none" />
               
-              {/* Vòng Trống Đồng Đông Sơn vàng kim bao quanh logo xoay nhẹ nhàng */}
-              <div className="absolute -inset-1 opacity-70 pointer-events-none">
-                <TrongDongOrnament size={70} color="#F59E0B" spin={true} spinDuration={80} />
+              {/* Vòng Trống Đồng Masterpiece V7 bao quanh logo */}
+              <div className="absolute -inset-1 opacity-80 pointer-events-none">
+                <TrongDongMasterpiece size={72} color="#F59E0B" accentColor="#FBBF24" opacity={1} spin={true} spinDuration={80} />
               </div>
 
               {/* Khung tròn viền vàng chứa Logo Nền tảng chính thức */}
@@ -126,14 +127,8 @@ export default function Header({ currentMode, setCurrentMode }) {
         </div>
       </div>
 
-      {/* ĐƯỜNG DIỀM HOA VĂN ĐÔNG SƠN (6px SẮC VÀNG ĐỒNG CHUYỂN SẮC) */}
-      <div 
-        className="relative w-full h-[6px] bg-gradient-to-r from-amber-800 via-amber-300 to-amber-800 shadow-md" 
-        title="Đường diềm hoa văn Trống Đồng Đông Sơn"
-      >
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-amber-200/70" />
-        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-amber-900/60" />
-      </div>
+      {/* ĐƯỜNG DIỀM HOA VĂN ĐÔNG SƠN V7 (14px RÕ NÉT VÀNG ĐỒNG) */}
+      <DongSonBorder />
 
     </header>
   );

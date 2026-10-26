@@ -51,6 +51,8 @@ const {
   handleGetRealtimeStats
 } = require('../controllers/submissionController');
 
+const { handleExportExcel, handleRecordSatisfaction } = require('../controllers/excelExportController');
+
 // 0. Authentication & Device Security
 router.post('/auth/login', handleLogin);
 router.get('/auth/device-status', handleDeviceStatus);
@@ -69,10 +71,12 @@ router.put('/admin/officers/:username', verifyToken, requireAdmin, handleUpdateO
 // 0d. Real-Time Online Submissions & Queue Sync
 router.post('/submissions', handleCreateSubmission);
 router.get('/submissions/live', handleGetLiveQueue);
+router.get('/submissions/export-excel', handleExportExcel);
 router.get('/submissions/:code', handleGetSubmission);
 router.put('/submissions/:code', handleUpdateSubmission);
 router.post('/submissions/reset-all', handleResetAllSubmissions);
 router.post('/submissions/reset-demo', handleResetDemoQueue);
+router.post('/submissions/satisfaction', handleRecordSatisfaction);
 router.get('/stats/realtime', handleGetRealtimeStats);
 
 // 1. RAG AI Chat & Voice

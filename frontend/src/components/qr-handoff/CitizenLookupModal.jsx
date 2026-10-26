@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import SatisfactionRating from '../common/SatisfactionRating';
 
 // Chuyển đổi giọng nói tiếng Việt (số, chữ) thành mã số CCCD hoặc mã hồ sơ
 export function parseSpokenQuery(text) {
@@ -403,6 +404,9 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
                   <strong>Ghi chú từ cán bộ:</strong> {submission.officerNote}
                 </div>
               )}
+
+              {/* Khảo sát mức độ hài lòng của nhân dân (Hạng mục 8.3) */}
+              <SatisfactionRating submissionCode={submission.submissionCode} />
             </div>
           ) : !errorMsg ? (
             <div className="text-center py-8 text-slate-400 text-xs font-medium">

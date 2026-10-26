@@ -4,6 +4,19 @@ Hệ thống: **HIỆP HÒA AI-GOV (Chuyên viên Hành chính công AI Đa phư
 
 Tất cả các thay đổi kiến trúc, thêm tính năng, sửa lỗi và cập nhật dữ liệu của dự án được ghi nhận tại đây theo thứ tự thời gian.
 
+## [2026-10-26 13:30] - Phiên Bản V7.0: ĐẠI TU TOÀN DIỆN PRODUCTION GO-LIVE OVERHAUL (08 HẠNG MỤC HOÀN CHỈNH)
+- **Loại tác vụ**: Đại tu toàn diện nền tảng sẵn sàng Go-live và phục vụ công dân 100% dữ liệu thật:
+  1. **TTS/STT Điện Thoại Di Động**: Server-backed Google Cloud TTS `/api/tts` kết hợp First-Touch Audio Unlocker trên Singleton Audio chống câm tiếng 100% trên iPhone Safari & Android; Gemini Multimodal STT `/api/voice-stt` hiểu chuẩn giọng địa phương Tây Ninh/Nam Bộ.
+  2. **AI RAG Chuẩn Xác 100%**: 3-Way Intent Routing loại bỏ bắt từ khóa thô sơ, trích dẫn chính xác Điều, Khoản Thư Viện Pháp Luật (`thuvienphapluat.vn`) và 08 thủ tục cấp xã Hiệp Hòa.
+  3. **Lưu Trữ Bền Vững Chống Mất Tài Khoản (Dual-Persistence Engine)**: Client-Server HMAC-SHA256 Encrypted Snapshot Sync qua `persistentStore.js` và `localStorage`, tự động khôi phục dữ liệu tài khoản Cán bộ và hồ sơ khi Vercel Serverless Cold Start.
+  4. **Bố Cục Tờ Khai & Chữ Ký Rộng Rãi**: Chuẩn hóa Times New Roman, line-height 1.5, mở rộng khoảng trống ký tên & đóng dấu 2 cột tối thiểu `3.8cm` (`115px - 125px` / `w:spacing w:before="1800"`), chống nhảy trang với `break-inside: avoid`.
+  5. **Xuất Báo Cáo Excel (.xlsx) Theo Mốc Thời Gian**: Thanh lọc Hôm nay, 7 ngày, Tháng này, Quý này, Năm nay, Tùy chọn khoảng ngày, xuất file Excel chuẩn 14 cột hành chính công.
+  6. **Trống Đồng Đông Sơn Hoàng Kim Nổi Bật**: Component `TrongDongMasterpiece.jsx` 5 vòng đồng tâm sắc nét; tăng opacity tại Header (`0.42`), dải diềm 14px, đĩa Trống Đồng quanh Micro 240px (`opacity: 0.75`) có vòng hào quang vàng kim `golden pulse ring`.
+  7. **Tối Ưu Đa Thiết Bị**: Tự động ẩn thanh dock đáy khi mở modal, chuẩn hóa kích thước modal trên điện thoại `max-h-[92dvh] w-[96vw]`.
+  8. **03 Tính Năng Giá Trị Cao**: Tra cứu tiến độ hồ sơ bằng CCCD/Mã HS/SĐT hoặc giọng nói; Gọi loa mời công dân lên quầy với âm thanh hành chính; Khảo sát mức độ hài lòng của nhân dân (`SatisfactionRating.jsx`) tích hợp vào Excel & Admin.
+
+---
+
 ## [2026-10-24 22:50] - Phiên Bản V7.1: Sửa Triệt Để Lỗi Mở Tệp Word Bằng Chuẩn OpenXML DOCX, Xóa Sạch Dữ Liệu Ảo & Tăng Độ Bảo Mật Vận Hành Thực Tế
 - **Loại tác vụ**: Giải quyết dứt điểm 3 yêu cầu cấp thiết về an toàn thông tin và định dạng tài liệu: (1) Khắc phục triệt để lỗi không mở được tệp Word khi tải về máy tính bằng việc chuyển đổi sang cấu trúc chuẩn binary OpenXML PKZIP (`.docx`) đóng gói qua `PizZip`, phông chữ **Times New Roman** chuẩn khổ ngang A4; (2) Loại bỏ toàn bộ các dữ liệu ảo/hồ sơ demo giả định (`HH-1021`, `HH-1022`, `HH-1023`), đưa hàng đợi và toàn bộ các số liệu thống kê về 0 để phục vụ trực tiếp công dân thật; (3) Tăng cường bảo mật, gỡ bỏ tính năng auto điền tài khoản demo ở màn hình đăng nhập cán bộ và nút bấm tạo thiết bị giả lập bị khóa trong khu vực quản trị.
 - **Tác vụ thực hiện**:

@@ -149,30 +149,23 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
 
     setIsSubmittingOfficer(true);
     try {
-      const res = await fetch('/api/admin/officers', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username: newUsername,
-          password: newPassword,
-          name: newFullName,
-          department: newDepartment,
-          role: newRole
-        })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setActionMessage({ type: 'success', text: `✅ Đã tạo thành công tài khoản cán bộ "${newUsername}"!` });
+      const data = await apiClient.createOfficer({
+        username: newUsername,
+        password: newPassword,
+        name: newFullName,
+        department: newDepartment,
+        role: newRole
+      }, token);
+
+      if (data && data.success) {
+        setActionMessage({ type: 'success', text: `✅ Đã tạo thành công tài khoản cán bộ "${newUsername}" (Đã lưu bền vững Snapshot)!` });
         setShowCreateModal(false);
         setNewUsername('');
         setNewPassword('');
         setNewFullName('');
         fetchOfficers();
       } else {
-        setActionMessage({ type: 'error', text: data.error || 'Không thể tạo tài khoản.' });
+        setActionMessage({ type: 'error', text: data?.error || 'Không thể tạo tài khoản.' });
       }
     } catch (err) {
       setActionMessage({ type: 'error', text: 'Lỗi kết nối khi tạo tài khoản.' });

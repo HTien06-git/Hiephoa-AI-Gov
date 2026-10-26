@@ -1,4 +1,5 @@
 const securityService = require('../services/securityService');
+const { buildClientSnapshot } = require('../utils/persistentStore');
 
 // Lấy danh sách toàn bộ thiết bị
 function handleGetAllDevices(req, res) {
@@ -27,10 +28,12 @@ function handleResetDevice(req, res) {
       });
     }
 
+    const snapshot = buildClientSnapshot();
     return res.json({
       success: true,
       message: `Đã mở khóa và reset lượt đăng nhập cho thiết bị ${deviceId} về 0/5 thành công!`,
-      deviceId
+      deviceId,
+      clientSnapshot: snapshot
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
@@ -41,11 +44,13 @@ function handleResetDevice(req, res) {
 function handleResetAllDevices(req, res) {
   try {
     const count = securityService.resetAllDevices();
+    const snapshot = buildClientSnapshot();
     return res.json({
       success: true,
       message: `Đã mở khóa toàn bộ ${count} thiết bị về trạng thái hợp lệ (0/5)!`,
       resetCount: count,
-      unlockedCount: count
+      unlockedCount: count,
+      clientSnapshot: snapshot
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
@@ -78,11 +83,13 @@ function handleCreateOfficer(req, res) {
     }
 
     const created = securityService.createOfficer(username, password, name, role);
+    const snapshot = buildClientSnapshot();
     return res.json({
       success: true,
       message: `Tạo tài khoản cán bộ "${created.username}" thành công!`,
       officer: created,
-      data: created
+      data: created,
+      clientSnapshot: snapshot
     });
   } catch (err) {
     return res.status(400).json({
@@ -105,11 +112,13 @@ function handleUpdateOfficer(req, res) {
       });
     }
 
+    const snapshot = buildClientSnapshot();
     return res.json({
       success: true,
       message: `Cập nhật tài khoản cán bộ "${username}" thành công!`,
       officer: updated,
-      data: updated
+      data: updated,
+      clientSnapshot: snapshot
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });

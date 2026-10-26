@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Send, Sparkles, Volume2, VolumeX, MessageSquare, Check, CheckCircle2 } from 'lucide-react';
 import { useSpeechRecognition, deduplicateSpeechText } from '../../hooks/useSpeechRecognition';
 import TrongDongOrnament from '../common/TrongDongOrnament';
+import TrongDongMasterpiece from '../common/TrongDongMasterpiece';
 
 export default function HeroVoiceStation({
   onQuerySubmit,
@@ -208,29 +209,28 @@ export default function HeroVoiceStation({
         {/* ======================================================== */}
         <div className="lg:col-span-5 flex flex-col items-center justify-center text-center">
           
-          {/* Tâm điểm Nút Micro: Vòng Trống Đồng Vàng Kim 2 lớp */}
-          <div className="relative flex items-center justify-center w-44 h-44 sm:w-48 sm:h-48 my-1">
+          {/* Tâm điểm Nút Micro: Đĩa Trống Đồng Đông Sơn Hoàng Kim 240px (Hạng mục 6.2 Vị trí 3) */}
+          <div className="relative flex items-center justify-center w-56 h-56 sm:w-64 sm:h-64 my-1">
             
-            {/* Lớp hoa văn chim Lạc bên ngoài xoay nhẹ nhàng và phát sáng ánh vàng ấm */}
-            <div className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-700 ${
-              isListening
-                ? 'opacity-95 scale-105 drop-shadow-[0_0_18px_rgba(217,119,6,0.5)]'
-                : 'opacity-40 hover:opacity-60 drop-shadow-[0_0_12px_rgba(217,119,6,0.25)]'
-            }`}>
-              <TrongDongOrnament
-                size={185}
-                color={isListening ? "#DC2626" : "#D97706"}
-                spin={true}
-                spinDuration={isListening ? 30 : 90}
-              />
-            </div>
+            {/* Vòng hào quang vàng kim (golden pulse ring) khi đang nghe hoặc AI đang phát giọng nói */}
+            {(isListening || isSpeaking) && (
+              <div className="absolute inset-2 rounded-full border-2 border-amber-400/80 animate-ping pointer-events-none opacity-75" />
+            )}
 
-            {/* Lớp trong đứng yên sắc nét */}
-            <div className="absolute inset-2 flex items-center justify-center pointer-events-none opacity-50">
-              <TrongDongOrnament
-                size={145}
-                color="#B45309"
-                spin={false}
+            {/* Đĩa Trống Đồng Đông Sơn 240px sắc nét với opacity: 0.75 */}
+            <div className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-700 ${
+              isListening || isSpeaking
+                ? 'opacity-95 scale-105 drop-shadow-[0_0_24px_rgba(245,158,11,0.65)]'
+                : 'opacity-75 drop-shadow-[0_0_12px_rgba(217,119,6,0.35)]'
+            }`}>
+              <TrongDongMasterpiece
+                size={240}
+                color={isListening ? "#DC2626" : "#D97706"}
+                accentColor="#B45309"
+                opacity={1}
+                spin={true}
+                spinDuration={isListening ? 25 : 60}
+                glow={isListening || isSpeaking}
               />
             </div>
 

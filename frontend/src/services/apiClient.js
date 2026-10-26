@@ -1,3 +1,5 @@
+import { getSnapshotHeaders, saveClientSnapshot } from './persistentBackup';
+
 const API_BASE = '/api';
 
 export const apiClient = {
@@ -8,7 +10,7 @@ export const apiClient = {
     try {
       const response = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getSnapshotHeaders() },
         body: JSON.stringify({ message, procedureId, categoryId, history })
       });
       if (!response.ok) throw new Error('API server error');
@@ -267,11 +269,40 @@ export const apiClient = {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...getSnapshotHeaders(),
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify(updates)
       });
-      return await res.json();
+      const data = await res.json();
+      if (data && data.clientSnapshot) {
+        saveClientSnapshot(data.clientSnapshot);
+      }
+      return data;
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
+   * Admin tạo tài khoản cán bộ mới
+   */
+  async createOfficer(officerData, token) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/officers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getSnapshotHeaders(),
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(officerData)
+      });
+      const data = await res.json();
+      if (data && data.clientSnapshot) {
+        saveClientSnapshot(data.clientSnapshot);
+      }
+      return data;
     } catch (err) {
       return { success: false, error: err.message };
     }

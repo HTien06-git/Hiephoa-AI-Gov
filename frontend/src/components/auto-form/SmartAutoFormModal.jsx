@@ -245,29 +245,8 @@ export default function SmartAutoFormModal({
       }
     } catch (err) {
       console.error('OCR Error:', err);
-      const mockData = {
-        ho_ten: 'NGUYỄN VĂN AN',
-        ngay_sinh: '15/08/1992',
-        so_cccd: '072092008989',
-        noi_thuong_tru: 'Ấp Văn Hiệp, xã Hiệp Hòa, tỉnh Tây Ninh',
-        ngay_cap: '20/12/2021'
-      };
-      const mapped = { ...formData };
-      if (formId === 'FORM_KHAI_SINH') {
-        mapped.ho_ten_nguoi_yeu_cau = mockData.ho_ten;
-        mapped.ngay_sinh_nguoi_yeu_cau = mockData.ngay_sinh;
-        mapped.so_cccd = mockData.so_cccd;
-        mapped.noi_thuong_tru = mockData.noi_thuong_tru;
-        mapped.ho_ten_cha = mockData.ho_ten;
-      } else {
-        mapped.ho_ten = mockData.ho_ten;
-        mapped.ngay_sinh = mockData.ngay_sinh;
-        mapped.so_cccd = mockData.so_cccd;
-        mapped.noi_thuong_tru = mockData.noi_thuong_tru;
-      }
-      setFormData(mapped);
-      setOcrSuccessMsg('Đã trích xuất thông tin mẫu từ thẻ Căn cước công dân!');
-      if (speakText) speakText('Đã nạp thông tin Căn cước công dân vào mẫu đơn.');
+      setNotification('Không thể đọc rõ thông tin thẻ CCCD từ hình ảnh này. Bà con vui lòng chụp lại rõ nét hơn hoặc điền trực tiếp vào biểu mẫu.');
+      if (speakText) speakText('Không thể đọc rõ thông tin từ hình ảnh. Bà con vui lòng chụp lại ảnh rõ hơn hoặc điền thông tin vào các ô bên dưới nhé.');
     } finally {
       setIsOcrLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -1051,23 +1030,37 @@ export default function SmartAutoFormModal({
                   </div>
                 </div>
 
-                {/* NGÀY THÁNG NĂM & CHỮ KÝ NẰM TRỌN TRONG TRANG */}
-                <div className="mt-6 pt-2 grid grid-cols-2 text-center text-black">
-                  <div>
-                    {/* Phần xác nhận của cơ quan (nếu có) */}
+                {/* NGÀY THÁNG NĂM & CHỮ KÝ NẰM TRỌN TRONG TRANG (HẠNG MỤC 4) */}
+                <div
+                  className="mt-8 pt-3 grid grid-cols-2 text-center text-black"
+                  style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
+                >
+                  <div className="text-center px-2">
+                    <div className="font-bold uppercase text-xs sm:text-sm">
+                      XÁC NHẬN CỦA UBND XÃ HIỆP HÒA
+                    </div>
+                    <div className="italic text-xs text-slate-600 mt-0.5">
+                      (Ký, đóng dấu tròn và ghi rõ họ tên)
+                    </div>
+                    {/* Khoảng trống ký tên & đóng dấu tối thiểu 3.8cm (115px) */}
+                    <div className="min-h-[115px] sm:min-h-[125px] h-[3.8cm]" />
+                    <div className="font-bold uppercase text-xs sm:text-sm tracking-wide text-slate-500">
+                      ỦY BAN NHÂN DÂN XÃ HIỆP HÒA
+                    </div>
                   </div>
-                  <div>
+
+                  <div className="text-center px-2">
                     <div className="italic text-xs sm:text-sm">
                       Hiệp Hòa, ngày {formData.ngay_lam_don || '.....'} tháng {formData.thang_lam_don || '.....'} năm {formData.nam_lam_don || '2026'}
                     </div>
                     <div className="font-bold uppercase text-xs sm:text-sm mt-1">
-                      NGƯỜI YÊU CẦU / NGƯỜI LÀM ĐƠN
+                      NGƯỜI LÀM ĐƠN / NGƯỜI YÊU CẦU
                     </div>
-                    <div className="italic text-xs text-slate-500 mt-0.5">
-                      (Ký và ghi rõ họ tên)
+                    <div className="italic text-xs text-slate-600 mt-0.5">
+                      (Ký và ghi rõ họ, chữ đệm, tên)
                     </div>
-                    {/* Khoảng trống rộng rãi chừa chỗ cho công dân ký tay */}
-                    <div className="h-16 sm:h-20" />
+                    {/* Khoảng trống rộng rãi cho công dân ký tay tối thiểu 3.8cm (115px) */}
+                    <div className="min-h-[115px] sm:min-h-[125px] h-[3.8cm]" />
                     <div className="font-bold uppercase text-xs sm:text-sm tracking-wide">
                       {norm(
                         formData.ho_ten_nguoi_yeu_cau ||

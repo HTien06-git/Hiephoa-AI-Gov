@@ -26,17 +26,33 @@ export function saveSubmissionToDevice(sub) {
     const filtered = existing.filter(item => item.submissionCode !== sub.submissionCode);
     const newRecord = {
       submissionCode: sub.submissionCode,
+      formId: sub.formId || sub.procedureId || 'FORM_CUSTOM',
       procedureTitle: sub.procedureTitle || 'Thủ tục hành chính',
-      citizenName: sub.citizenName || 'Bà con xã Hiệp Hòa',
+      citizenName: sub.citizenName || sub.formData?.ho_ten || 'Bà con xã Hiệp Hòa',
+      citizenCccd: sub.citizenCccd || sub.formData?.so_cccd || '',
       status: sub.status || 'WAITING',
       officerNote: sub.officerNote || '',
-      assignedOfficer: sub.assignedOfficer || '',
+      assignedOfficer: sub.assignedOfficer || 'Chờ tiếp nhận',
       createdAt: sub.createdAt || new Date().toISOString(),
       updatedAt: sub.updatedAt || new Date().toISOString(),
-      hamlet: sub.hamlet || 'Xã Hiệp Hòa'
+      hamlet: sub.hamlet || sub.formData?.ap_cu_tru || 'Xã Hiệp Hòa',
+      formData: sub.formData || {}
     };
     filtered.unshift(newRecord);
-    localStorage.setItem(KEY, JSON.stringify(filtered.slice(0, 20)));
+    localStorage.setItem(KEY, JSON.stringify(filtered.slice(0, 25)));
+
+    // Đồng thời cập nhật danh sách theo dõi toast
+    try {
+      sessionStorage.removeItem('hh_dismiss_all_notifications');
+      const trackedKey = 'hh_tracked_submissions';
+      const tracked = JSON.parse(localStorage.getItem(trackedKey) || '[]');
+      if (!tracked.includes(sub.submissionCode)) {
+        tracked.unshift(sub.submissionCode);
+        localStorage.setItem(trackedKey, JSON.stringify(tracked.slice(0, 15)));
+      }
+    } catch (e) {}
+
+    return newRecord;
   } catch (e) {
     console.warn('Lỗi lưu hồ sơ vào thiết bị:', e);
   }
@@ -82,16 +98,45 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
   // Tên người nộp thủ tục để thông báo trực tiếp tới bà con
   const citizenDisplayName = submission.citizenName || submission.formData?.ho_ten || submission.formData?.ho_ten_nguoi_yeu_cau || submission.formData?.ho_ten_nam || 'Bà con';
 
-  // Gửi hồ sơ lên backend ngay khi mở Modal nếu chưa có code thực
+  // Đảm bảo hồ sơ được lưu vào thiết bị ngay lập tức và đồng bộ lên backend
   useEffect(() => {
     let isMounted = true;
 
+    // 1. Luôn lưu bản ghi vào thiết bị ngay khi mở Modal (đảm bảo không bao giờ bị mất hồ sơ)
+    const currentCode = initialCode || submission.submissionCode || `HH-${Math.floor(1024 + Math.random() * 50)}`;
+    const provisionalRecord = {
+      submissionCode: currentCode,
+      formId,
+      procedureTitle: formTitle || 'Thủ tục hành chính',
+      citizenName: citizenDisplayName,
+      status: submission.status || 'WAITING',
+      officerNote: submission.officerNote || '',
+      assignedOfficer: submission.assignedOfficer || 'Chờ tiếp nhận',
+      formData: formData || {}
+    };
+    saveSubmissionToDevice(provisionalRecord);
+
     async function registerLiveSubmission() {
+      // Nếu đã có initialCode (mở lại từ lịch sử), chỉ cần tra cứu cập nhật trạng thái mới nhất
+      if (initialCode) {
+        try {
+          const res = await apiClient.getSubmission(initialCode);
+          if (isMounted && res && res.submission) {
+            setSubmission(res.submission);
+            previousStatusRef.current = res.submission.status;
+            previousNoteRef.current = res.submission.officerNote || '';
+            saveSubmissionToDevice(res.submission);
+          }
+        } catch (e) {}
+        return;
+      }
+
+      // Tạo hồ sơ mới lên server
       try {
         setIsSyncing(true);
         const res = await apiClient.createSubmission({
           formId,
-          procedureTitle: formTitle,
+          procedureTitle: formTitle || 'Thủ tục hành chính',
           formData,
           preCheckResult
         });
@@ -100,19 +145,8 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
           previousStatusRef.current = res.submission.status;
           previousNoteRef.current = res.submission.officerNote || '';
 
-          // Lưu hồ sơ vào thiết bị để người dân xem lại sau khi thoát ra
+          // Lưu hồ sơ đã xác nhận vào thiết bị
           saveSubmissionToDevice(res.submission);
-
-          // Lưu mã hồ sơ vào danh sách theo dõi toast
-          try {
-            sessionStorage.removeItem('hh_dismiss_all_notifications');
-            const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
-            const targetCode = res.submission.submissionCode;
-            if (targetCode && !tracked.includes(targetCode)) {
-              tracked.unshift(targetCode);
-              localStorage.setItem('hh_tracked_submissions', JSON.stringify(tracked.slice(0, 10)));
-            }
-          } catch (e) {}
         }
       } catch (e) {
         console.warn('[CitizenQrModal] Error creating live submission:', e);
@@ -125,7 +159,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialCode]);
 
   // TỰ ĐỘNG POLLING TRỰC TUYẾN MỖI 3 GIÂY & TỰ ĐỘNG ĐỌC THÔNG BÁO MỚI KHI CÁN BỘ CẬP NHẬT TRẠNG THÁI HOẶC GHI CHÚ
   useEffect(() => {

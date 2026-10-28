@@ -191,25 +191,27 @@ export default function CategoryGrid({
               </div>
 
               {/* 4. Chân thẻ chỉ gồm đúng 02 Nút Hành Động Chuẩn Mực */}
-              <div className="grid grid-cols-2 gap-2.5 pt-4 mt-3 border-t border-stone-100">
+              <div className="grid grid-cols-2 gap-2 pt-3.5 mt-3 border-t border-stone-100">
                 {/* Nút 1: Đỏ Son Chính Phủ */}
                 <button
                   type="button"
                   onClick={() => onOpenAutoForm(proc, 'data_input')}
-                  className="bg-[#991B1B] hover:bg-[#7F1D1D] text-white font-semibold py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-colors active:scale-98"
+                  className="bg-[#991B1B] hover:bg-[#7F1D1D] text-white font-bold py-2.5 px-2 rounded-xl text-[11px] xs:text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs transition-colors active:scale-98 min-w-0"
+                  title="Điền đơn tự động và tạo mã QR nộp cho cán bộ"
                 >
                   <FileSignature className="w-4 h-4 text-amber-300 shrink-0" />
-                  <span className="whitespace-nowrap">Điền Đơn & Mã QR</span>
+                  <span className="truncate whitespace-nowrap">Điền Đơn & QR</span>
                 </button>
 
                 {/* Nút 2: Trắng viền Vàng Đồng đậm */}
                 <button
                   type="button"
                   onClick={() => onSelectProcedure(proc)}
-                  className="bg-amber-50/60 hover:bg-amber-100/80 text-[#7F1D1D] border border-amber-400/80 font-semibold py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors active:scale-98"
+                  className="bg-amber-50/70 hover:bg-amber-100 text-[#7F1D1D] border border-amber-400/80 font-bold py-2.5 px-2 rounded-xl text-[11px] xs:text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors active:scale-98 min-w-0"
+                  title="Xem chi tiết hướng dẫn và hỏi AI"
                 >
                   <HelpCircle className="w-4 h-4 text-amber-700 shrink-0" />
-                  <span className="whitespace-nowrap">Chi Tiết & Hỏi AI</span>
+                  <span className="truncate whitespace-nowrap">Chi Tiết & Hỏi AI</span>
                 </button>
               </div>
             </div>

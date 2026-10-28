@@ -69,8 +69,8 @@ function chunkTextForTTS(text) {
   return chunks.length > 0 ? chunks : [cleaned];
 }
 
-// Tốc độ đọc chuẩn hành chính công: 1.15x (nhanh, lưu loát, dứt khoát, tự nhiên)
-const SPEECH_RATE = 1.15;
+// Tốc độ đọc chuẩn hành chính công: 1.28x (nhanh, lưu loát, dứt khoát, tự nhiên, không bị chậm chạp)
+const SPEECH_RATE = 1.28;
 
 /**
  * THIẾT KẾ SINGLETON AUDIO DUY NHẤT TOÀN ỨNG DỤNG
@@ -258,13 +258,20 @@ export function useSpeechSynthesis() {
       }
     };
 
-    audio.onplay = () => {
-      audio.playbackRate = SPEECH_RATE;
+    const applyRate = () => {
+      try {
+        audio.playbackRate = SPEECH_RATE;
+        audio.defaultPlaybackRate = SPEECH_RATE;
+      } catch (e) {}
     };
 
+    audio.onplay = applyRate;
+    audio.oncanplay = applyRate;
+    audio.onloadedmetadata = applyRate;
+
     audio.defaultPlaybackRate = SPEECH_RATE;
-    audio.playbackRate = SPEECH_RATE;
     audio.src = directUrl;
+    applyRate();
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {

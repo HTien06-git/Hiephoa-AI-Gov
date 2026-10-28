@@ -127,8 +127,15 @@ function autoHydrateMiddleware(req, res, next) {
             counter: 1000, submissions: [], stats: {}, activityFeed: []
           };
         }
-        if (Array.isArray(submissions)) {
-          globalThis.__HIEPHOA_REALTIME_STORE__.submissions = submissions;
+        if (Array.isArray(submissions) && submissions.length > 0) {
+          const currentSubs = globalThis.__HIEPHOA_REALTIME_STORE__.submissions || [];
+          const existingMap = new Map(currentSubs.map(s => [s.submissionCode, s]));
+          for (const s of submissions) {
+            if (!existingMap.has(s.submissionCode)) {
+              existingMap.set(s.submissionCode, s);
+            }
+          }
+          globalThis.__HIEPHOA_REALTIME_STORE__.submissions = Array.from(existingMap.values());
         }
         if (stats) {
           globalThis.__HIEPHOA_REALTIME_STORE__.stats = stats;

@@ -95,14 +95,34 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   // Gọi Loa state (Hạng mục 8.2)
   const [callingOutCode, setCallingOutCode] = useState(null);
 
-  // Polling hàng đợi thời gian thực mỗi 3 giây
+  // Polling hàng đợi thời gian thực mỗi 3 giây với cơ chế Cache chống chập chờn (lúc mất lúc hiện)
   const fetchLiveQueue = async () => {
     try {
       const res = await apiClient.getLiveQueue();
-      if (res && res.success) {
-        setLiveQueue(res.submissions || []);
+      if (res && res.success && Array.isArray(res.submissions)) {
+        if (res.submissions.length > 0) {
+          setLiveQueue(res.submissions);
+          try {
+            localStorage.setItem('hh_officer_cached_queue', JSON.stringify(res.submissions));
+          } catch (e) {}
+        } else {
+          // Nếu server tạm thời trả rỗng (ví dụ cold start), giữ lại cache cũ để không bị biến mất hồ sơ
+          const cached = JSON.parse(localStorage.getItem('hh_officer_cached_queue') || '[]');
+          if (cached.length > 0) {
+            setLiveQueue(cached);
+          } else {
+            setLiveQueue([]);
+          }
+        }
         if (res.stats) setRealtimeStats(res.stats);
         if (res.activityFeed) setActivityFeed(res.activityFeed);
+
+        // Cập nhật trạng thái của hồ sơ đang xem một cách mượt mà không bị gián đoạn thao tác
+        setSelectedSubmission(prev => {
+          if (!prev) return null;
+          const found = res.submissions.find(s => s.submissionCode === prev.submissionCode);
+          return found ? { ...prev, status: found.status, officerNote: found.officerNote || prev.officerNote, assignedOfficer: found.assignedOfficer || prev.assignedOfficer } : prev;
+        });
       }
     } catch (err) {
       console.warn('Queue polling error:', err);
@@ -110,6 +130,12 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   };
 
   useEffect(() => {
+    // Khôi phục cache hàng đợi trước để hiển thị ngay lập tức
+    try {
+      const cached = JSON.parse(localStorage.getItem('hh_officer_cached_queue') || '[]');
+      if (cached.length > 0) setLiveQueue(cached);
+    } catch (e) {}
+
     fetchLiveQueue();
     const interval = setInterval(fetchLiveQueue, 3000);
     return () => clearInterval(interval);
@@ -196,21 +222,54 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
     e.target.value = '';
   };
 
-  // Xử lý khi quét mã QR hoặc tìm mã hồ sơ (hỗ trợ mọi định dạng JSON, text, token)
+  // Xử lý khi quét mã QR hoặc tìm mã hồ sơ (hỗ trợ mọi định dạng JSON, text, token, tự động nạp hồ sơ nếu chưa có)
   const handleProcessQrCode = async (raw) => {
     if (!raw) return;
     const trimmed = String(raw).trim();
 
     try {
-      // 1. Nếu là JSON
+      // 1. Nếu là JSON chứa dữ liệu đầy đủ từ mã QR
       if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
         const parsed = JSON.parse(trimmed);
-        if (parsed.code) {
-          handleSelectSubmissionByCode(parsed.code);
-          return;
-        }
-        if (parsed.submissionCode) {
-          handleSelectSubmissionByCode(parsed.submissionCode);
+        const code = parsed.code || parsed.submissionCode;
+
+        if (code) {
+          // Kiểm tra xem hồ sơ đã có trên server chưa
+          const res = await apiClient.getSubmission(code);
+          if (res && res.success && res.submission) {
+            handleOpenSubmissionDetail(res.submission);
+            setActiveTab('live_queue');
+            setActionNotification(`Đã tìm thấy và mở hồ sơ [${code}]!`);
+            return;
+          }
+
+          // Nếu server chưa có (do công dân nộp offline hoặc cold start), tự động nạp hồ sơ từ dữ liệu mã QR!
+          const newSub = {
+            submissionCode: code,
+            procedureId: parsed.schema_id || 'FORM_CUSTOM',
+            procedureTitle: parsed.title || 'Thủ tục hành chính cấp xã',
+            citizenName: parsed.fields?.ho_ten || parsed.fields?.ho_ten_nguoi_yeu_cau || parsed.fields?.ho_ten_nam || 'Bà con nhân dân',
+            citizenCccd: parsed.fields?.so_cccd || parsed.fields?.so_cccd_nam || '',
+            status: 'WAITING',
+            assignedOfficer: user?.name || 'Trần Văn Hòa (Cán bộ Một cửa)',
+            officerNote: '',
+            formData: parsed.fields || {}
+          };
+
+          const createRes = await apiClient.createSubmission(newSub);
+          const finalSub = (createRes && createRes.submission) ? createRes.submission : newSub;
+
+          // Cập nhật ngay vào hàng đợi hiển thị
+          setLiveQueue(prev => [finalSub, ...prev.filter(s => s.submissionCode !== code)]);
+          try {
+            const cached = JSON.parse(localStorage.getItem('hh_officer_cached_queue') || '[]');
+            localStorage.setItem('hh_officer_cached_queue', JSON.stringify([finalSub, ...cached.filter(s => s.submissionCode !== code)]));
+          } catch (e) {}
+
+          handleOpenSubmissionDetail(finalSub);
+          setActiveTab('live_queue');
+          setActionNotification(`Đã tự động tiếp nhận hồ sơ [${code}] từ dữ liệu mã QR xuất trình!`);
+          fetchLiveQueue();
           return;
         }
       }
@@ -239,9 +298,7 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
     try {
       const res = await apiClient.getSubmission(code);
       if (res && res.success && res.submission) {
-        setSelectedSubmission(res.submission);
-        setEditedFormData(res.submission.formData || {});
-        setOfficerNoteInput(res.submission.officerNote || '');
+        handleOpenSubmissionDetail(res.submission);
         setActiveTab('live_queue');
       } else {
         alert(`Không tìm thấy hồ sơ có mã ${code}`);
@@ -255,19 +312,87 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
     setSelectedSubmission(sub);
     setEditedFormData(sub.formData || {});
     setOfficerNoteInput(sub.officerNote || '');
+
+    // Cuộn nhẹ xuống chi tiết trên màn hình điện thoại
+    setTimeout(() => {
+      const detailEl = document.getElementById('officer-submission-detail-panel');
+      if (detailEl && window.innerWidth < 1024) {
+        detailEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 150);
+  };
+
+  // XỬ LÝ NHANH TRỰC TIẾP TRÊN TỪNG HỒ SƠ (KHÔNG BỊ RESET HAY MẤT DỮ LIỆU)
+  const handleQuickStatus = async (sub, newStatus, customNote = null) => {
+    const officerName = user?.name || 'Trần Văn Hòa (Cán bộ Một cửa)';
+    const note = customNote !== null ? customNote : (officerNoteInput || sub.officerNote || '');
+
+    // Cập nhật lạc quan ngay lập tức trên UI (0ms delay)
+    const updatedSub = {
+      ...sub,
+      status: newStatus,
+      assignedOfficer: officerName,
+      officerNote: note,
+      updatedAt: new Date().toISOString()
+    };
+
+    setLiveQueue(prev => prev.map(s => s.submissionCode === sub.submissionCode ? updatedSub : s));
+    if (selectedSubmission?.submissionCode === sub.submissionCode) {
+      setSelectedSubmission(updatedSub);
+    }
+
+    try {
+      const cached = JSON.parse(localStorage.getItem('hh_officer_cached_queue') || '[]');
+      const newCache = cached.map(s => s.submissionCode === sub.submissionCode ? updatedSub : s);
+      localStorage.setItem('hh_officer_cached_queue', JSON.stringify(newCache));
+    } catch (e) {}
+
+    const statusLabels = {
+      PROCESSING: 'ĐANG XỬ LÝ TẠI QUẦY',
+      COMPLETED: 'ĐÃ HOÀN TẤT & TRẢ KẾT QUẢ',
+      NEEDS_SUPPLEMENT: 'YÊU CẦU BỔ SUNG GIẤY TỜ',
+      WAITING: 'CHỜ TIẾP NHẬN'
+    };
+
+    setActionNotification(`Đã chuyển trạng thái hồ sơ [${sub.submissionCode}] sang: ${statusLabels[newStatus] || newStatus}!`);
+
+    if (newStatus === 'COMPLETED') {
+      setReceiptRecord(updatedSub);
+    }
+
+    // Gửi cập nhật lên backend
+    try {
+      const res = await apiClient.updateSubmission(sub.submissionCode, {
+        status: newStatus,
+        assignedOfficer: officerName,
+        officerNote: note
+      });
+      if (res && res.success && res.submission) {
+        if (newStatus === 'COMPLETED') {
+          setReceiptRecord(res.submission);
+        }
+      }
+    } catch (e) {
+      console.warn('[OfficerScanPage] Backend update notice:', e.message);
+    }
+
+    setTimeout(() => setActionNotification(''), 4000);
   };
 
   // Cập nhật thông tin tờ khai trực tiếp
   const handleSaveFormData = async () => {
     if (!selectedSubmission) return;
     try {
+      const updated = { ...selectedSubmission, formData: editedFormData };
+      setSelectedSubmission(updated);
+      setLiveQueue(prev => prev.map(s => s.submissionCode === selectedSubmission.submissionCode ? updated : s));
+
       const res = await apiClient.updateSubmission(selectedSubmission.submissionCode, {
         formData: editedFormData
       });
       if (res && res.success) {
         setSelectedSubmission(res.submission);
         setActionNotification(`Đã lưu cập nhật tờ khai [${selectedSubmission.submissionCode}] thành công!`);
-        fetchLiveQueue();
       }
     } catch (e) {
       alert('Không thể lưu thông tin tờ khai.');
@@ -275,31 +400,10 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
     setTimeout(() => setActionNotification(''), 3500);
   };
 
-  // Chuyển trạng thái hồ sơ (TIẾP NHẬN / HOÀN THÀNH / BỔ SUNG)
+  // Chuyển trạng thái hồ sơ từ bảng chi tiết
   const handleChangeStatus = async (newStatus) => {
     if (!selectedSubmission) return;
-    const officerName = user?.name || 'Trần Văn Hòa (Cán bộ Một cửa)';
-
-    try {
-      const res = await apiClient.updateSubmission(selectedSubmission.submissionCode, {
-        status: newStatus,
-        assignedOfficer: officerName,
-        officerNote: officerNoteInput
-      });
-
-      if (res && res.success) {
-        setSelectedSubmission(res.submission);
-        setActionNotification(`Đã cập nhật trạng thái hồ sơ [${selectedSubmission.submissionCode}] sang: ${newStatus}!`);
-        fetchLiveQueue();
-
-        if (newStatus === 'COMPLETED') {
-          setReceiptRecord(res.submission);
-        }
-      }
-    } catch (e) {
-      alert('Không thể cập nhật trạng thái hồ sơ.');
-    }
-    setTimeout(() => setActionNotification(''), 3500);
+    await handleQuickStatus(selectedSubmission, newStatus, officerNoteInput);
   };
 
   // Xuất file Word và in ấn tờ khai
@@ -878,24 +982,80 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                             {sub.citizenPhone && <span>• ĐT: {sub.citizenPhone}</span>}
                           </div>
 
-                          {/* Nút Gọi Loa mời công dân lên quầy (Hạng mục 8.2) */}
-                          <div className="mt-2 flex justify-end">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAnnounceCallout(sub);
-                              }}
-                              disabled={callingOutCode === sub.submissionCode}
-                              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all active:scale-95 shadow-xs
-                                ${callingOutCode === sub.submissionCode
-                                  ? 'bg-amber-100 text-amber-700 cursor-wait animate-pulse'
-                                  : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'}`}
-                              title="Phát loa mời công dân lên quầy tiếp nhận"
-                            >
-                              <Volume2 className="w-3.5 h-3.5 shrink-0" />
-                              <span>{callingOutCode === sub.submissionCode ? '📢 Đang phát...' : '📢 Gọi Loa'}</span>
-                            </button>
+                          {/* CỤM NÚT XỬ LÝ TRỰC TIẾP HỒ SƠ NGAY TẠI ĐÂY (KHÔNG CẦN CHỜ ĐỢI HAY CHUYỂN TRANG) */}
+                          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between gap-1.5 flex-wrap">
+                            <div className="flex items-center gap-1 flex-wrap">
+                              {/* Nút 1: Tiếp nhận nhanh */}
+                              {isWaiting && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleQuickStatus(sub, 'PROCESSING');
+                                  }}
+                                  className="px-2 py-1 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-black text-[11px] flex items-center gap-1 shadow-2xs active:scale-95 transition-all"
+                                  title="Chuyển sang trạng thái đang xử lý tại quầy"
+                                >
+                                  <Clock className="w-3 h-3 text-amber-300" />
+                                  <span>Tiếp nhận</span>
+                                </button>
+                              )}
+
+                              {/* Nút 2: Hoàn tất & Mời ký */}
+                              {!isCompleted && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleQuickStatus(sub, 'COMPLETED');
+                                  }}
+                                  className="px-2 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-black text-[11px] flex items-center gap-1 shadow-2xs active:scale-95 transition-all"
+                                  title="Đã xử lý xong, thông báo mời công dân ký tên và nhận kết quả"
+                                >
+                                  <CheckCircle2 className="w-3 h-3 text-amber-300" />
+                                  <span>Hoàn tất</span>
+                                </button>
+                              )}
+
+                              {/* Nút 3: Yêu cầu bổ sung nhanh */}
+                              {!isCompleted && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const note = window.prompt(`Nhập nội dung giấy tờ cần bổ sung gửi tới bà con ${sub.citizenName}:`, sub.officerNote || 'Bổ sung bản sao CCCD có công chứng');
+                                    if (note !== null) {
+                                      handleQuickStatus(sub, 'NEEDS_SUPPLEMENT', note);
+                                    }
+                                  }}
+                                  className="px-2 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-black text-[11px] flex items-center gap-1 shadow-2xs active:scale-95 transition-all"
+                                  title="Yêu cầu công dân bổ sung thêm giấy tờ"
+                                >
+                                  <AlertCircle className="w-3 h-3 text-white" />
+                                  <span>Bổ sung</span>
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              {/* Nút Gọi Loa mời công dân lên quầy (Hạng mục 8.2) */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAnnounceCallout(sub);
+                                }}
+                                disabled={callingOutCode === sub.submissionCode}
+                                className={`px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all active:scale-95 shadow-xs
+                                  ${callingOutCode === sub.submissionCode
+                                    ? 'bg-amber-100 text-amber-700 cursor-wait animate-pulse'
+                                    : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'}`}
+                                title="Phát loa mời công dân lên quầy tiếp nhận"
+                              >
+                                <Volume2 className="w-3 h-3 shrink-0" />
+                                <span>{callingOutCode === sub.submissionCode ? 'Đang phát...' : 'Loa'}</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
@@ -905,7 +1065,7 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
               </div>
 
               {/* CỘT PHẢI: CHI TIẾT HỒ SƠ, CHỈNH SỬA & THAO TÁC NGHIỆP VỤ (7 CỘT TRÊN DESKTOP) */}
-              <div className="lg:col-span-7">
+              <div id="officer-submission-detail-panel" className="lg:col-span-7">
                 {selectedSubmission ? (
                   <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
                     

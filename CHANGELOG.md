@@ -111,6 +111,33 @@
 
 ---
 
+### 8. TỐI ƯU TRẢI NGHIỆM ĐIỆN THOẠI & XỬ LÝ HỒ SƠ THỰC TẾ (MOBILE & OFFICER WORKFLOW)
+* **Vấn đề phát hiện trên thiết bị thực tế:**
+  1. Giao diện điện thoại một số nút hành động bị nhảy chữ rớt dòng làm mất thẩm mỹ (ví dụ "Điền Đơn Tự" / "Động").
+  2. Trang cán bộ hàng đợi bị chập chờn lúc mất lúc hiện khi polling 3 giây hoặc cold-start server.
+  3. Lịch sử hồ sơ trên điện thoại người dân không tự lưu vào máy khi nộp QR, hoặc tạo mã trùng lặp khi mở lại.
+  4. Cán bộ chưa thể xử lý nhanh trực tiếp trên danh sách thẻ mà phải mở chi tiết.
+  5. Tốc độ nói của AI quá chậm và câu trả lời hướng dẫn thủ tục bị lặp từ chào đầu.
+* **Các cải tiến đã thực hiện:**
+  - `frontend/src/hooks/useSpeechSynthesis.js`:
+    - Nâng tốc độ đọc `SPEECH_RATE` từ `1.15` lên `1.28` giúp giọng AI nhanh, dứt khoát, tự nhiên và lưu loát.
+    - Gắn bộ lắng nghe sự kiện `audio.onplay`, `audio.oncanplay`, `audio.onloadedmetadata` đảm bảo trình duyệt Safari/Chrome trên iOS và Android không tự reset playbackRate về 1.0.
+  - `backend/src/services/geminiRagService.js`:
+    - Loại bỏ tiền tố chào trùng lặp (`Dạ thưa bà con, để thực hiện thủ tục...`) vì trong kho dữ liệu `proc.voice_answer` đã có sẵn câu chào chuẩn `"Thưa bà con, để làm..."`, chấm dứt hiện tượng lặp từ.
+  - `backend/src/utils/persistentStore.js`:
+    - Cải tiến `autoHydrateMiddleware`: Không bao giờ ghi đè danh sách hồ sơ bằng mảng rỗng khi cold-start; tự động hợp nhất các bản ghi hiện có qua Map `submissionCode`.
+  - `frontend/src/pages/OfficerScanPage.jsx`:
+    - Tích hợp bộ đệm `localStorage` (`hh_officer_cached_queue`) trong `fetchLiveQueue`, bảo vệ hàng đợi không bao giờ bị chớp tắt/mất hồ sơ khi mạng trễ.
+    - Bổ sung thanh thao tác nhanh trực tiếp ngay trên từng thẻ hồ sơ: **⚡ Tiếp nhận**, **✅ Hoàn tất**, **⚠️ Bổ sung**, **📢 Loa gọi**, cập nhật trạng thái tức thì (Optimistic UI 0ms).
+    - Tự động nạp và tiếp nhận hồ sơ từ dữ liệu mã QR khi cán bộ quét nếu hồ sơ chưa kịp đồng bộ lên server.
+  - `frontend/src/components/qr-handoff/CitizenQrModal.jsx` & `SmartAutoFormModal.jsx`:
+    - Tự động ghi nhớ hồ sơ vào danh sách thiết bị người dân (`hh_tracked_submissions`) ngay tại thời điểm mở mã QR thành công.
+    - Ngăn chặn việc tự động sinh mã mới trùng lặp khi người dân mở lại hồ sơ từ lịch sử máy.
+  - `frontend/src/components/categories/CategoryGrid.jsx` & `CitizenLookupModal.jsx`:
+    - Chuẩn hóa các nút bấm với `whitespace-nowrap text-[11px] xs:text-xs sm:text-sm` và rút gọn nhãn hiển thị trực quan (Điền Đơn & QR, Chi Tiết & Hỏi AI, Mở Mã QR, Nghe AI Đọc, Chi tiết), loại bỏ 100% tình trạng nhảy chữ rớt dòng trên màn hình điện thoại 360px - 414px.
+
+---
+
 ### 📋 DANH SÁCH CÁC TỆP TIN ĐÃ THAY ĐỔI
 1. `backend/src/services/vectorStore.js`
 2. `backend/src/services/geminiRagService.js`
@@ -132,7 +159,10 @@
 18. `frontend/src/services/docxExportService.js`
 19. `SLIDE_THUYET_TRINH_HIEP_HOA_AI_GOV.md`
 20. `slide_presentation.html`
-21. `CHANGELOG.md` *(Tệp nhật ký hiện tại)*
+21. `backend/src/utils/persistentStore.js`
+22. `frontend/src/hooks/useSpeechSynthesis.js`
+23. `frontend/src/components/categories/CategoryGrid.jsx`
+24. `CHANGELOG.md` *(Tệp nhật ký hiện tại)*
 
 ---
 
@@ -141,3 +171,4 @@
 * **Kiểm tra cú pháp Backend**: Kiểm tra cú pháp toàn bộ tệp Node.js với `node --check` đạt chuẩn 100%.
 * **Kiểm thử logic**: Chạy thử luồng phân loại ý định RAG với câu hỏi nhạy cảm từ khóa *"xin giấy độc thân để mua đất"* đạt kết quả đúng mã `TT_TINH_TRANG_HON_NHAN`.
 * **Trạng thái Git**: Đã đồng bộ lên nhánh `main` kho lưu trữ `HTien06-git/Hiephoa-AI-Gov`.
+

@@ -208,10 +208,8 @@ Chỉ xuất JSON thuần túy, không có markdown block.
       const proc = matchedProcedure;
       return {
         intentType: 'PROCEDURE_GUIDE',
-        voice_text: `Dạ thưa bà con, để thực hiện thủ tục ${proc.title}, bà con cần chuẩn bị hồ sơ gồm: ${proc.voice_answer} Bà con có thể bấm nút Điền Đơn Tự Động trên màn hình để hoàn thành tờ khai trong 3 giây nhé!`,
+        voice_text: `${proc.voice_answer} Bà con có thể bấm nút Điền Đơn Tự Động trên màn hình để hoàn thành tờ khai ngay nhé!`,
         answer: `### Hướng dẫn thực hiện thủ tục: ${proc.title}
-
-Dạ thưa bà con, liên quan đến thủ tục **${proc.title}** tại UBND xã Hiệp Hòa:
 
 ${proc.voice_answer}
 

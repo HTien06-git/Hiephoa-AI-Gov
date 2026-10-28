@@ -313,16 +313,16 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
             <button
               type="button"
               onClick={() => setActiveTab('device')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition-all ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition-all min-w-0 ${
                 activeTab === 'device'
                   ? 'bg-red-700 text-white shadow-sm ring-1 ring-red-300'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
               <Smartphone className="w-4 h-4 shrink-0" />
-              <span>Hồ sơ trên thiết bị này</span>
+              <span className="truncate whitespace-nowrap">Hồ sơ trên máy này</span>
               {deviceList.length > 0 && (
-                <span className={`px-2 py-0.2 rounded-full text-[11px] font-bold ${
+                <span className={`px-2 py-0.2 rounded-full text-[11px] font-bold shrink-0 ${
                   activeTab === 'device' ? 'bg-amber-300 text-red-950' : 'bg-red-700 text-white'
                 }`}>
                   {deviceList.length}
@@ -333,14 +333,14 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
             <button
               type="button"
               onClick={() => setActiveTab('search')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition-all ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition-all min-w-0 ${
                 activeTab === 'search'
                   ? 'bg-red-700 text-white shadow-sm ring-1 ring-red-300'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
               <Search className="w-4 h-4 shrink-0" />
-              <span>Tìm theo CCCD / Mã số</span>
+              <span className="truncate whitespace-nowrap">Tra cứu CCCD/Mã</span>
             </button>
           </div>
 
@@ -470,27 +470,27 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
                         </div>
 
                         {/* HÀNG NÚT HÀNH ĐỘNG CHO MỖI HỒ SƠ */}
-                        <div className="mt-3 flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
+                        <div className="mt-3 flex items-center gap-1.5 sm:gap-2 flex-wrap pt-2 border-t border-slate-100">
                           {/* Nút mở lại mã QR xoay vòng bảo mật */}
                           <button
                             type="button"
                             onClick={(e) => handleOpenQrForDeviceItem(item, e)}
-                            className="px-3 py-1.5 rounded-xl bg-[#991B1B] hover:bg-red-800 text-amber-300 font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all"
+                            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#991B1B] hover:bg-red-800 text-amber-300 font-bold text-[11px] sm:text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all whitespace-nowrap"
                             title="Mở mã QR xoay vòng bảo mật để xuất trình cho cán bộ quét nhận diện"
                           >
                             <QrCode className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                            <span>Mở Mã QR Bảo Mật</span>
+                            <span>Mở Mã QR</span>
                           </button>
 
                           {/* Nút AI đọc tiến độ */}
                           <button
                             type="button"
                             onClick={() => speakSubmissionStatus(item)}
-                            className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs flex items-center gap-1.5 border border-amber-300 active:scale-95 transition-all"
+                            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-[11px] sm:text-xs flex items-center gap-1.5 border border-amber-300 active:scale-95 transition-all whitespace-nowrap"
                             title="Nghe AI đọc tiến độ giải quyết hồ sơ này"
                           >
                             <Volume2 className="w-3.5 h-3.5 text-amber-800 shrink-0" />
-                            <span>Nghe AI Đọc Tiến Độ</span>
+                            <span>Nghe AI Đọc</span>
                           </button>
 
                           {/* Nút xem chi tiết & đánh giá */}
@@ -501,10 +501,10 @@ export default function CitizenLookupModal({ onClose, speakText, initialQuery = 
                               setActiveTab('search');
                               handleLookup(item.submissionCode);
                             }}
-                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1 transition-all ml-auto"
+                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] sm:text-xs flex items-center gap-1 transition-all ml-auto whitespace-nowrap"
                           >
-                            <span>Chi tiết & Đánh giá</span>
-                            <ChevronRight className="w-3.5 h-3.5" />
+                            <span>Chi tiết</span>
+                            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
                           </button>
                         </div>
                       </div>

@@ -802,13 +802,21 @@ export default function SmartAutoFormModal({
                     <button
                       type="button"
                       onClick={() => {
-                        if (onGenerateQr) onGenerateQr({ formId, schema, formData });
+                        if (onGenerateQr) {
+                          onGenerateQr({
+                            formId,
+                            formTitle: schema.title || procedure?.title || 'Thủ tục hành chính',
+                            procedureId: procedure?.id || formId,
+                            schema,
+                            formData
+                          });
+                        }
                       }}
                       className="h-9 sm:h-10 px-3 sm:px-3.5 rounded-xl bg-gradient-to-r from-red-700 to-[#991B1B] hover:from-red-800 hover:to-red-900 text-white text-xs sm:text-sm font-black flex items-center gap-1.5 shadow-md active:scale-95 transition-all ring-2 ring-amber-300"
                       title="Tạo mã QR lưu hồ sơ lên điện thoại của bà con và gửi tới Cán bộ"
                     >
                       <QrCode className="w-4 h-4 text-amber-300 shrink-0" />
-                      <span>Tạo Mã QR & Nộp Hồ Sơ</span>
+                      <span className="whitespace-nowrap">Tạo Mã QR & Nộp Hồ Sơ</span>
                     </button>
 
                     {/* Nút chuyển nhanh sang xem đơn A4 trên điện thoại */}

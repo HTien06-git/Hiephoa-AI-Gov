@@ -1,0 +1,143 @@
+# LỊCH SỬ CHỈNH SỬA & NHẬT KÝ NÂNG CẤP HỆ THỐNG
+# NỀN TẢNG HIỆP HÒA AI-GOV (UBND XÃ HIỆP HÒA)
+
+---
+
+## 📌 PHIÊN BẢN v2.4.0 — HOÀN THIỆN TOÀN DIỆN & SỬA LỖI ĐA THIẾT BỊ
+**Thời gian cập nhật:** 29/10/2026  
+**Mục tiêu:** Khắc phục triệt để các tồn tại phát sinh khi thử nghiệm trên nhiều thiết bị thực tế, chuẩn hóa dữ liệu phục vụ Hội thi và sẵn sàng triển khai diện rộng cho nhân dân xã Hiệp Hòa.
+
+---
+
+### 1. NÂNG CẤP TRỢ LÝ GIỌNG NÓI & ĐỊNH TUYẾN Ý ĐỊNH AI (RAG ENGINE)
+* **Vấn đề phát hiện:** Khi công dân nhập hoặc đọc bằng giọng nói các yêu cầu thủ tục như *"xin giấy độc thân để mua đất"*, AI bị bắt nhầm từ khóa *"mua đất"* và định tuyến sai sang tư vấn tranh chấp đất đai hoặc cấp sổ đỏ giấy tay. Thời gian timeout của Gemini chỉ là 2000ms gây ngắt sớm sang fallback.
+* **Các thay đổi đã thực hiện:**
+  - `backend/src/services/vectorStore.js`:
+    - Tái cấu trúc thuật toán chấm điểm ngữ nghĩa chuyên sâu tiếng Việt.
+    - Thiết lập trọng số ưu tiên vượt trội cho các thủ tục hộ tịch cốt lõi: `TT_TINH_TRANG_HON_NHAN` (+350 điểm cho "độc thân", "tình trạng hôn nhân"), `TT_KET_HON` (+300 điểm), `TT_KHAI_SINH` (+350 điểm), `TT_CHUNG_THUC` (+300 điểm).
+    - Tự động nhận diện ngữ cảnh: Kể cả khi công dân nêu *"xin giấy độc thân để mua bán đất / vay vốn ngân hàng"*, trọng tâm xử lý vẫn là thủ tục Cấp giấy xác nhận tình trạng hôn nhân, tuyệt đối không nhảy sang mảng đất đai.
+  - `backend/src/services/geminiRagService.js`:
+    - Tăng thời gian chờ gọi AI từ `2000ms` lên `7500ms` để xử lý mượt mà trên các kết nối mạng di động 4G/5G.
+    - Tinh chỉnh bộ máy định tuyến nội bộ: Đặt nhóm **PROCEDURE_GUIDE (Nhóm C)** lên mức ưu tiên cao nhất trước Nhóm B (Tư vấn pháp luật thông thường), đảm bảo khi có thủ tục khớp sẽ trả lời ngay hướng dẫn hồ sơ kèm checklist và nút điền đơn chuẩn.
+
+---
+
+### 2. NÂNG CẤP AI KIỂM TRA ẢNH GIẤY TỜ TỪNG BƯỚC (STEP-BY-STEP PRE-CHECK)
+* **Vấn đề phát hiện:** Chức năng kiểm tra giấy tờ cũ yêu cầu gửi toàn bộ ảnh cùng lúc, AI dễ nhận định sai hoặc không kiểm tra chi tiết từng giấy tờ cần thiết.
+* **Các thay đổi đã thực hiện:**
+  - `frontend/src/components/pre-check/DocumentPreCheckModal.jsx`:
+    - Thiết kế lại hoàn toàn theo quy trình **Wizard từng bước (Step-by-Step)**.
+    - Tự động chia nhỏ checklist của từng thủ tục thành các bước chụp riêng biệt (Ví dụ: Bước 1: Căn cước công dân -> Bước 2: Giấy chứng sinh / Tờ khai...).
+    - **Tích hợp giọng nói tự động**: Mỗi khi chuyển sang bước mới, AI tự động phát âm thanh hướng dẫn công dân cần chuẩn bị giấy tờ gì và cách chụp rõ nét.
+    - Cho phép chụp trực tiếp từ camera hoặc tải ảnh từ máy cho từng mục cụ thể.
+    - Đánh giá ngay tại chỗ với phản hồi giọng nói: Thông báo đạt chuẩn (PASS) hoặc yêu cầu chụp lại (NEEDS_RETAKE) nếu ảnh bị mờ/tối/mất góc.
+    - Hiển thị màn hình tổng kết 100% hồ sơ hoàn tất trước khi nộp.
+  - `backend/src/services/visionOcrService.js` & `backend/src/controllers/preCheckController.js`:
+    - Bổ sung phương thức `preCheckStepItem` phân tích ảnh từng bước, sinh nhận xét và phản hồi giọng nói tiếng Việt thân thiện, gần gũi với bà con nông dân.
+
+---
+
+### 3. KHẮC PHỤC MODULE QUÉT QR CỦA CÁN BỘ TIẾP NHẬN
+* **Vấn đề phát hiện:** Thư viện quét cũ tạo phần tử DOM không đồng bộ với vòng đời React, gây lỗi không tìm thấy thẻ chứa và không mở được camera khi chuyển tab.
+* **Các thay đổi đã thực hiện:**
+  - `frontend/src/pages/OfficerScanPage.jsx`:
+    - Thay thế trình bao cũ bằng việc khởi tạo trực tiếp lớp `Html5Qrcode` với cơ chế kiểm tra `isMounted`, đảm bảo dọn dẹp camera an toàn khi unmount.
+    - Bổ sung **3 chế độ tiếp nhận đa phương thức**:
+      1. *Camera trực tiếp*: Có nút Bật/Tắt chủ động, lật camera trước/sau, khung ngắm có vạch quét laser trực quan.
+      2. *Tải ảnh mã QR (Upload file)*: Quét giải mã trực tiếp từ file ảnh chụp trên máy tính nếu không có webcam.
+      3. *Đầu đọc Barcode USB / Nhập tay*: Hỗ trợ súng quét mã vạch chuyên dụng tại bàn tiếp dân Một cửa.
+
+---
+
+### 4. DỌN DẸP TRANG QUẢN TRỊ ADMIN & BỔ SUNG QUẢN LÝ CÁN BỘ
+* **Vấn đề phát hiện:** Cơ sở dữ liệu còn lưu các tài khoản mẫu thử nghiệm và thiết bị test giả lập.
+* **Các thay đổi đã thực hiện:**
+  - `backend/src/data/security_db.json`:
+    - Xóa bỏ thiết bị giả lập `DEV-TEST-LOCKOUT-999`.
+    - Xóa các tài khoản thử nghiệm `canbo_hieptan`, `canbo1cua@gmail.com`.
+    - Đưa số lượng thống kê ảo về `0`. Giữ lại danh mục tài khoản chính thức `admin` và `canbo1`.
+  - `backend/src/services/securityService.js` & `backend/src/controllers/adminController.js`:
+    - Cập nhật hàm `deleteOfficer(username)` cho phép quản trị viên xóa cán bộ chuyển công tác.
+    - Đăng ký endpoint `DELETE /api/admin/officers/:username` trong `backend/src/routes/api.js`.
+  - `frontend/src/components/admin/AdminDeviceManager.jsx`:
+    - Thêm nút "Xóa Cán Bộ" kèm hộp thoại xác nhận an toàn, kết nối trực tiếp API backend.
+
+---
+
+### 5. THEO DÕI HỒ SƠ THEO THIẾT BỊ & MÃ QR XOAY VÒNG BẢO MẬT 15 GIÂY
+* **Vấn đề phát hiện:** Người dân sau khi điền đơn và nộp mã QR, nếu đóng trình duyệt thì không biết cách xem lại tình trạng hồ sơ đã được xã giải quyết chưa hoặc cán bộ có yêu cầu thêm giấy tờ gì không; mã QR tĩnh có nguy cơ bị lộ thông tin.
+* **Các thay đổi đã thực hiện:**
+  - `frontend/src/components/qr-handoff/CitizenQrModal.jsx`:
+    - **Cơ chế QR Xoay Vòng Bảo Mật (Dynamic Rotating QR)**: Tự động cập nhật mã token bảo mật mỗi 15 giây một lần kèm thanh đếm ngược trực quan, ngăn chặn chụp trộm hoặc làm giả mã tiếp nhận.
+    - Hàm `saveSubmissionToDevice(sub)`: Tự động lưu toàn bộ thông tin đơn và mã hồ sơ vào bộ nhớ cục bộ thiết bị (`localStorage: hh_device_submissions`).
+  - `frontend/src/components/qr-handoff/CitizenLookupModal.jsx`:
+    - Bổ sung Tab **"Hồ sơ trên thiết bị này"** tự động liệt kê tất cả hồ sơ người dân từng làm từ máy của mình.
+    - Polling tự động mỗi 5 giây: Cập nhật trạng thái thời gian thực từ quầy Một cửa (🟢 *ĐÃ GIẢI QUYẾT XONG*, 🔵 *ĐANG XỬ LÝ*, 🟡 *CHỜ TIẾP NHẬN*, 🟠 *CẦN BỔ SUNG GIẤY TỜ*).
+    - Hiển thị nổi bật lời dặn của cán bộ: *"Cán bộ yêu cầu bổ sung: [Nội dung ghi chú]"*.
+    - Cung cấp nút tiện ích: **"Mở Mã QR Bảo Mật"** (mở lại QR xoay vòng để xuất trình cho cán bộ), **"Nghe AI Đọc Tiến Độ"** và **"Xóa Khỏi Máy"**.
+  - `frontend/src/pages/CitizenHomePage.jsx` & `frontend/src/components/layout/QuickActionFloatingDock.jsx`:
+    - Hiển thị Banner thông báo hồ sơ đã nộp ngay đầu trang chủ và Badge số lượng hồ sơ trên nút Tra cứu ở thanh công cụ nổi.
+
+---
+
+### 6. XUẤT BÁO CÁO THỐNG KÊ CHUẨN MICROSOFT WORD (.DOCX) THEO NGHỊ ĐỊNH 30/2020/NĐ-CP
+* **Vấn đề phát hiện:** Chức năng xuất báo cáo cũ chỉ tải file CSV đổi đuôi `.xlsx`, dẫn đến cảnh báo lỗi định dạng khi mở trên máy tính.
+* **Các thay đổi đã thực hiện:**
+  - `frontend/src/services/docxExportService.js`:
+    - Xây dựng module xuất file OpenXML PKZIP `.docx` nguyên bản chuẩn 100%, tương thích hoàn hảo với Microsoft Word và Google Docs.
+    - Tuân thủ nghiêm ngặt thể thức văn bản hành chính theo **Nghị định 30/2020/NĐ-CP**:
+      - Quốc hiệu, Tiêu ngữ, Tên cơ quan ban hành: UBND XÃ HIỆP HÒA.
+      - Phông chữ chuẩn Times New Roman, khổ giấy A4.
+      - Tiêu đề báo cáo in hoa đậm, phần tóm tắt số liệu thống kê rõ ràng.
+      - Bảng dữ liệu chi tiết đầy đủ 8 cột nghiệp vụ (STT, Mã hồ sơ, Thủ tục, Người nộp, Số CCCD, Trạng thái, Cán bộ phụ trách, Ghi chú).
+      - Cụm chữ ký 3 bên: Người lập biểu, Cán bộ Một cửa tiếp nhận, Chủ tịch UBND xã ký duyệt đóng dấu.
+  - `frontend/src/pages/OfficerScanPage.jsx`:
+    - Thay thế hoàn toàn nút xuất cũ bằng nút **"Xuất Báo Cáo Word (.docx)"**.
+
+---
+
+### 7. CHUẨN HÓA BẢN XEM TRƯỚC VĂN BẢN A4 — KHẮC PHỤC LỖI NHẢY HÀNG
+* **Vấn đề phát hiện:** Khi công dân điền thông tin vào mẫu đơn, chuỗi dấu chấm nối tiếp dài gây tràn khung và làm các trường liền kề bị rớt xuống dòng, làm mất thẩm mỹ trang in A4.
+* **Các thay đổi đã thực hiện:**
+  - `frontend/src/components/auto-form/SmartAutoFormModal.jsx`:
+    - Thay thế chuỗi lặp ký tự `.` bằng đường chấm baseline CSS `border-b border-dotted` có `minWidth` chuẩn văn bản in.
+    - Tái cấu trúc toàn bộ 5 mẫu đơn hành chính chuẩn:
+      - *Mẫu 1*: Tờ khai đăng ký khai sinh (`FORM_KHAI_SINH`).
+      - *Mẫu 2*: Tờ khai đăng ký kết hôn (`FORM_KET_HON`).
+      - *Mẫu 3*: Tờ khai xác nhận tình trạng hôn nhân (`FORM_TINH_TRANG_HON_NHAN`).
+      - *Mẫu 4*: Đơn đề nghị chứng thực (`FORM_CHUNG_THUC`).
+      - *Mẫu 5*: Đơn xin xác nhận cư trú / Hộ nghèo (`FORM_CU_TRU_HO_NGHEO`).
+    - Tất cả nhãn và giá trị được bọc trong các khối flex `inline-flex items-baseline gap-1 whitespace-nowrap`, đảm bảo không bao giờ bị đứt gãy tiêu đề hay nhảy dòng giữa chữ.
+
+---
+
+### 📋 DANH SÁCH CÁC TỆP TIN ĐÃ THAY ĐỔI
+1. `backend/src/services/vectorStore.js`
+2. `backend/src/services/geminiRagService.js`
+3. `backend/src/services/visionOcrService.js`
+4. `backend/src/controllers/preCheckController.js`
+5. `backend/src/controllers/adminController.js`
+6. `backend/src/services/securityService.js`
+7. `backend/src/routes/api.js`
+8. `backend/src/data/security_db.json`
+9. `frontend/src/components/pre-check/DocumentPreCheckModal.jsx`
+10. `frontend/src/components/auto-form/SmartAutoFormModal.jsx`
+11. `frontend/src/components/qr-handoff/CitizenQrModal.jsx`
+12. `frontend/src/components/qr-handoff/CitizenLookupModal.jsx`
+13. `frontend/src/components/admin/AdminDeviceManager.jsx`
+14. `frontend/src/components/layout/QuickActionFloatingDock.jsx`
+15. `frontend/src/pages/CitizenHomePage.jsx`
+16. `frontend/src/pages/OfficerScanPage.jsx`
+17. `frontend/src/services/apiClient.js`
+18. `frontend/src/services/docxExportService.js`
+19. `SLIDE_THUYET_TRINH_HIEP_HOA_AI_GOV.md`
+20. `slide_presentation.html`
+21. `CHANGELOG.md` *(Tệp nhật ký hiện tại)*
+
+---
+
+### 🎯 KẾT QUẢ KIỂM THỬ ĐỘC LẬP
+* **Build Frontend**: Lệnh `npm --prefix frontend run build` hoàn thành với mã thoát `0` (không có lỗi cú pháp hoặc cảnh báo nghiêm trọng).
+* **Kiểm tra cú pháp Backend**: Kiểm tra cú pháp toàn bộ tệp Node.js với `node --check` đạt chuẩn 100%.
+* **Kiểm thử logic**: Chạy thử luồng phân loại ý định RAG với câu hỏi nhạy cảm từ khóa *"xin giấy độc thân để mua đất"* đạt kết quả đúng mã `TT_TINH_TRANG_HON_NHAN`.
+* **Trạng thái Git**: Đã đồng bộ lên nhánh `main` kho lưu trữ `HTien06-git/Hiephoa-AI-Gov`.

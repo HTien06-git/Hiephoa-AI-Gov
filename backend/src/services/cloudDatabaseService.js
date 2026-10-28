@@ -127,3 +127,4 @@ class CloudDatabaseService {
 }
 
 module.exports = new CloudDatabaseService();
+

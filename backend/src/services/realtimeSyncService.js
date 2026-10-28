@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const cloudDatabaseService = require('./cloudDatabaseService');
 
 // Môi trường Vercel Serverless ghi vào /tmp, local ghi vào src/data
 const isVercel = Boolean(process.env.VERCEL);
@@ -126,11 +127,15 @@ class RealtimeSyncService {
     });
 
     this.saveStore();
+    cloudDatabaseService.pushToCloud().catch(() => {});
     return newSub;
   }
 
   // Lấy toàn bộ hàng đợi trực tuyến (GET /api/submissions/live)
-  getLiveQueue() {
+  async getLiveQueue() {
+    if (Date.now() - cloudDatabaseService.lastSyncTime > 3000) {
+      await cloudDatabaseService.pullFromCloud();
+    }
     const store = globalThis.__HIEPHOA_REALTIME_STORE__;
     const now = Date.now();
     // Đánh dấu isNew nếu tạo trong vòng 60 giây
@@ -231,6 +236,7 @@ class RealtimeSyncService {
 
     store.submissions[index] = current;
     this.saveStore();
+    cloudDatabaseService.pushToCloud().catch(() => {});
     return current;
   }
 
@@ -246,6 +252,7 @@ class RealtimeSyncService {
       type: 'chat'
     });
     this.saveStore();
+    cloudDatabaseService.pushToCloud().catch(() => {});
   }
 
   // Ghi nhận sự kiện kiểm tra ảnh giấy tờ
@@ -257,6 +264,7 @@ class RealtimeSyncService {
       type: 'precheck'
     });
     this.saveStore();
+    cloudDatabaseService.pushToCloud().catch(() => {});
   }
 
   addActivity({ text, type }) {

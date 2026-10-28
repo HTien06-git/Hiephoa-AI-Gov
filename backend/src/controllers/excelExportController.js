@@ -13,7 +13,7 @@ async function handleExportExcel(req, res) {
   try {
     const { startDate, endDate, status, procedureId } = req.query;
 
-    const queueData = realtimeSyncService.getLiveQueue();
+    const queueData = await realtimeSyncService.getLiveQueue();
     let submissions = queueData.submissions || [];
 
     // Lọc theo khoảng thời gian

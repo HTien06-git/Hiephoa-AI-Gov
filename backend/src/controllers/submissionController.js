@@ -21,9 +21,9 @@ function handleCreateSubmission(req, res) {
 }
 
 // GET /api/submissions/live: Cán bộ Một cửa & Admin tự động polling mỗi 3 giây
-function handleGetLiveQueue(req, res) {
+async function handleGetLiveQueue(req, res) {
   try {
-    const queueData = realtimeSyncService.getLiveQueue();
+    const queueData = await realtimeSyncService.getLiveQueue();
     return res.json({
       success: true,
       count: queueData.submissions.length,
@@ -128,9 +128,9 @@ function handleResetDemoQueue(req, res) {
 }
 
 // GET /api/stats/realtime: Thống kê tổng hợp trực tuyến
-function handleGetRealtimeStats(req, res) {
+async function handleGetRealtimeStats(req, res) {
   try {
-    const queueData = realtimeSyncService.getLiveQueue();
+    const queueData = await realtimeSyncService.getLiveQueue();
     return res.json({
       success: true,
       stats: queueData.stats,

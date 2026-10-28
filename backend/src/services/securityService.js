@@ -20,7 +20,7 @@ if (!globalThis.__HIEPHOA_SECURITY_STORE__) {
 
 const JWT_SECRET = process.env.JWT_SECRET || 'HiepHao_AI_Gov_Secret_Security_Key_2026';
 
-// Danh sách tài khoản hệ thống mặc định (Hỗ trợ cấu hình qua Environment Variables)
+// Danh sách tài khoản hệ thống mặc định (Chỉ giữ duy nhất Quản Trị Viên tối cao - Không tạo sẵn tài khoản mẫu)
 const DEFAULT_USERS = {
   admin: {
     username: 'admin',
@@ -31,17 +31,6 @@ const DEFAULT_USERS = {
     isLocked: false,
     processedCount: 0,
     department: 'Ban Quản Trị Trung Tâm',
-    createdAt: new Date().toISOString()
-  },
-  canbo1: {
-    username: 'canbo1',
-    password: process.env.OFFICER_PASSWORD || 'MotCua@2026',
-    role: 'OFFICER',
-    name: 'Trần Văn Hòa (Cán bộ Tư pháp - Hộ tịch)',
-    status: 'ONLINE',
-    isLocked: false,
-    processedCount: 0,
-    department: 'Tư pháp - Hộ tịch',
     createdAt: new Date().toISOString()
   }
 };
@@ -57,17 +46,25 @@ class SecurityService {
       if (!globalThis.__HIEPHOA_SECURITY_STORE__.officers) {
         globalThis.__HIEPHOA_SECURITY_STORE__.officers = { ...DEFAULT_USERS };
       }
+      delete globalThis.__HIEPHOA_SECURITY_STORE__.officers.canbo1;
+
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf8');
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed.devices === 'object') {
-          globalThis.__HIEPHOA_SECURITY_STORE__.devices = parsed.devices;
+          globalThis.__HIEPHOA_SECURITY_STORE__.devices = {
+            ...parsed.devices,
+            ...globalThis.__HIEPHOA_SECURITY_STORE__.devices
+          };
         }
         if (parsed && typeof parsed.officers === 'object') {
+          delete parsed.officers.canbo1;
           globalThis.__HIEPHOA_SECURITY_STORE__.officers = {
             ...DEFAULT_USERS,
-            ...parsed.officers
+            ...parsed.officers,
+            ...globalThis.__HIEPHOA_SECURITY_STORE__.officers
           };
+          delete globalThis.__HIEPHOA_SECURITY_STORE__.officers.canbo1;
         }
       }
     } catch (err) {
@@ -328,16 +325,18 @@ class SecurityService {
   getAllOfficers() {
     this.loadStore();
     const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
-    return Object.values(officers).map(o => ({
-      username: o.username,
-      name: o.name,
-      role: o.role,
-      department: o.department || 'Bộ phận Một cửa',
-      status: o.status || 'ONLINE',
-      isLocked: Boolean(o.isLocked),
-      processedCount: o.processedCount || 0,
-      createdAt: o.createdAt || new Date().toISOString()
-    }));
+    return Object.values(officers)
+      .filter(o => o && o.username !== 'canbo1')
+      .map(o => ({
+        username: o.username,
+        name: o.name,
+        role: o.role,
+        department: o.department || 'Bộ phận Một cửa',
+        status: o.status || 'ONLINE',
+        isLocked: Boolean(o.isLocked),
+        processedCount: o.processedCount || 0,
+        createdAt: o.createdAt || new Date().toISOString()
+      }));
   }
 
   // Xác thực tài khoản (hỗ trợ cả tài khoản mặc định và tài khoản mới tạo)

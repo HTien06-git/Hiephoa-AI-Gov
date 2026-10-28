@@ -1,4 +1,5 @@
 const securityService = require('../services/securityService');
+const { buildClientSnapshot } = require('../utils/persistentStore');
 
 // Xử lý đăng nhập tài khoản Cán bộ / Admin kèm kiểm tra khóa thiết bị
 async function handleLogin(req, res) {
@@ -75,11 +76,13 @@ async function handleLogin(req, res) {
     // NẾU ĐĂNG NHẬP THÀNH CÔNG VÀ CHƯA BỊ KHÓA
     securityService.recordSuccessLogin(deviceId);
     const token = securityService.generateToken(user, deviceId);
+    const snapshot = buildClientSnapshot();
 
     return res.json({
       success: true,
       token,
       user,
+      clientSnapshot: snapshot,
       message: `Đăng nhập thành công với vai trò ${user.role === 'ADMIN' ? 'Quản Trị Viên' : 'Cán Bộ Một Cửa'}!`
     });
   } catch (err) {

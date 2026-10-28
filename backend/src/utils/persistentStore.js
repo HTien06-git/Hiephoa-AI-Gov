@@ -100,36 +100,45 @@ function isColdStart() {
 }
 
 /**
- * Middleware autoHydrateMiddleware: Tự động khôi phục dữ liệu nếu Cold Start
- * Đọc header X-Hiephoa-Snapshot và khôi phục nếu hợp lệ
+ * Middleware autoHydrateMiddleware: Tự động khôi phục dữ liệu từ Client Snapshot
+ * Đọc header X-Hiephoa-Snapshot và khôi phục/hợp nhất nếu hợp lệ
  */
 function autoHydrateMiddleware(req, res, next) {
   try {
     const snapshotHeader = req.headers['x-hiephoa-snapshot'];
     const sigHeader = req.headers['x-hiephoa-sig'];
 
-    if (snapshotHeader && sigHeader && isColdStart()) {
-      console.log('[persistentStore] Cold Start phát hiện! Đang khôi phục từ Client Snapshot...');
+    if (snapshotHeader && sigHeader) {
       const restored = restoreFromSnapshot({ snapshot: snapshotHeader, sig: sigHeader });
 
       if (restored && restored.data) {
         const { officers, devices, submissions, stats, activityFeed, counter } = restored.data;
+        let hasNewData = false;
 
-        // Khôi phục Security Store (Cán bộ + Thiết bị)
+        // Khởi tạo bộ nhớ toàn cục nếu chưa có
         if (!globalThis.__HIEPHOA_SECURITY_STORE__) {
           globalThis.__HIEPHOA_SECURITY_STORE__ = { devices: {}, officers: {} };
         }
-        if (officers && typeof officers === 'object') {
-          globalThis.__HIEPHOA_SECURITY_STORE__.officers = {
-            ...globalThis.__HIEPHOA_SECURITY_STORE__.officers,
-            ...officers
-          };
-          console.log(`[persistentStore] Đã khôi phục ${Object.keys(officers).length} tài khoản Cán bộ`);
+        if (!globalThis.__HIEPHOA_SECURITY_STORE__.officers) {
+          globalThis.__HIEPHOA_SECURITY_STORE__.officers = {};
         }
+
+        // Khôi phục & Hợp nhất Cán bộ (bỏ qua tài khoản mẫu canbo1)
+        if (officers && typeof officers === 'object') {
+          for (const [key, off] of Object.entries(officers)) {
+            if (key === 'canbo1' || off?.username === 'canbo1') continue;
+            if (!globalThis.__HIEPHOA_SECURITY_STORE__.officers[key]) {
+              globalThis.__HIEPHOA_SECURITY_STORE__.officers[key] = off;
+              hasNewData = true;
+            }
+          }
+        }
+        delete globalThis.__HIEPHOA_SECURITY_STORE__.officers.canbo1;
+
         if (devices && typeof devices === 'object') {
           globalThis.__HIEPHOA_SECURITY_STORE__.devices = {
-            ...globalThis.__HIEPHOA_SECURITY_STORE__.devices,
-            ...devices
+            ...devices,
+            ...globalThis.__HIEPHOA_SECURITY_STORE__.devices
           };
         }
 
@@ -145,27 +154,31 @@ function autoHydrateMiddleware(req, res, next) {
           for (const s of submissions) {
             if (!existingMap.has(s.submissionCode)) {
               existingMap.set(s.submissionCode, s);
+              hasNewData = true;
             }
           }
           globalThis.__HIEPHOA_REALTIME_STORE__.submissions = Array.from(existingMap.values());
         }
-        if (stats) {
+        if (stats && (!globalThis.__HIEPHOA_REALTIME_STORE__.stats || Object.keys(globalThis.__HIEPHOA_REALTIME_STORE__.stats).length === 0)) {
           globalThis.__HIEPHOA_REALTIME_STORE__.stats = stats;
         }
-        if (Array.isArray(activityFeed)) {
+        if (Array.isArray(activityFeed) && (!globalThis.__HIEPHOA_REALTIME_STORE__.activityFeed || globalThis.__HIEPHOA_REALTIME_STORE__.activityFeed.length === 0)) {
           globalThis.__HIEPHOA_REALTIME_STORE__.activityFeed = activityFeed;
         }
-        if (typeof counter === 'number') {
+        if (typeof counter === 'number' && (!globalThis.__HIEPHOA_REALTIME_STORE__.counter || counter > globalThis.__HIEPHOA_REALTIME_STORE__.counter)) {
           globalThis.__HIEPHOA_REALTIME_STORE__.counter = counter;
         }
 
-        // Lưu ngay vào /tmp để các request sau không cần re-hydrate
-        try {
-          fs.writeFileSync(SECURITY_DB_FILE, JSON.stringify(globalThis.__HIEPHOA_SECURITY_STORE__, null, 2), 'utf8');
-          fs.writeFileSync(REALTIME_DB_FILE, JSON.stringify(globalThis.__HIEPHOA_REALTIME_STORE__, null, 2), 'utf8');
-          console.log('[persistentStore] Đã lưu lại dữ liệu khôi phục vào /tmp thành công!');
-        } catch (saveErr) {
-          console.warn('[persistentStore] Không thể lưu /tmp sau khôi phục:', saveErr.message);
+        // Lưu ngay vào /tmp nếu có dữ liệu mới hoặc container mới
+        if (hasNewData || isColdStart()) {
+          try {
+            const secDir = path.dirname(SECURITY_DB_FILE);
+            if (!fs.existsSync(secDir)) fs.mkdirSync(secDir, { recursive: true });
+            fs.writeFileSync(SECURITY_DB_FILE, JSON.stringify(globalThis.__HIEPHOA_SECURITY_STORE__, null, 2), 'utf8');
+            fs.writeFileSync(REALTIME_DB_FILE, JSON.stringify(globalThis.__HIEPHOA_REALTIME_STORE__, null, 2), 'utf8');
+          } catch (saveErr) {
+            console.warn('[persistentStore] Không thể lưu /tmp sau khôi phục:', saveErr.message);
+          }
         }
       }
     }
@@ -183,9 +196,12 @@ function buildClientSnapshot() {
     const secStore = globalThis.__HIEPHOA_SECURITY_STORE__ || {};
     const rtStore = globalThis.__HIEPHOA_REALTIME_STORE__ || {};
 
+    const cleanOfficers = { ...(secStore.officers || {}) };
+    delete cleanOfficers.canbo1;
+
     // Chỉ backup officers (không backup mật khẩu rõ ràng – vẫn lưu vì đây là dữ liệu backup có ký số)
     const data = {
-      officers: secStore.officers || {},
+      officers: cleanOfficers,
       devices: secStore.devices || {},
       submissions: (rtStore.submissions || []).slice(0, 100), // Tối đa 100 hồ sơ gần nhất
       stats: rtStore.stats || {},

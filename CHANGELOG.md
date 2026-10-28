@@ -165,10 +165,33 @@
   - `backend/src/services/cloudDatabaseService.js`:
     - Xây dựng tầng kết nối đám mây Edge Database đồng bộ hai chiều với độ trễ siêu thấp (< 25ms).
     - Tự động kéo dữ liệu (Pull) khi có thiết bị mới truy cập và tự động đẩy dữ liệu (Push) khi có hồ sơ mới, đổi trạng thái hoặc tương tác AI.
-  - `wrangler.toml`, `_worker.js` & `functions/api/sync.js`:
-    - Khởi tạo Endpoint Edge Sync API trên mạng lưới Cloudflare toàn cầu (`https://hiephoa-ai-gov.truonghoangtien90.workers.dev/api/sync`).
-    - Tự động liên kết với kho lưu trữ vĩnh viễn **Cloudflare KV** namespace `HIEPHOA_KV` (ID: `47c9188d5861419cbdbc010b8a1cc744`).
-    - Dữ liệu hồ sơ công dân và thống kê toàn diện được lưu trữ bền vững vĩnh viễn, chia sẻ tức thời giữa mọi máy tính và điện thoại.
+  - Tự động liên kết với kho lưu trữ vĩnh viễn **Cloudflare KV** namespace `HIEPHOA_KV` (ID: `47c9188d5861419cbdbc010b8a1cc744`).
+  - Dữ liệu hồ sơ công dân và thống kê toàn diện được lưu trữ bền vững vĩnh viễn, chia sẻ tức thời giữa mọi máy tính và điện thoại.
+
+---
+
+### 11. LOẠI BỎ TRIỆT ĐỂ TÀI KHOẢN MẪU `canbo1` & ĐỒNG BỘ BỀN VỮNG TÀI KHOẢN CÁN BỘ MỚI TẠO
+* **Vấn đề phát hiện:**
+  - Tài khoản cán bộ do Quản trị viên (Admin) tạo mới không hiển thị bền vững trong trang Admin do các lệnh gọi API danh sách cán bộ không kèm snapshot mã hóa hai chiều.
+  - Vercel Serverless khi cold-start nạp lại danh sách mặc định có sẵn tài khoản mẫu `canbo1` ("Trần Văn Hòa"), làm ghi đè danh sách tài khoản thực tế và hiển thị dữ liệu mẫu không mong muốn.
+* **Các thay đổi đã thực hiện:**
+  - `backend/src/services/securityService.js`:
+    - Xóa bỏ hoàn toàn tài khoản mẫu `canbo1` khỏi danh sách `DEFAULT_USERS` và bộ nhớ khởi tạo, chỉ duy trì duy nhất tài khoản Quản Trị Viên tối cao (`admin` / `HiepHoa@2026`).
+    - Lọc sạch toàn bộ tài khoản mẫu `canbo1` trong `loadStore()` và `getAllOfficers()`.
+  - `backend/src/data/security_db.json`:
+    - Dọn dẹp triệt để `canbo1` khỏi cơ sở dữ liệu tệp lưu trữ.
+  - `backend/src/utils/persistentStore.js`:
+    - Nâng cấp `autoHydrateMiddleware`: Hợp nhất thông minh danh sách tài khoản cán bộ thực tế từ Client Snapshot có chữ ký HMAC-SHA256, tự động loại bỏ tài khoản mẫu `canbo1` và lưu ngay vào bộ nhớ đệm `/tmp`.
+    - Cập nhật `buildClientSnapshot()` luôn làm sạch dữ liệu trước khi ký số Base64.
+  - `backend/src/controllers/adminController.js` & `backend/src/controllers/authController.js`:
+    - Bổ sung `clientSnapshot` vào phản hồi của `handleGetAllOfficers` và `handleLogin` để đảm bảo frontend luôn có bản sao lưu mã hóa mới nhất.
+  - `frontend/src/services/apiClient.js`:
+    - Bổ sung hàm `getOfficers(token)` gửi kèm đầy đủ Snapshot Headers (`X-Hiephoa-Snapshot`, `X-Hiephoa-Sig`) và tự động lưu `clientSnapshot` trả về.
+  - `frontend/src/components/admin/AdminDeviceManager.jsx`:
+    - Khởi tạo danh sách cán bộ từ bộ nhớ đệm an toàn `hh_admin_officers_cache`.
+    - Hợp nhất thông minh (Smart Merge) giữa bộ nhớ local và phản hồi máy chủ, đảm bảo tài khoản cán bộ mới tạo hiển thị ngay lập tức và không bao giờ bị mất khi tải lại trang hoặc khi Vercel cold-start.
+    - Cập nhật các thao tác Tạo mới, Khóa/Mở khóa, Xóa cán bộ đồng bộ tức thì vào cache và server.
+  - Làm sạch toàn bộ các vị trí hiển thị tên mẫu "Trần Văn Hòa" trong `AppointmentSlipModal.jsx`, `OfficerScanPage.jsx`, `docxExportService.js` và `OfficerLoginModal.jsx`, thay thế bằng tên cán bộ đang đăng nhập thực tế hoặc chức danh hành chính chuẩn `"Cán bộ Tiếp nhận Một cửa"`.
 
 ---
 

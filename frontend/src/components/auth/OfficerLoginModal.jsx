@@ -14,6 +14,7 @@ import {
   Check
 } from 'lucide-react';
 import { getDeviceFingerprint } from '../../utils/deviceFingerprint';
+import { getSnapshotHeaders, saveClientSnapshot } from '../../services/persistentBackup';
 import TrongDongWatermark from '../common/TrongDongWatermark';
 import DongSonBorder from '../common/DongSonBorder';
 
@@ -85,10 +86,14 @@ export default function OfficerLoginModal({ isOpen, onClose, onLoginSuccess }) {
         deviceName: deviceInfo.deviceName
       };
 
+      let snapHeaders = {};
+      try { snapHeaders = getSnapshotHeaders(); } catch (e) {}
+
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...snapHeaders
         },
         body: JSON.stringify(payload)
       });
@@ -119,6 +124,9 @@ export default function OfficerLoginModal({ isOpen, onClose, onLoginSuccess }) {
 
       // Đăng nhập thành công
       if (data.token) {
+        if (data.clientSnapshot) {
+          saveClientSnapshot(data.clientSnapshot);
+        }
         localStorage.setItem('hiephoa_auth_token', data.token);
         localStorage.setItem('hiephoa_user', JSON.stringify(data.user));
         sessionStorage.setItem('hiephoa_auth_token', data.token);
@@ -279,7 +287,7 @@ export default function OfficerLoginModal({ isOpen, onClose, onLoginSuccess }) {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Ví dụ: canbo1 hoặc admin"
+                    placeholder="Nhập tên tài khoản (Ví dụ: admin hoặc tên cán bộ)"
                     autoFocus
                     required
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 focus:border-red-600 focus:bg-white rounded-xl text-sm font-semibold text-slate-900 outline-none transition-all"

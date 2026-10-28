@@ -138,7 +138,7 @@ export const docxExportService = {
     const dateStr = `${day}/${month}/${year}`;
     const filename = `SO_THEO_DOI_HO_SO_TRONG_NGAY_${day}_${month}_${year}.docx`;
 
-    const officerName = officerUser?.name || 'Trần Văn Hòa';
+    const officerName = officerUser?.name || 'Cán bộ Thụ lý Một cửa';
     const totalCount = submissions.length;
     const completedCount = submissions.filter(s => s.status === 'COMPLETED').length;
     const processingCount = submissions.filter(s => s.status === 'PROCESSING').length;
@@ -339,7 +339,7 @@ export const docxExportService = {
     const toLabel = filterInfo.endDate ? filterInfo.endDate : dateStr;
     const filename = `BAO_CAO_THONG_KE_HO_SO_HIEP_HOA_${day}_${month}_${year}.docx`;
 
-    const officerName = officerUser?.name || 'Trần Văn Hòa';
+    const officerName = officerUser?.name || 'Cán bộ Thụ lý Một cửa';
     const totalCount = submissions.length;
     const completedCount = submissions.filter(s => s.status === 'COMPLETED').length;
     const processingCount = submissions.filter(s => s.status === 'PROCESSING').length;

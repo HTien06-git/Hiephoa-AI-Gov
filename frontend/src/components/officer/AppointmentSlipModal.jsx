@@ -14,7 +14,7 @@ export default function AppointmentSlipModal({ submission, currentUser, onClose 
   const initCccd = submission.citizenCccd || submission.formData?.so_cccd || submission.formData?.so_cccd_nguoi_yeu_cau || submission.formData?.so_dinh_danh || '072096001234';
   const initPhone = submission.citizenPhone || submission.formData?.so_dien_thoai || submission.formData?.sdt || '0912345678';
   const initAddress = submission.hamlet || submission.formData?.dia_chi_thuong_tru || submission.formData?.noi_thuong_tru || 'Xã Hiệp Hòa, tỉnh Tây Ninh';
-  const initOfficer = currentUser?.name || 'Trần Văn Hòa';
+  const initOfficer = currentUser?.name || 'Cán bộ Tiếp nhận Một cửa';
 
   // Tính ngày hẹn trả kết quả mặc định (Thường sau 1-3 ngày làm việc)
   const defaultReceiptDate = new Date(submission.createdAt || Date.now());

@@ -28,10 +28,28 @@ import { apiClient } from '../../services/apiClient';
 export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES' }) {
   const [subTab, setSubTab] = useState(initialSubTab); // 'DEVICES' | 'OFFICERS'
   const [devices, setDevices] = useState([]);
-  const [officers, setOfficers] = useState([]);
+  const [officers, setOfficers] = useState(() => {
+    try {
+      const cached = localStorage.getItem('hh_admin_officers_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.filter(o => o && o.username !== 'canbo1');
+        }
+      }
+    } catch (e) {}
+    return [];
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState(null);
   const [filter, setFilter] = useState('ALL'); // 'ALL', 'LOCKED', 'WARNING'
+
+  const saveOfficersCache = (list) => {
+    try {
+      const filtered = (list || []).filter(o => o && o.username !== 'canbo1');
+      localStorage.setItem('hh_admin_officers_cache', JSON.stringify(filtered));
+    } catch (e) {}
+  };
 
   // Modal tạo tài khoản cán bộ mới
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -77,15 +95,38 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
   // Tải danh sách tài khoản cán bộ
   const fetchOfficers = async () => {
     try {
-      const res = await fetch('/api/admin/officers', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const list = data.officers || data.data || [];
-        setOfficers(list);
+      const res = await apiClient.getOfficers(token);
+      if (res && res.success) {
+        const serverList = (res.officers || res.data || []).filter(o => o && o.username !== 'canbo1');
+        
+        // Hợp nhất thông minh với cache local để đảm bảo tài khoản vừa tạo không bao giờ bị mất
+        setOfficers(prev => {
+          const map = new Map();
+          // 1. Thêm từ cache local
+          try {
+            const cached = JSON.parse(localStorage.getItem('hh_admin_officers_cache') || '[]');
+            for (const item of cached) {
+              if (item && item.username && item.username !== 'canbo1') {
+                map.set(item.username.toLowerCase(), item);
+              }
+            }
+          } catch (e) {}
+          // 2. Thêm từ state hiện tại
+          for (const item of prev) {
+            if (item && item.username && item.username !== 'canbo1') {
+              map.set(item.username.toLowerCase(), item);
+            }
+          }
+          // 3. Cập nhật từ server
+          for (const item of serverList) {
+            if (item && item.username && item.username !== 'canbo1') {
+              map.set(item.username.toLowerCase(), item);
+            }
+          }
+          const merged = Array.from(map.values());
+          saveOfficersCache(merged);
+          return merged;
+        });
       }
     } catch (err) {
       console.warn('Lỗi tải danh sách cán bộ:', err);
@@ -168,8 +209,12 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
           processedCount: 0,
           createdAt: new Date().toISOString()
         };
-        // Cập nhật lạc quan (Optimistic UI) vào danh sách cán bộ ngay tức thì
-        setOfficers(prev => [createdOfficer, ...prev.filter(o => o.username.toLowerCase() !== createdOfficer.username.toLowerCase())]);
+        // Cập nhật lạc quan (Optimistic UI) vào danh sách cán bộ ngay tức thì và lưu vào cache
+        setOfficers(prev => {
+          const updated = [createdOfficer, ...prev.filter(o => o.username.toLowerCase() !== createdOfficer.username.toLowerCase() && o.username !== 'canbo1')];
+          saveOfficersCache(updated);
+          return updated;
+        });
         setActionMessage({ type: 'success', text: `✅ Đã tạo thành công tài khoản cán bộ "${newUsername}"!` });
         setShowCreateModal(false);
         setNewUsername('');
@@ -205,6 +250,11 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
     try {
       const res = await apiClient.updateOfficer(officer.username, { isLocked: newLockState }, token);
       if (res && res.success) {
+        setOfficers(prev => {
+          const updated = prev.map(o => o.username.toLowerCase() === officer.username.toLowerCase() ? { ...o, isLocked: newLockState } : o);
+          saveOfficersCache(updated);
+          return updated;
+        });
         setActionMessage({
           type: 'success',
           text: `✅ ${newLockState ? 'Đã tạm khóa' : 'Đã mở khóa'} tài khoản cán bộ "${officer.username}"!`
@@ -228,6 +278,11 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
           setActionMessage({
             type: 'success',
             text: `✅ Đã xóa tài khoản cán bộ "${officer.username}" thành công!`
+          });
+          setOfficers(prev => {
+            const updated = prev.filter(o => o.username.toLowerCase() !== officer.username.toLowerCase());
+            saveOfficersCache(updated);
+            return updated;
           });
           fetchOfficers();
         } else {

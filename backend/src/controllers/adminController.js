@@ -61,10 +61,12 @@ function handleResetAllDevices(req, res) {
 function handleGetAllOfficers(req, res) {
   try {
     const list = securityService.getAllOfficers();
+    const snapshot = buildClientSnapshot();
     return res.json({
       success: true,
       officers: list,
-      data: list
+      data: list,
+      clientSnapshot: snapshot
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });

@@ -330,6 +330,33 @@ export const apiClient = {
   },
 
   /**
+   * Admin lấy danh sách toàn bộ cán bộ (kèm snapshot đồng bộ hai chiều)
+   */
+  async getOfficers(token) {
+    try {
+      let snapHeaders = {};
+      try { snapHeaders = getSnapshotHeaders(); } catch (e) {}
+
+      const res = await fetch(`${API_BASE}/admin/officers`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...snapHeaders,
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      });
+      if (!res.ok) throw new Error('Không thể tải danh sách cán bộ');
+      const data = await res.json();
+      if (data && data.clientSnapshot) {
+        saveClientSnapshot(data.clientSnapshot);
+      }
+      return data;
+    } catch (err) {
+      console.warn('[apiClient] getOfficers error:', err.message);
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
    * Admin cập nhật tài khoản cán bộ (đổi mật khẩu, khóa/mở khóa)
    */
   async updateOfficer(username, updates, token) {

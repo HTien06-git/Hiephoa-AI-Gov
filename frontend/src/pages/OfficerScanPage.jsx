@@ -251,7 +251,7 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
             citizenName: parsed.fields?.ho_ten || parsed.fields?.ho_ten_nguoi_yeu_cau || parsed.fields?.ho_ten_nam || 'Bà con nhân dân',
             citizenCccd: parsed.fields?.so_cccd || parsed.fields?.so_cccd_nam || '',
             status: 'WAITING',
-            assignedOfficer: user?.name || 'Trần Văn Hòa (Cán bộ Một cửa)',
+            assignedOfficer: user?.name || 'Cán bộ Bộ phận Một cửa',
             officerNote: '',
             formData: parsed.fields || {}
           };
@@ -324,7 +324,7 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
 
   // XỬ LÝ NHANH TRỰC TIẾP TRÊN TỪNG HỒ SƠ (KHÔNG BỊ RESET HAY MẤT DỮ LIỆU)
   const handleQuickStatus = async (sub, newStatus, customNote = null) => {
-    const officerName = user?.name || 'Trần Văn Hòa (Cán bộ Một cửa)';
+    const officerName = user?.name || 'Cán bộ Bộ phận Một cửa';
     const note = customNote !== null ? customNote : (officerNoteInput || sub.officerNote || '');
 
     // Cập nhật lạc quan ngay lập tức trên UI (0ms delay)
@@ -588,7 +588,7 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                   {isAdmin ? 'Quản Trị Viên:' : 'Cán bộ trực:'}
                 </div>
                 <div className="text-xs font-black text-white truncate max-w-[160px]">
-                  {isAdmin ? 'ADMINISTRATOR' : (user?.name || 'Trần Văn Hòa')}
+                  {isAdmin ? 'ADMINISTRATOR' : (user?.name || 'Cán bộ Một cửa')}
                 </div>
               </div>
 
@@ -1444,7 +1444,7 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                   <div>• <strong>Nội dung yêu cầu giải quyết:</strong> {receiptRecord.procedureTitle}</div>
                   <div>• <strong>Thời gian tiếp nhận:</strong> {new Date(receiptRecord.createdAt).toLocaleString('vi-VN')}</div>
                   <div>• <strong>Thời gian hẹn trả kết quả:</strong> <span style={{ textDecoration: 'underline', fontWeight: 'bold' }}>{new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('vi-VN')}</span></div>
-                  <div>• <strong>Cán bộ thụ lý:</strong> {receiptRecord.assignedOfficer || user?.name || 'Trần Văn Hòa'}</div>
+                  <div>• <strong>Cán bộ thụ lý:</strong> {receiptRecord.assignedOfficer || user?.name || 'Cán bộ Tiếp nhận'}</div>
                 </div>
 
                 <table style={{ width: '100%', marginTop: '30px', borderCollapse: 'collapse' }}>
@@ -1460,7 +1460,7 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                         <div style={{ fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase' }}>CÁN BỘ TIẾP NHẬN</div>
                         <div style={{ fontSize: '10pt', fontStyle: 'italic' }}>(Ký, đóng dấu hoặc xác thực)</div>
                         <div style={{ height: '60px' }} />
-                        <div style={{ fontSize: '12pt', fontWeight: 'bold' }}>{user?.name || 'Trần Văn Hòa'}</div>
+                        <div style={{ fontSize: '12pt', fontWeight: 'bold' }}>{user?.name || 'Cán bộ Tiếp nhận'}</div>
                       </td>
                     </tr>
                   </tbody>

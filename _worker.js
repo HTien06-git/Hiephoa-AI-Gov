@@ -100,6 +100,11 @@ export default {
       }
     }
 
+    // Nếu không phải route /api/sync: phục vụ giao diện tĩnh qua env.ASSETS
+    if (env && env.ASSETS) {
+      return env.ASSETS.fetch(request);
+    }
+
     return new Response(JSON.stringify({ status: 'online', service: 'HIEP_HOA_AI_GOV_EDGE_DATABASE' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

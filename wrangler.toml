@@ -2,7 +2,13 @@ name = "hiephoa-ai-gov"
 main = "_worker.js"
 compatibility_date = "2024-09-23"
 
+[build]
+command = "npm run build"
+
+[assets]
+directory = "frontend/dist"
+binding = "ASSETS"
+
 [[kv_namespaces]]
 binding = "HIEPHOA_KV"
 id = "47c9188d5861419cbdbc010b8a1cc744"
-

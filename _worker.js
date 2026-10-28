@@ -1,6 +1,6 @@
 /**
- * Cloudflare Worker with Static Assets Entrypoint
- * Handles Edge API /api/sync and proxies static assets to env.ASSETS
+ * Cloudflare Worker Edge Database Sync
+ * Handles Edge API /api/sync with HIEPHOA_KV
  */
 
 let edgeMemory = {
@@ -18,22 +18,21 @@ let edgeMemory = {
   updatedAt: new Date().toISOString()
 };
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Hiephoa-Snapshot, X-Hiephoa-Sig',
+};
+
 export default {
   async fetch(request, env) {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: corsHeaders });
+    }
+
     const url = new URL(request.url);
 
-    // API Edge Sync: /api/sync hoặc /sync
-    if (url.pathname === '/api/sync' || url.pathname === '/sync') {
-      const corsHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Hiephoa-Snapshot, X-Hiephoa-Sig',
-      };
-
-      if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: corsHeaders });
-      }
-
+    if (url.pathname === '/api/sync' || url.pathname === '/sync' || url.pathname === '/') {
       if (request.method === 'GET') {
         let data = edgeMemory;
         if (env && env.HIEPHOA_KV) {
@@ -101,12 +100,8 @@ export default {
       }
     }
 
-    // Nếu không phải /api/sync: trả về asset tĩnh nếu có ASSETS binding
-    if (env && env.ASSETS) {
-      return env.ASSETS.fetch(request);
-    }
-
-    return new Response('Hiệp Hòa AI-Gov Edge Online', { status: 200 });
+    return new Response(JSON.stringify({ status: 'online', service: 'HIEP_HOA_AI_GOV_EDGE_DATABASE' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 };
-

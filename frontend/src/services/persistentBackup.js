@@ -32,15 +32,33 @@ export function getClientSnapshot() {
 
 /**
  * Tạo headers bổ sung chứa snapshot để gửi lên server (chống Cold Start)
- * Chỉ gửi khi snapshot tồn tại
+ * Chỉ gửi khi snapshot tồn tại và đảm bảo 100% tuân thủ chuẩn ISO-8859-1 (chỉ ASCII)
  */
 export function getSnapshotHeaders() {
   try {
     const snap = getClientSnapshot();
     if (!snap || !snap.snapshot || !snap.sig) return {};
+
+    let safeSnapshot = String(snap.snapshot);
+
+    // Kiểm tra nếu snapshot có chứa ký tự ngoài dải ISO-8859-1 (code point > 255)
+    // chuyển đổi thành chuỗi Base64 an toàn để không bị Fetch API báo lỗi String contains non ISO-8859-1 code point
+    if (/[\u0080-\uFFFF]/.test(safeSnapshot)) {
+      try {
+        safeSnapshot = btoa(unescape(encodeURIComponent(safeSnapshot)));
+      } catch (e) {
+        return {};
+      }
+    }
+
+    // Giới hạn kích thước header để tránh lỗi HTTP 431 Request Header Fields Too Large
+    if (safeSnapshot.length > 3500) {
+      return {};
+    }
+
     return {
-      'X-Hiephoa-Snapshot': snap.snapshot.slice(0, 4096), // Giới hạn kích thước header
-      'X-Hiephoa-Sig': snap.sig
+      'X-Hiephoa-Snapshot': safeSnapshot,
+      'X-Hiephoa-Sig': String(snap.sig)
     };
   } catch {
     return {};

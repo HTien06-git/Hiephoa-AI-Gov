@@ -12,10 +12,12 @@ export const apiClient = {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
+      let snapHeaders = {};
+      try { snapHeaders = getSnapshotHeaders(); } catch (e) {}
 
       const response = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getSnapshotHeaders() },
+        headers: { 'Content-Type': 'application/json', ...snapHeaders },
         body: JSON.stringify({ message, procedureId, categoryId, history }),
         signal: controller.signal
       });
@@ -332,11 +334,14 @@ export const apiClient = {
    */
   async updateOfficer(username, updates, token) {
     try {
+      let snapHeaders = {};
+      try { snapHeaders = getSnapshotHeaders(); } catch (e) {}
+
       const res = await fetch(`${API_BASE}/admin/officers/${encodeURIComponent(username)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...getSnapshotHeaders(),
+          ...snapHeaders,
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify(updates)
@@ -356,11 +361,14 @@ export const apiClient = {
    */
   async createOfficer(officerData, token) {
     try {
+      let snapHeaders = {};
+      try { snapHeaders = getSnapshotHeaders(); } catch (e) {}
+
       const res = await fetch(`${API_BASE}/admin/officers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getSnapshotHeaders(),
+          ...snapHeaders,
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify(officerData)
@@ -380,11 +388,14 @@ export const apiClient = {
    */
   async deleteOfficer(username, token) {
     try {
+      let snapHeaders = {};
+      try { snapHeaders = getSnapshotHeaders(); } catch (e) {}
+
       const res = await fetch(`${API_BASE}/admin/officers/${encodeURIComponent(username)}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          ...getSnapshotHeaders(),
+          ...snapHeaders,
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
       });

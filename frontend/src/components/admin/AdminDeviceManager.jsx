@@ -158,17 +158,32 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
       }, token);
 
       if (data && data.success) {
-        setActionMessage({ type: 'success', text: `✅ Đã tạo thành công tài khoản cán bộ "${newUsername}" (Đã lưu bền vững Snapshot)!` });
+        const createdOfficer = data.officer || {
+          username: newUsername.trim().toLowerCase(),
+          name: newFullName ? newFullName.trim() : (newRole === 'ADMIN' ? 'Quản Trị Viên' : 'Cán Bộ Một Cửa'),
+          department: newDepartment || 'Bộ phận Một cửa',
+          role: newRole,
+          status: 'ONLINE',
+          isLocked: false,
+          processedCount: 0,
+          createdAt: new Date().toISOString()
+        };
+        // Cập nhật lạc quan (Optimistic UI) vào danh sách cán bộ ngay tức thì
+        setOfficers(prev => [createdOfficer, ...prev.filter(o => o.username.toLowerCase() !== createdOfficer.username.toLowerCase())]);
+        setActionMessage({ type: 'success', text: `✅ Đã tạo thành công tài khoản cán bộ "${newUsername}"!` });
         setShowCreateModal(false);
         setNewUsername('');
         setNewPassword('');
         setNewFullName('');
         fetchOfficers();
       } else {
-        setActionMessage({ type: 'error', text: data?.error || 'Không thể tạo tài khoản.' });
+        if (data?.error && data.error.includes('ISO-8859-1')) {
+          try { localStorage.removeItem('__HIEPHOA_PERSISTENT_BACKUP__'); } catch (e) {}
+        }
+        setActionMessage({ type: 'error', text: data?.error || 'Không thể tạo tài khoản cán bộ.' });
       }
     } catch (err) {
-      setActionMessage({ type: 'error', text: 'Lỗi kết nối khi tạo tài khoản.' });
+      setActionMessage({ type: 'error', text: 'Lỗi kết nối khi tạo tài khoản: ' + err.message });
     } finally {
       setIsSubmittingOfficer(false);
     }

@@ -45,6 +45,7 @@ function verifySignature(payload, signature) {
 
 /**
  * Tạo gói snapshot mã hoá để gửi về client localStorage
+ * Snapshot được mã hoá Base64 để an toàn 100% với HTTP Header (chỉ chứa ký tự ASCII, không lỗi ISO-8859-1)
  * @param {Object} data - Dữ liệu cần backup (officers + submissions + devices)
  * @returns {{ snapshot: string, sig: string, ts: number }}
  */
@@ -52,7 +53,8 @@ function createEncryptedSnapshot(data) {
   const ts = Date.now();
   const payload = JSON.stringify({ data, ts });
   const sig = signPayload(payload);
-  return { snapshot: payload, sig, ts };
+  const base64Snapshot = Buffer.from(payload, 'utf8').toString('base64');
+  return { snapshot: base64Snapshot, sig, ts };
 }
 
 /**
@@ -62,12 +64,22 @@ function createEncryptedSnapshot(data) {
  */
 function restoreFromSnapshot(pkg) {
   if (!pkg || !pkg.snapshot || !pkg.sig) return null;
-  if (!verifySignature(pkg.snapshot, pkg.sig)) {
+
+  let payloadStr = pkg.snapshot;
+  // Hỗ trợ giải mã Base64 an toàn cho HTTP Header
+  try {
+    const decoded = Buffer.from(pkg.snapshot, 'base64').toString('utf8');
+    if (decoded.startsWith('{') && decoded.endsWith('}')) {
+      payloadStr = decoded;
+    }
+  } catch (e) {}
+
+  if (!verifySignature(payloadStr, pkg.sig)) {
     console.warn('[persistentStore] Chữ ký snapshot không hợp lệ – Bỏ qua khôi phục');
     return null;
   }
   try {
-    const parsed = JSON.parse(pkg.snapshot);
+    const parsed = JSON.parse(payloadStr);
     return parsed;
   } catch {
     return null;

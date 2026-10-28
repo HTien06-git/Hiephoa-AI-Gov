@@ -156,34 +156,38 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
           
           {/* BANNER THÔNG BÁO HỒ SƠ ĐÃ NỘP TRÊN THIẾT BỊ NÀY */}
           {deviceSubmissionsCount > 0 && (
-            <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 via-white to-red-50 border-2 border-amber-400 shadow-md flex items-center justify-between gap-3 animate-fade-in">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-[#991B1B] text-amber-300 flex items-center justify-center shrink-0 font-black shadow-xs ring-2 ring-amber-300">
-                  <Smartphone className="w-5 h-5 text-amber-300" />
+            <div className="mb-4 p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 via-white to-red-50 border-2 border-amber-400 shadow-md flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 sm:gap-3 animate-fade-in">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#991B1B] text-amber-300 flex items-center justify-center shrink-0 font-black shadow-xs ring-2 ring-amber-300">
+                  <Smartphone className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300" />
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-2">
-                    <span>Hồ sơ đã nộp trên thiết bị này</span>
-                    <span className="px-2 py-0.5 rounded-full bg-red-700 text-amber-300 text-xs font-black">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs sm:text-sm font-black text-slate-900 whitespace-nowrap">
+                      Hồ sơ trên thiết bị này
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-red-700 text-amber-300 text-[10px] sm:text-xs font-black whitespace-nowrap shrink-0">
                       {deviceSubmissionsCount} hồ sơ
                     </span>
                   </div>
-                  <div className="text-[11px] sm:text-xs text-slate-600 mt-0.5">
-                    Bà con có thể xem ngay tiến độ đã giải quyết chưa, ghi chú yêu cầu thêm từ cán bộ, hoặc mở lại mã QR xoay vòng bảo mật.
+                  <div className="text-[11px] sm:text-xs text-slate-600 mt-0.5 line-clamp-1 sm:line-clamp-2">
+                    Bà con có thể xem ngay tiến độ đã giải quyết chưa, hoặc mở lại mã QR.
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setLookupInitialQuery('');
-                  setIsLookupOpen(true);
-                }}
-                className="shrink-0 px-3.5 py-2 rounded-xl bg-[#991B1B] hover:bg-red-800 text-white font-black text-xs shadow-sm active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
-              >
-                <span>Xem hồ sơ</span>
-                <ChevronRight className="w-4 h-4 text-amber-300" />
-              </button>
+              <div className="flex items-center justify-end xs:justify-start shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLookupInitialQuery('');
+                    setIsLookupOpen(true);
+                  }}
+                  className="w-full xs:w-auto px-3.5 py-1.5 sm:py-2 rounded-xl bg-[#991B1B] hover:bg-red-800 text-white font-black text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap"
+                >
+                  <span>Xem hồ sơ</span>
+                  <ChevronRight className="w-4 h-4 text-amber-300 shrink-0" />
+                </button>
+              </div>
             </div>
           )}
 

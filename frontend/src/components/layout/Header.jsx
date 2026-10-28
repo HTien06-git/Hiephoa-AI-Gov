@@ -78,8 +78,9 @@ export default function Header({ currentMode, setCurrentMode }) {
                   <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#6B0F12]" />
                   <span>HIỆP HÒA AI-GOV</span>
                 </span>
-                <span className="text-amber-100/90 text-[8px] xs:text-[9.5px] sm:text-xs md:text-sm font-medium whitespace-nowrap truncate">
-                  Chuyên viên Hành chính công AI Đa phương thức 24/7
+                <span className="text-amber-100/90 text-[8px] xs:text-[9.5px] sm:text-xs md:text-sm font-medium whitespace-nowrap">
+                  <span className="inline sm:hidden">Trợ lý AI Phục vụ 24/7</span>
+                  <span className="hidden sm:inline">Chuyên viên Hành chính công AI Đa phương thức 24/7</span>
                 </span>
               </div>
             </div>

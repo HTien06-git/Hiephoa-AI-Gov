@@ -138,6 +138,26 @@
 
 ---
 
+### 9. KHẮC PHỤC LỖI CẤP TÀI KHOẢN CÁN BỘ & SỬA NHẢY CHỮ MOBILE (HÌNH 1 & HÌNH 2)
+* **Khắc phục lỗi Cấp tài khoản Cán bộ mới (Hình 1):**
+  - **Nguyên nhân gốc rễ**: Lỗi `Failed to execute 'fetch' on 'Window': Failed to read the 'headers' for 'Request': String contains non ISO-8859-1 code point.` xảy ra do module `persistentBackup.js` đưa snapshot chứa chuỗi tiếng Việt có dấu (như tên phòng ban, họ tên cán bộ) trực tiếp vào HTTP Header `X-Hiephoa-Snapshot`. Trình duyệt web chặn hoàn toàn các ký tự Unicode > 255 trong Header.
+  - **Giải pháp**:
+    - `backend/src/utils/persistentStore.js`: Mã hoá Base64 cho toàn bộ chuỗi snapshot (`Buffer.from(payload, 'utf8').toString('base64')`), đảm bảo 100% ký tự nằm trong bảng mã ASCII tiêu chuẩn.
+    - `frontend/src/services/persistentBackup.js`: Bổ sung bộ lọc kiểm tra ký tự `[\u0080-\uFFFF]`, tự động mã hoá Base64 hoặc bỏ qua nếu độ dài vượt 3500 ký tự (tránh HTTP 431).
+    - `frontend/src/services/apiClient.js`: Bọc `getSnapshotHeaders()` trong `try ... catch` an toàn trên mọi hàm API admin.
+    - `backend/src/controllers/adminController.js`: Bổ sung tham số `department` khi gọi `securityService.createOfficer(...)`.
+    - `frontend/src/components/admin/AdminDeviceManager.jsx`: Cập nhật lạc quan (Optimistic UI) tài khoản cán bộ mới vào bảng ngay tức thì.
+* **Khắc phục hiện tượng nhảy chữ, rớt dòng trên Mobile (Hình 2):**
+  - `frontend/src/pages/CitizenHomePage.jsx`:
+    - Thẻ "Hồ sơ trên thiết bị này": Cấu trúc lại dạng responsive flex cột/hàng, thêm `whitespace-nowrap` cho tiêu đề và huy hiệu `{count} hồ sơ` (chấm dứt hiện tượng rớt chữ "1 hồ" / "sơ" thành 2 dòng bên trong hình tròn).
+  - `frontend/src/components/layout/Header.jsx`:
+    - Dòng mô tả chuyển viên AI trên mobile hiển thị gọn gàng `Trợ lý AI Phục vụ 24/7`, không còn bị cắt đuôi `Chuyên viên Hành chính công AI Đa phươn...`.
+  - `frontend/src/components/voice/HeroVoiceStation.jsx`:
+    - Huy hiệu trợ lý rút gọn thành `TRỢ LÝ PHÁP LUẬT & HÀNH CHÍNH CÔNG AI`, không còn bị chấm lửng `XÃ HIỆP...`.
+    - Tiêu đề câu hỏi chính không sử dụng non-breaking spaces cưỡng bức, tự động căn dòng hài hòa trên mọi thiết bị.
+
+---
+
 ### 📋 DANH SÁCH CÁC TỆP TIN ĐÃ THAY ĐỔI
 1. `backend/src/services/vectorStore.js`
 2. `backend/src/services/geminiRagService.js`
@@ -162,7 +182,10 @@
 21. `backend/src/utils/persistentStore.js`
 22. `frontend/src/hooks/useSpeechSynthesis.js`
 23. `frontend/src/components/categories/CategoryGrid.jsx`
-24. `CHANGELOG.md` *(Tệp nhật ký hiện tại)*
+24. `frontend/src/services/persistentBackup.js`
+25. `frontend/src/components/layout/Header.jsx`
+26. `frontend/src/components/voice/HeroVoiceStation.jsx`
+27. `CHANGELOG.md` *(Tệp nhật ký hiện tại)*
 
 ---
 

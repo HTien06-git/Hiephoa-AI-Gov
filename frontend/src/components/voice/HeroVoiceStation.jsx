@@ -121,17 +121,17 @@ export default function HeroVoiceStation({
           {/* Huy hiệu nhỏ */}
           <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-red-100 text-[#991B1B] text-[9.5px] xs:text-[10.5px] sm:text-xs font-black uppercase shadow-2xs whitespace-nowrap max-w-full overflow-hidden text-ellipsis">
             <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span className="truncate">TRỢ LÝ HÀNH CHÍNH CÔNG & PHÁP LUẬT XÃ HIỆP HÒA</span>
+            <span className="truncate">TRỢ LÝ PHÁP LUẬT & HÀNH CHÍNH CÔNG AI</span>
           </div>
 
           {/* Tiêu đề */}
-          <h2 className="text-lg sm:text-2xl lg:text-[26px] font-black text-slate-900 tracking-tight leading-snug">
-            Bà con cần làm giấy tờ hoặc hỏi&nbsp;luật, hãy chạm vào Micro để nói&nbsp;chuyện!
+          <h2 className="text-base sm:text-2xl lg:text-[26px] font-black text-slate-900 tracking-tight leading-snug">
+            Bà con cần làm giấy tờ hoặc hỏi luật, hãy chạm vào Micro để nói chuyện!
           </h2>
 
           {/* Hộp lời chào ngắn gọn kèm nút Nghe lời chào */}
           <div className="p-3 sm:p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/90 text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
-            <p className="line-clamp-2">
+            <p className="line-clamp-3">
               "{greetingText}"
             </p>
             <div className="mt-2 sm:mt-2.5 flex items-center gap-2">

@@ -74,7 +74,7 @@ function handleGetAllOfficers(req, res) {
 // Tạo mới tài khoản cán bộ
 function handleCreateOfficer(req, res) {
   try {
-    const { username, password, name, role } = req.body;
+    const { username, password, name, role, department } = req.body;
     if (!username || !password) {
       return res.status(400).json({
         success: false,
@@ -82,7 +82,7 @@ function handleCreateOfficer(req, res) {
       });
     }
 
-    const created = securityService.createOfficer(username, password, name, role);
+    const created = securityService.createOfficer(username, password, name, role, department);
     const snapshot = buildClientSnapshot();
     return res.json({
       success: true,

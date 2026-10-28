@@ -11,9 +11,36 @@ import {
   AlertCircle,
   Volume2,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Lock,
+  Eye
 } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
+
+// Helper lưu trữ hồ sơ theo thiết bị (localStorage)
+export function saveSubmissionToDevice(sub) {
+  if (!sub || !sub.submissionCode) return;
+  try {
+    const KEY = 'hh_device_submissions';
+    const existing = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const filtered = existing.filter(item => item.submissionCode !== sub.submissionCode);
+    const newRecord = {
+      submissionCode: sub.submissionCode,
+      procedureTitle: sub.procedureTitle || 'Thủ tục hành chính',
+      citizenName: sub.citizenName || 'Bà con xã Hiệp Hòa',
+      status: sub.status || 'WAITING',
+      officerNote: sub.officerNote || '',
+      assignedOfficer: sub.assignedOfficer || '',
+      createdAt: sub.createdAt || new Date().toISOString(),
+      updatedAt: sub.updatedAt || new Date().toISOString(),
+      hamlet: sub.hamlet || 'Xã Hiệp Hòa'
+    };
+    filtered.unshift(newRecord);
+    localStorage.setItem(KEY, JSON.stringify(filtered.slice(0, 20)));
+  } catch (e) {
+    console.warn('Lỗi lưu hồ sơ vào thiết bị:', e);
+  }
+}
 
 export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
   if (!qrPayload) return null;
@@ -32,6 +59,25 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const previousStatusRef = useRef(submission.status);
   const previousNoteRef = useRef(submission.officerNote || '');
+
+  // CƠ CHẾ MÃ QR ĐỘNG BẢO MẬT XOAY VÒNG MỖI 15 GIÂY (Dynamic Rotating Security QR)
+  const [securityToken, setSecurityToken] = useState(() => `SEC-${Date.now()}`);
+  const [countdown, setCountdown] = useState(15);
+
+  // Đếm ngược 15 giây tự động làm mới mã bảo mật
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          // Xoay token bảo mật mới
+          setSecurityToken(`SEC-${Date.now()}-${Math.floor(Math.random() * 1000)}`);
+          return 15;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Tên người nộp thủ tục để thông báo trực tiếp tới bà con
   const citizenDisplayName = submission.citizenName || submission.formData?.ho_ten || submission.formData?.ho_ten_nguoi_yeu_cau || submission.formData?.ho_ten_nam || 'Bà con';
@@ -54,7 +100,10 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
           previousStatusRef.current = res.submission.status;
           previousNoteRef.current = res.submission.officerNote || '';
 
-          // Lưu mã hồ sơ vào thiết bị để tự động hiển thị thông báo kết quả từ cán bộ
+          // Lưu hồ sơ vào thiết bị để người dân xem lại sau khi thoát ra
+          saveSubmissionToDevice(res.submission);
+
+          // Lưu mã hồ sơ vào danh sách theo dõi toast
           try {
             sessionStorage.removeItem('hh_dismiss_all_notifications');
             const tracked = JSON.parse(localStorage.getItem('hh_tracked_submissions') || '[]');
@@ -95,6 +144,9 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
 
           const personName = currentSub.citizenName || currentSub.formData?.ho_ten || currentSub.formData?.ho_ten_nguoi_yeu_cau || citizenDisplayName;
 
+          // Cập nhật lại lịch sử trên thiết bị
+          saveSubmissionToDevice(currentSub);
+
           // 1. Kiểm tra nếu có ghi chú yêu cầu mới từ cán bộ thay đổi trên màn hình
           if (newNote && newNote !== oldNote) {
             previousNoteRef.current = newNote;
@@ -134,10 +186,12 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
     return () => clearInterval(interval);
   }, [submission.submissionCode, speakText, citizenDisplayName]);
 
-  const rawString = JSON.stringify({
+  // Payload mã QR chứa mã hồ sơ + Token bảo mật động xoay vòng mỗi 15s
+  const dynamicQrPayloadString = JSON.stringify({
     code: submission.submissionCode,
     schema_id: formId,
     title: submission.procedureTitle,
+    sec_token: securityToken,
     time: Date.now(),
     fields: submission.formData
   });
@@ -178,7 +232,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border-2 border-amber-400 p-5 sm:p-6 text-center animate-scale-up relative my-auto">
         <button
           type="button"
@@ -209,39 +263,67 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
 
         {/* Ghi chú của cán bộ nếu có */}
         {submission.officerNote && (
-          <div className="mt-2.5 p-2.5 bg-rose-50 border border-rose-300 rounded-xl text-left text-xs font-semibold text-rose-900">
-            <strong>Ghi chú từ cán bộ:</strong> {submission.officerNote}
+          <div className="mt-2.5 p-3 bg-rose-50 border border-rose-300 rounded-xl text-left text-xs font-bold text-rose-900 space-y-1">
+            <div className="flex items-center gap-1.5 text-rose-800 uppercase font-black">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>YÊU CẦU TỪ CÁN BỘ MỘT CỬA:</span>
+            </div>
+            <div>{submission.officerNote}</div>
           </div>
         )}
 
-        {/* Khung QR Code */}
-        <div className="my-4 p-3.5 bg-white rounded-2xl border-2 border-slate-300 inline-block shadow-md">
+        {/* Khung QR Code Động với Hiệu ứng bảo mật xoay vòng */}
+        <div className="my-3.5 p-3.5 bg-white rounded-2xl border-2 border-slate-300 inline-block shadow-md relative">
           <QRCodeSVG
-            value={rawString}
+            value={dynamicQrPayloadString}
             size={210}
             level="M"
             includeMargin={true}
           />
+
+          {/* Dấu bảo mật góc */}
+          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs">
+            <Lock className="w-2.5 h-2.5" />
+            <span>BẢO MẬT</span>
+          </div>
+        </div>
+
+        {/* THANH BẢO MẬT ĐỘNG: ĐẾM NGƯỢC LÀM MỚI MỖI 15 GIÂY */}
+        <div className="px-3 py-2 bg-slate-100 rounded-xl border border-slate-200 text-center space-y-1 mb-3">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+            <span className="flex items-center gap-1 text-emerald-800">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Mã QR bảo mật động xoay vòng:</span>
+            </span>
+            <span className="font-mono text-emerald-700 font-extrabold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              Làm mới sau {countdown}s
+            </span>
+          </div>
+          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-emerald-500 transition-all duration-1000 ease-linear"
+              style={{ width: `${(countdown / 15) * 100}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-slate-500">
+            Mã QR tự động cập nhật liên tục để bảo mật chống sao chép. Cán bộ quét lúc nào cũng nhận đúng hồ sơ của bà con!
+          </p>
         </div>
 
         {/* TRẠNG THÁI KẾT NỐI TỰ ĐỘNG ĐẾN CÁN BỘ MỘT CỬA */}
-        <div className="my-3 p-3 bg-emerald-50/90 border border-emerald-300 rounded-2xl flex items-center justify-center gap-2 text-emerald-950 text-xs sm:text-sm font-bold shadow-xs">
+        <div className="my-2 p-2.5 bg-emerald-50/90 border border-emerald-300 rounded-2xl flex items-center justify-center gap-2 text-emerald-950 text-xs sm:text-sm font-bold shadow-xs">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>Hồ sơ đã được gửi trực tuyến tới màn hình Cán bộ Một cửa</span>
+          <span>Hồ sơ đã được lưu trên thiết bị này và gửi tới Bộ phận Một cửa</span>
         </div>
 
         {/* Hướng dẫn bà con */}
         <div className="bg-amber-50/90 p-3 rounded-xl border border-amber-200 text-left text-xs text-amber-950 space-y-1 mb-4">
           <div className="font-extrabold flex items-center gap-1 text-[#991B1B]">
-            <span>👉 Hướng dẫn nộp hồ sơ tại xã:</span>
+            <span>👉 Hướng dẫn cho bà con:</span>
           </div>
           <p className="text-slate-700 leading-relaxed font-normal">
-            Bà con chỉ cần đưa mã QR này (hoặc đọc mã <strong>{submission.submissionCode}</strong>) cho cán bộ Một cửa. Màn hình máy tính của cán bộ sẽ tự động nhận hồ sơ trong <strong>10 giây</strong> để in ngay!
+            Bà con chỉ cần đưa mã QR này (hoặc đọc mã <strong>{submission.submissionCode}</strong>) cho cán bộ Một cửa để in ngay. <strong>Sau khi thoát ra, bà con mở lại trang web trên thiết bị này sẽ thấy ngay hồ sơ của mình để theo dõi tiến độ giải quyết!</strong>
           </p>
-          <div className="flex items-center gap-1 text-[11px] text-emerald-800 font-bold pt-1">
-            <RefreshCw className="w-3 h-3 text-emerald-600 animate-spin" />
-            <span>Hệ thống tự động cập nhật kết quả mỗi 3 giây và sẽ đọc to khi cán bộ hoàn tất.</span>
-          </div>
         </div>
 
         {/* Nút In QR & Đóng */}
@@ -266,7 +348,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
 
         <div className="mt-3 flex items-center justify-center gap-1 text-[11px] text-slate-500 font-medium">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Bảo mật Zero-Data • Đồng bộ thời gian thực UBND xã Hiệp Hòa</span>
+          <span>Bảo mật Zero-Data • Lưu vết theo thiết bị truy cập UBND xã Hiệp Hòa</span>
         </div>
       </div>
     </div>

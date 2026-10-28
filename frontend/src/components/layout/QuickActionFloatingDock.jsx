@@ -22,7 +22,8 @@ export default function QuickActionFloatingDock({
   onOpenLookup,
   onScrollToProcedures,
   onOpenPreCheck,
-  onScrollToTop
+  onScrollToTop,
+  deviceCount = 0
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -49,13 +50,13 @@ export default function QuickActionFloatingDock({
   }
 
   return (
-    <aside 
+    <aside
       aria-label="Thanh công cụ thao tác nhanh"
       style={{ zIndex: 60 }}
       className="fixed bottom-2 sm:bottom-5 left-1/2 -translate-x-1/2 z-50 select-none animate-fadeIn max-w-[96vw] pointer-events-auto"
     >
       <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-[#5B0B0E] border-2 border-amber-400 shadow-[0_12px_45px_rgba(0,0,0,0.85)]">
-        
+
         {/* 1. NÚT MICRO - CHẠM & NÓI VỚI CHUYÊN VIÊN AI (Vàng Hoàng Gia tỏa sáng) */}
         <button
           type="button"
@@ -75,10 +76,15 @@ export default function QuickActionFloatingDock({
           type="button"
           onClick={onOpenLookup}
           aria-label="Tra cứu tiến độ hồ sơ CCCD"
-          title="Tra cứu hồ sơ bằng CCCD hoặc Mã hồ sơ"
-          className="p-1.5 sm:p-2 rounded-full bg-gradient-to-tr from-cyan-700 to-blue-800 text-cyan-100 hover:text-white hover:scale-105 active:scale-95 transition-all border border-cyan-400/50 shadow-sm"
+          title={deviceCount > 0 ? `Bà con có ${deviceCount} hồ sơ trên thiết bị này` : "Tra cứu hồ sơ bằng CCCD hoặc Mã hồ sơ"}
+          className="relative p-1.5 sm:p-2 rounded-full bg-gradient-to-tr from-cyan-700 to-blue-800 text-cyan-100 hover:text-white hover:scale-105 active:scale-95 transition-all border border-cyan-400/50 shadow-sm"
         >
           <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-cyan-200" />
+          {deviceCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-[#690F12] font-black text-[9px] flex items-center justify-center ring-1 ring-white animate-pulse">
+              {deviceCount}
+            </span>
+          )}
           <span className="sr-only">Tra cứu</span>
         </button>
 

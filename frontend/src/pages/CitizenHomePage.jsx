@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { ChevronRight, FileCheck, Smartphone } from 'lucide-react';
 import Header from '../components/layout/Header';
 import AccessibilityBar from '../components/layout/AccessibilityBar';
 import HeroVoiceStation from '../components/voice/HeroVoiceStation';
@@ -8,7 +9,7 @@ import RagChatDrawer from '../components/rag-chat/RagChatDrawer';
 import SmartAutoFormModal from '../components/auto-form/SmartAutoFormModal';
 import DocumentPreCheckModal from '../components/pre-check/DocumentPreCheckModal';
 import CitizenQrModal from '../components/qr-handoff/CitizenQrModal';
-import CitizenLookupModal from '../components/qr-handoff/CitizenLookupModal';
+import CitizenLookupModal, { getDeviceSubmissions } from '../components/qr-handoff/CitizenLookupModal';
 import QuickActionFloatingDock from '../components/layout/QuickActionFloatingDock';
 import CitizenDeviceNotificationToast from '../components/layout/CitizenDeviceNotificationToast';
 import TrongDongMasterpiece from '../components/common/TrongDongMasterpiece';
@@ -39,6 +40,18 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
   const [isLookupOpen, setIsLookupOpen] = useState(false);
   const [lookupInitialQuery, setLookupInitialQuery] = useState('');
   const [isQueryLoading, setIsQueryLoading] = useState(false);
+  const [deviceSubmissionsCount, setDeviceSubmissionsCount] = useState(0);
+
+  // Theo dõi số lượng hồ sơ đã nộp trên thiết bị này
+  useEffect(() => {
+    const updateCount = () => {
+      const list = getDeviceSubmissions();
+      setDeviceSubmissionsCount(list.length);
+    };
+    updateCount();
+    const interval = setInterval(updateCount, 3000);
+    return () => clearInterval(interval);
+  }, [qrPayload, isLookupOpen]);
 
   const handleOpenAutoForm = (proc, mode = 'data_input') => {
     setAutoFormMode(mode);
@@ -141,6 +154,39 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
         {/* Main Content: Bố cục tinh gọn gồm 03 khu vực mạch lạc */}
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 overflow-x-hidden pb-32 sm:pb-28">
           
+          {/* BANNER THÔNG BÁO HỒ SƠ ĐÃ NỘP TRÊN THIẾT BỊ NÀY */}
+          {deviceSubmissionsCount > 0 && (
+            <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 via-white to-red-50 border-2 border-amber-400 shadow-md flex items-center justify-between gap-3 animate-fade-in">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-[#991B1B] text-amber-300 flex items-center justify-center shrink-0 font-black shadow-xs ring-2 ring-amber-300">
+                  <Smartphone className="w-5 h-5 text-amber-300" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-2">
+                    <span>Hồ sơ đã nộp trên thiết bị này</span>
+                    <span className="px-2 py-0.5 rounded-full bg-red-700 text-amber-300 text-xs font-black">
+                      {deviceSubmissionsCount} hồ sơ
+                    </span>
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-slate-600 mt-0.5">
+                    Bà con có thể xem ngay tiến độ đã giải quyết chưa, ghi chú yêu cầu thêm từ cán bộ, hoặc mở lại mã QR xoay vòng bảo mật.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setLookupInitialQuery('');
+                  setIsLookupOpen(true);
+                }}
+                className="shrink-0 px-3.5 py-2 rounded-xl bg-[#991B1B] hover:bg-red-800 text-white font-black text-xs shadow-sm active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span>Xem hồ sơ</span>
+                <ChevronRight className="w-4 h-4 text-amber-300" />
+              </button>
+            </div>
+          )}
+
           {/* KHU VỰC 1: TRUNG TÂM TƯ VẤN GIỌNG NÓI & HỎI ĐÁP PHÁP LUẬT AI 24/7 (Hero Voice Station) */}
           <HeroVoiceStation
             onQuerySubmit={handleQuerySubmit}
@@ -284,6 +330,7 @@ export default function CitizenHomePage({ onSwitchToOfficer }) {
           onScrollToProcedures={handleScrollToProcedures}
           onOpenPreCheck={handleOpenPreCheckDefault}
           onScrollToTop={handleScrollToTop}
+          deviceCount={deviceSubmissionsCount}
         />
       )}
 

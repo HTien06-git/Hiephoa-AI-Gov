@@ -3,6 +3,35 @@ const visionOcrService = require('../services/visionOcrService');
 async function handlePreCheck(req, res) {
   try {
     const procedureId = req.body.procedureId || req.query.procedureId || 'TT_KHAI_SINH';
+    const itemName = req.body.itemName || req.query.itemName || '';
+    const stepIndex = parseInt(req.body.stepIndex ?? req.query.stepIndex ?? 0, 10);
+
+    // 1. Nếu là kiểm tra từng mục giấy tờ cụ thể (Step-by-step)
+    if (itemName || req.body.singleCheck) {
+      let imageBuffer = null;
+      let mimeType = 'image/jpeg';
+
+      if (req.file) {
+        imageBuffer = req.file.buffer;
+        mimeType = req.file.mimetype;
+      } else if (req.body.image) {
+        const cleanBase64 = req.body.image.replace(/^data:image\/\w+;base64,/, '');
+        imageBuffer = Buffer.from(cleanBase64, 'base64');
+        if (req.body.image.includes('image/png')) mimeType = 'image/png';
+      }
+
+      const stepResult = await visionOcrService.preCheckStepItem({
+        imageBuffer,
+        mimeType,
+        itemName,
+        procedureId,
+        stepIndex
+      });
+
+      return res.json(stepResult);
+    }
+
+    // 2. Kiểm tra tổng thể hồ sơ
     let files = [];
 
     if (req.files && Array.isArray(req.files)) {

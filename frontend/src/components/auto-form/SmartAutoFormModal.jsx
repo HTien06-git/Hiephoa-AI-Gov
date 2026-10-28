@@ -372,23 +372,27 @@ export default function SmartAutoFormModal({
   const filledRequiredFields = schema.fields.filter(f => f.required && formData[f.name] && formData[f.name].trim() !== '').length;
   const progressPercent = totalRequiredFields > 0 ? Math.round((filledRequiredFields / totalRequiredFields) * 100) : 100;
 
-  // Helper render trường dữ liệu trong bản A4 (nếu có thì in đậm, nếu chưa thì hiển thị dấu chấm)
+  // Helper render trường dữ liệu trong bản A4 (chuẩn văn bản hành chính, không bị nhảy dòng hay tách chữ)
   const renderDocVal = (fieldName, dotLength = 32) => {
     let val = formData[fieldName];
     // Tự động chuẩn hóa hiển thị ngày tháng năm sinh dạng 00/00/0000 (DD/MM/YYYY) có dấu gạch
-    if (val && (fieldName.includes('ngay_sinh') || fieldName.includes('ngay_cap'))) {
+    if (val && (fieldName.includes('ngay_sinh') || fieldName.includes('ngay_cap') || fieldName.includes('date'))) {
       val = formatToSlashDate(val);
     }
     if (val && String(val).trim() !== '') {
       return (
-        <span className="font-bold underline decoration-slate-400 decoration-1 text-slate-950 px-1">
+        <span className="font-bold underline decoration-slate-400 decoration-1 text-slate-950 px-1 inline-block align-baseline whitespace-pre-wrap">
           {norm(String(val))}
         </span>
       );
     }
+    const minW = Math.max(dotLength * 5.5, 75);
     return (
-      <span className="text-slate-400 font-normal tracking-wider">
-        {'.'.repeat(dotLength)}
+      <span
+        style={{ minWidth: `${minW}px` }}
+        className="inline-block border-b border-dotted border-slate-400 mx-1 align-baseline text-transparent select-none h-[1.1em]"
+      >
+        .
       </span>
     );
   };
@@ -904,55 +908,129 @@ export default function SmartAutoFormModal({
                       <div className="font-bold uppercase text-xs sm:text-sm border-b border-black pb-0.5 mt-2">
                         I. Thông tin người yêu cầu đăng ký khai sinh:
                       </div>
-                      <div>
-                        - Họ, chữ đệm, tên: {renderDocVal('ho_ten_nguoi_yeu_cau', 36)}
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Họ, chữ đệm, tên:</span>
+                        {renderDocVal('ho_ten_nguoi_yeu_cau', 36)}
                       </div>
-                      <div>
-                        - Ngày, tháng, năm sinh: {renderDocVal('ngay_sinh_nguoi_yeu_cau', 16)} - Quan hệ với người được khai sinh: {renderDocVal('quan_he_voi_tre', 16)}
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Ngày, tháng, năm sinh:</span>
+                          {renderDocVal('ngay_sinh_nguoi_yeu_cau', 16)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Quan hệ với người được khai sinh:</span>
+                          {renderDocVal('quan_he_voi_tre', 16)}
+                        </span>
                       </div>
-                      <div>
-                        - Số Căn cước công dân: {renderDocVal('so_cccd', 20)} - Ngày cấp: {renderDocVal('ngay_cap_cccd', 14)}
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Số Căn cước công dân:</span>
+                          {renderDocVal('so_cccd', 20)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Ngày cấp:</span>
+                          {renderDocVal('ngay_cap_cccd', 14)}
+                        </span>
                       </div>
-                      <div>
-                        - Nơi thường trú: {renderDocVal('noi_thuong_tru', 42)}
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Nơi thường trú:</span>
+                        {renderDocVal('noi_thuong_tru', 42)}
                       </div>
-                      <div>
-                        - Số điện thoại liên hệ: {renderDocVal('so_dien_thoai', 20)}
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Số điện thoại liên hệ:</span>
+                        {renderDocVal('so_dien_thoai', 20)}
                       </div>
 
                       <div className="font-bold uppercase text-xs sm:text-sm border-b border-black pb-0.5 mt-3">
                         II. Thông tin người được khai sinh (Trẻ em):
                       </div>
-                      <div>
-                        - Họ, chữ đệm, tên: {renderDocVal('ho_ten_tre', 38)}
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Họ, chữ đệm, tên:</span>
+                        {renderDocVal('ho_ten_tre', 38)}
                       </div>
-                      <div>
-                        - Giới tính: {renderDocVal('gioi_tinh_tre', 12)} - Ngày sinh: {renderDocVal('ngay_sinh_tre', 18)}
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Giới tính:</span>
+                          {renderDocVal('gioi_tinh_tre', 12)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Ngày sinh:</span>
+                          {renderDocVal('ngay_sinh_tre', 18)}
+                        </span>
                       </div>
-                      <div>
-                        - Ngày sinh bằng chữ: {renderDocVal('ngay_sinh_tre_bang_chu', 42)}
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Ngày sinh bằng chữ:</span>
+                        {renderDocVal('ngay_sinh_tre_bang_chu', 42)}
                       </div>
-                      <div>
-                        - Nơi sinh: {renderDocVal('noi_sinh_tre', 42)}
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Nơi sinh:</span>
+                        {renderDocVal('noi_sinh_tre', 42)}
                       </div>
-                      <div>
-                        - Dân tộc: {renderDocVal('dan_toc_tre', 12)} - Quốc tịch: {renderDocVal('quoc_tich_tre', 14)} - Quê quán: {renderDocVal('que_quan_tre', 30)}
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Dân tộc:</span>
+                          {renderDocVal('dan_toc_tre', 12)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Quốc tịch:</span>
+                          {renderDocVal('quoc_tich_tre', 14)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Quê quán:</span>
+                          {renderDocVal('que_quan_tre', 30)}
+                        </span>
                       </div>
 
                       <div className="font-bold uppercase text-xs sm:text-sm border-b border-black pb-0.5 mt-3">
                         III. Thông tin người mẹ và người cha:
                       </div>
-                      <div>
-                        - Họ tên mẹ: {renderDocVal('ho_ten_me', 30)} - Năm sinh: {renderDocVal('nam_sinh_me', 10)} - Dân tộc: {renderDocVal('dan_toc_me', 10)}
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Họ tên mẹ:</span>
+                          {renderDocVal('ho_ten_me', 30)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Năm sinh:</span>
+                          {renderDocVal('nam_sinh_me', 10)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Dân tộc:</span>
+                          {renderDocVal('dan_toc_me', 10)}
+                        </span>
                       </div>
-                      <div>
-                        - Số CCCD mẹ: {renderDocVal('so_cccd_me', 20)} - Nơi cư trú: {renderDocVal('noi_cu_tru_me', 32)}
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Số CCCD mẹ:</span>
+                          {renderDocVal('so_cccd_me', 20)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1">
+                          <span className="whitespace-nowrap">- Nơi cư trú:</span>
+                          {renderDocVal('noi_cu_tru_me', 32)}
+                        </span>
                       </div>
-                      <div>
-                        - Họ tên cha: {renderDocVal('ho_ten_cha', 30)} - Năm sinh: {renderDocVal('nam_sinh_cha', 10)} - Dân tộc: {renderDocVal('dan_toc_cha', 10)}
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Họ tên cha:</span>
+                          {renderDocVal('ho_ten_cha', 30)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Năm sinh:</span>
+                          {renderDocVal('nam_sinh_cha', 10)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Dân tộc:</span>
+                          {renderDocVal('dan_toc_cha', 10)}
+                        </span>
                       </div>
-                      <div>
-                        - Số CCCD cha: {renderDocVal('so_cccd_cha', 20)} - Nơi cư trú: {renderDocVal('noi_cu_tru_cha', 32)}
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span>- Số CCCD cha:</span>
+                          {renderDocVal('so_cccd_cha', 20)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1">
+                          <span className="whitespace-nowrap">- Nơi cư trú:</span>
+                          {renderDocVal('noi_cu_tru_cha', 32)}
+                        </span>
                       </div>
                     </>
                   )}
@@ -960,24 +1038,24 @@ export default function SmartAutoFormModal({
                   {/* MẪU 2: TỜ KHAI ĐĂNG KÝ KẾT HÔN */}
                   {formId === 'FORM_KET_HON' && (
                     <>
-                      <div className="grid grid-cols-2 gap-3 border border-black p-2.5 mt-2">
-                        <div>
-                          <div className="font-bold uppercase text-center border-b border-black pb-1 mb-1.5 text-xs sm:text-sm">Bên Nam</div>
-                          <div>- Họ và tên: {renderDocVal('ho_ten_nam', 18)}</div>
-                          <div>- Ngày sinh: {renderDocVal('ngay_sinh_nam', 14)}</div>
-                          <div>- Dân tộc: {renderDocVal('dan_toc_nam', 12)}</div>
-                          <div>- Số CCCD: {renderDocVal('so_cccd_nam', 16)}</div>
-                          <div>- Thường trú: {renderDocVal('noi_thuong_tru_nam', 20)}</div>
-                          <div>- Lần kết hôn: {renderDocVal('lan_ket_hon_nam', 12)}</div>
+                      <div className="grid grid-cols-2 gap-4 border border-black p-3 mt-2 rounded-xs">
+                        <div className="space-y-1">
+                          <div className="font-bold uppercase text-center border-b border-black pb-1 mb-2 text-xs sm:text-sm">Bên Nam</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Họ và tên:</span>{renderDocVal('ho_ten_nam', 18)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Ngày sinh:</span>{renderDocVal('ngay_sinh_nam', 14)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Dân tộc:</span>{renderDocVal('dan_toc_nam', 12)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Số CCCD:</span>{renderDocVal('so_cccd_nam', 16)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Thường trú:</span>{renderDocVal('noi_thuong_tru_nam', 20)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Lần kết hôn:</span>{renderDocVal('lan_ket_hon_nam', 12)}</div>
                         </div>
-                        <div>
-                          <div className="font-bold uppercase text-center border-b border-black pb-1 mb-1.5 text-xs sm:text-sm">Bên Nữ</div>
-                          <div>- Họ và tên: {renderDocVal('ho_ten_nu', 18)}</div>
-                          <div>- Ngày sinh: {renderDocVal('ngay_sinh_nu', 14)}</div>
-                          <div>- Dân tộc: {renderDocVal('dan_toc_nu', 12)}</div>
-                          <div>- Số CCCD: {renderDocVal('so_cccd_nu', 16)}</div>
-                          <div>- Thường trú: {renderDocVal('noi_thuong_tru_nu', 20)}</div>
-                          <div>- Lần kết hôn: {renderDocVal('lan_ket_hon_nu', 12)}</div>
+                        <div className="space-y-1">
+                          <div className="font-bold uppercase text-center border-b border-black pb-1 mb-2 text-xs sm:text-sm">Bên Nữ</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Họ và tên:</span>{renderDocVal('ho_ten_nu', 18)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Ngày sinh:</span>{renderDocVal('ngay_sinh_nu', 14)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Dân tộc:</span>{renderDocVal('dan_toc_nu', 12)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Số CCCD:</span>{renderDocVal('so_cccd_nu', 16)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Thường trú:</span>{renderDocVal('noi_thuong_tru_nu', 20)}</div>
+                          <div className="flex items-baseline gap-1"><span className="whitespace-nowrap font-medium">- Lần kết hôn:</span>{renderDocVal('lan_ket_hon_nu', 12)}</div>
                         </div>
                       </div>
                       <div className="italic text-xs mt-2">
@@ -989,38 +1067,152 @@ export default function SmartAutoFormModal({
                   {/* MẪU 3: TỜ KHAI XÁC NHẬN TÌNH TRẠNG HÔN NHÂN */}
                   {formId === 'FORM_TINH_TRANG_HON_NHAN' && (
                     <>
-                      <div>- Họ và tên người yêu cầu: {renderDocVal('ho_ten', 36)} - Giới tính: {renderDocVal('gioi_tinh', 12)}</div>
-                      <div>- Ngày, tháng, năm sinh: {renderDocVal('ngay_sinh', 16)} - Dân tộc: {renderDocVal('dan_toc', 12)} - Quốc tịch: {renderDocVal('quoc_tich', 12)}</div>
-                      <div>- Số Căn cước công dân: {renderDocVal('so_cccd', 20)} - Ngày cấp: {renderDocVal('ngay_cap_cccd', 14)}</div>
-                      <div>- Nơi thường trú: {renderDocVal('noi_thuong_tru', 46)}</div>
-                      <div>- Thời gian cư trú tại địa phương: {renderDocVal('thoi_gian_cu_tru', 36)}</div>
-                      <div>- Tình trạng hôn nhân hiện tại: {renderDocVal('tinh_trang_hon_nhan', 42)}</div>
-                      <div>- Mục đích sử dụng Giấy xác nhận: {renderDocVal('muc_dich_su_dung', 40)}</div>
-                      <div>- Số lượng bản đề nghị cấp: {renderDocVal('so_luong_ban', 8)} bản.</div>
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Họ và tên người yêu cầu:</span>
+                          {renderDocVal('ho_ten', 32)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Giới tính:</span>
+                          {renderDocVal('gioi_tinh', 12)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Ngày, tháng, năm sinh:</span>
+                          {renderDocVal('ngay_sinh', 16)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Dân tộc:</span>
+                          {renderDocVal('dan_toc', 12)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Quốc tịch:</span>
+                          {renderDocVal('quoc_tich', 12)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Số Căn cước công dân:</span>
+                          {renderDocVal('so_cccd', 20)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Ngày cấp:</span>
+                          {renderDocVal('ngay_cap_cccd', 14)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Nơi thường trú:</span>
+                        {renderDocVal('noi_thuong_tru', 46)}
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Thời gian cư trú tại địa phương:</span>
+                        {renderDocVal('thoi_gian_cu_tru', 36)}
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Tình trạng hôn nhân hiện tại:</span>
+                        {renderDocVal('tinh_trang_hon_nhan', 42)}
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Mục đích sử dụng Giấy xác nhận:</span>
+                        {renderDocVal('muc_dich_su_dung', 40)}
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-1 py-0.5">
+                        <span className="font-medium">- Số lượng bản đề nghị cấp:</span>
+                        {renderDocVal('so_luong_ban', 8)}
+                        <span>bản.</span>
+                      </div>
                     </>
                   )}
 
                   {/* MẪU 4: ĐƠN ĐỀ NGHỊ CHỨNG THỰC */}
                   {formId === 'FORM_CHUNG_THUC' && (
                     <>
-                      <div>- Họ và tên người đề nghị: {renderDocVal('ho_ten', 36)} - Điện thoại: {renderDocVal('so_dien_thoai', 18)}</div>
-                      <div>- Ngày, tháng, năm sinh: {renderDocVal('ngay_sinh', 16)} - Số CCCD: {renderDocVal('so_cccd', 20)}</div>
-                      <div>- Địa chỉ thường trú: {renderDocVal('noi_thuong_tru', 48)}</div>
-                      <div>- Loại hình đề nghị chứng thực: {renderDocVal('loai_chung_thuc', 40)}</div>
-                      <div>- Tên giấy tờ cần chứng thực: {renderDocVal('ten_giay_to_chung_thuc', 42)}</div>
-                      <div>- Số lượng bản yêu cầu: {renderDocVal('so_luong_ban', 10)} bản.</div>
-                      <div>- Mục đích sử dụng: {renderDocVal('muc_dich_su_dung', 42)}</div>
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Họ và tên người đề nghị:</span>
+                          {renderDocVal('ho_ten', 32)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Điện thoại:</span>
+                          {renderDocVal('so_dien_thoai', 18)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Ngày, tháng, năm sinh:</span>
+                          {renderDocVal('ngay_sinh', 16)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Số CCCD:</span>
+                          {renderDocVal('so_cccd', 20)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Địa chỉ thường trú:</span>
+                        {renderDocVal('noi_thuong_tru', 48)}
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Loại hình đề nghị chứng thực:</span>
+                        {renderDocVal('loai_chung_thuc', 40)}
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Tên giấy tờ cần chứng thực:</span>
+                        {renderDocVal('ten_giay_to_chung_thuc', 42)}
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-1 py-0.5">
+                        <span className="font-medium">- Số lượng bản yêu cầu:</span>
+                        {renderDocVal('so_luong_ban', 10)}
+                        <span>bản.</span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Mục đích sử dụng:</span>
+                        {renderDocVal('muc_dich_su_dung', 42)}
+                      </div>
                     </>
                   )}
 
                   {/* MẪU 5: ĐƠN XIN XÁC NHẬN CƯ TRÚ / HỘ NGHÈO */}
                   {formId === 'FORM_CU_TRU_HO_NGHEO' && (
                     <>
-                      <div>- Họ và tên người làm đơn: {renderDocVal('ho_ten', 36)} - Giới tính: {renderDocVal('gioi_tinh', 12)}</div>
-                      <div>- Ngày, tháng, năm sinh: {renderDocVal('ngay_sinh', 16)} - Số CCCD: {renderDocVal('so_cccd', 20)}</div>
-                      <div>- Đang thường trú tại: {renderDocVal('ten_ap', 20)} - Chi tiết: {renderDocVal('noi_thuong_tru', 40)}</div>
-                      <div>- Nội dung đề nghị UBND xã xác nhận: {renderDocVal('noi_dung_de_nghi', 44)}</div>
-                      <div>- Mục đích sử dụng: {renderDocVal('muc_dich_su_dung', 42)}</div>
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Họ và tên người làm đơn:</span>
+                          {renderDocVal('ho_ten', 32)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Giới tính:</span>
+                          {renderDocVal('gioi_tinh', 12)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Ngày, tháng, năm sinh:</span>
+                          {renderDocVal('ngay_sinh', 16)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Số CCCD:</span>
+                          {renderDocVal('so_cccd', 20)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 py-0.5">
+                        <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                          <span className="font-medium">- Đang thường trú tại:</span>
+                          {renderDocVal('ten_ap', 20)}
+                        </span>
+                        <span className="inline-flex items-baseline gap-1">
+                          <span className="whitespace-nowrap font-medium">- Chi tiết:</span>
+                          {renderDocVal('noi_thuong_tru', 40)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Nội dung đề nghị UBND xã xác nhận:</span>
+                        {renderDocVal('noi_dung_de_nghi', 44)}
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 py-0.5">
+                        <span className="shrink-0 font-medium">- Mục đích sử dụng:</span>
+                        {renderDocVal('muc_dich_su_dung', 42)}
+                      </div>
                     </>
                   )}
 

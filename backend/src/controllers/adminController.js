@@ -125,11 +125,36 @@ function handleUpdateOfficer(req, res) {
   }
 }
 
+// Xóa tài khoản cán bộ
+function handleDeleteOfficer(req, res) {
+  try {
+    const { username } = req.params;
+    const ok = securityService.deleteOfficer(username);
+    if (!ok) {
+      return res.status(404).json({
+        success: false,
+        error: `Không tìm thấy tài khoản cán bộ "${username}" để xóa.`
+      });
+    }
+
+    const snapshot = buildClientSnapshot();
+    return res.json({
+      success: true,
+      message: `Đã xóa tài khoản cán bộ "${username}" thành công!`,
+      username,
+      clientSnapshot: snapshot
+    });
+  } catch (err) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+}
+
 module.exports = {
   handleGetAllDevices,
   handleResetDevice,
   handleResetAllDevices,
   handleGetAllOfficers,
   handleCreateOfficer,
-  handleUpdateOfficer
+  handleUpdateOfficer,
+  handleDeleteOfficer
 };

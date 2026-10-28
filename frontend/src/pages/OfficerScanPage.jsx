@@ -33,9 +33,11 @@ import {
   Volume2,
   BarChart2,
   Filter,
-  Calendar
+  Calendar,
+  Camera,
+  Upload
 } from 'lucide-react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import { docxExportService } from '../services/docxExportService';
 import { apiClient } from '../services/apiClient';
 import { saveClientSnapshot } from '../services/persistentBackup';
@@ -83,6 +85,13 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   });
   const [isExporting, setIsExporting] = useState(false);
 
+  // QR Scanner States & Refs
+  const [cameraRunning, setCameraRunning] = useState(false);
+  const [cameraError, setCameraError] = useState('');
+  const [quickManualCode, setQuickManualCode] = useState('');
+  const html5QrCodeRef = useRef(null);
+  const qrFileInputRef = useRef(null);
+
   // Gọi Loa state (Hạng mục 8.2)
   const [callingOutCode, setCallingOutCode] = useState(null);
 
@@ -106,65 +115,123 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
     return () => clearInterval(interval);
   }, []);
 
-  // Khởi tạo máy quét mã QR bằng camera khi ở tab 'scan_camera'
-  useEffect(() => {
-    let html5QrcodeScanner;
-    if (activeTab === 'scan_camera') {
-      try {
-        html5QrcodeScanner = new Html5QrcodeScanner(
-          "officer-qr-reader",
-          { fps: 10, qrbox: { width: 240, height: 240 } },
-          false
-        );
-
-        html5QrcodeScanner.render(
-          (decodedText) => {
-            handleProcessQrCode(decodedText);
-            try {
-              html5QrcodeScanner.clear();
-            } catch (e) {}
-          },
-          (error) => {}
-        );
-      } catch (e) {
-        console.warn('Scanner init notice:', e);
-      }
-    }
-
-    return () => {
-      try {
-        if (html5QrcodeScanner) html5QrcodeScanner.clear();
-      } catch (e) {}
-    };
-  }, [activeTab]);
-
-  // Xử lý khi quét mã QR hoặc tìm mã hồ sơ
-  const handleProcessQrCode = async (raw) => {
+  // Dừng máy quét camera an toàn
+  const stopQrCamera = async () => {
     try {
-      const parsed = JSON.parse(raw);
-      if (parsed.code) {
-        handleSelectSubmissionByCode(parsed.code);
-      } else {
-        // Hồ sơ từ client
-        const newSub = {
-          submissionCode: `HH-${Math.floor(1024 + Math.random() * 50)}`,
-          procedureTitle: parsed.title || 'Hồ sơ quét từ QR',
-          citizenName: parsed.fields?.ho_ten || parsed.fields?.ho_ten_nguoi_yeu_cau || 'Bà con xã Hiệp Hòa',
-          formData: parsed.fields || {},
-          status: 'WAITING',
-          createdAt: new Date().toISOString()
-        };
-        setSelectedSubmission(newSub);
-        setEditedFormData(newSub.formData);
-        setActiveTab('live_queue');
+      if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+        await html5QrCodeRef.current.stop();
       }
     } catch (e) {
-      // Nếu là chuỗi mã đơn thuần (ví dụ "HH-1021")
-      if (raw && raw.startsWith('HH-')) {
-        handleSelectSubmissionByCode(raw.trim());
-      } else {
-        alert('Mã QR không đúng định dạng hồ sơ điện tử xã Hiệp Hòa.');
+      console.warn('Stop camera error:', e);
+    } finally {
+      setCameraRunning(false);
+    }
+  };
+
+  // Khởi động máy quét camera trực tiếp
+  const startQrCamera = async () => {
+    setCameraError('');
+    try {
+      const container = document.getElementById('officer-qr-reader');
+      if (!container) {
+        setCameraError('Không tìm thấy khung quét camera trên màn hình.');
+        return;
       }
+
+      if (!html5QrCodeRef.current) {
+        html5QrCodeRef.current = new Html5Qrcode('officer-qr-reader');
+      }
+
+      const qr = html5QrCodeRef.current;
+      if (qr.isScanning) {
+        await qr.stop();
+      }
+
+      await qr.start(
+        { facingMode: 'environment' },
+        { fps: 15, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          handleProcessQrCode(decodedText);
+          stopQrCamera();
+        },
+        () => {}
+      );
+      setCameraRunning(true);
+    } catch (err) {
+      console.error('Camera start error:', err);
+      setCameraError('Không thể mở Camera (Có thể do thiết bị không có webcam hoặc trình duyệt chưa được cấp quyền truy cập Camera). Cán bộ có thể dùng tính năng Tải Ảnh Mã QR hoặc Nhập Mã Trực Tiếp bên dưới.');
+      setCameraRunning(false);
+    }
+  };
+
+  // Dọn dẹp khi chuyển tab
+  useEffect(() => {
+    if (activeTab === 'scan_camera') {
+      const timer = setTimeout(() => {
+        startQrCamera();
+      }, 300);
+      return () => {
+        clearTimeout(timer);
+        stopQrCamera();
+      };
+    } else {
+      stopQrCamera();
+    }
+  }, [activeTab]);
+
+  // Quét mã QR từ file ảnh người dân gửi
+  const handleScanQrFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const html5Qr = new Html5Qrcode('officer-qr-file-dummy');
+      const decodedText = await html5Qr.scanFile(file, true);
+      html5Qr.clear();
+      setActionNotification('Đã giải mã thành công từ tệp ảnh mã QR!');
+      handleProcessQrCode(decodedText);
+    } catch (err) {
+      alert('Không nhận diện được mã QR trong ảnh này. Cán bộ vui lòng chọn ảnh chụp rõ nét hơn hoặc nhập mã hồ sơ.');
+    }
+    e.target.value = '';
+  };
+
+  // Xử lý khi quét mã QR hoặc tìm mã hồ sơ (hỗ trợ mọi định dạng JSON, text, token)
+  const handleProcessQrCode = async (raw) => {
+    if (!raw) return;
+    const trimmed = String(raw).trim();
+
+    try {
+      // 1. Nếu là JSON
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        const parsed = JSON.parse(trimmed);
+        if (parsed.code) {
+          handleSelectSubmissionByCode(parsed.code);
+          return;
+        }
+        if (parsed.submissionCode) {
+          handleSelectSubmissionByCode(parsed.submissionCode);
+          return;
+        }
+      }
+
+      // 2. Nếu là chuỗi có chứa mã HH-xxxx
+      const match = trimmed.match(/HH-\d{3,5}/i);
+      if (match) {
+        handleSelectSubmissionByCode(match[0].toUpperCase());
+        return;
+      }
+
+      // 3. Nếu là chuỗi số CCCD 12 số
+      const digits = trimmed.replace(/\D/g, '');
+      if (digits.length >= 9) {
+        handleSelectSubmissionByCode(digits);
+        return;
+      }
+
+      handleSelectSubmissionByCode(trimmed);
+    } catch (e) {
+      handleSelectSubmissionByCode(trimmed);
     }
   };
 
@@ -268,11 +335,10 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
     setTimeout(() => setActionNotification(''), 3500);
   };
 
-  // Xuất báo cáo Excel (.xlsx) theo mốc thời gian (Hạng mục 5)
-  const handleExportExcel = async () => {
+  // Xuất Báo Cáo Thống Kê Tổng Hợp sang file Word (.docx) chuẩn Nghị định 30/2020/NĐ-CP
+  const handleExportWordReport = async () => {
     setIsExporting(true);
     try {
-      // Tính startDate/endDate từ bộ lọc nhanh
       const now = new Date();
       let startDate = excelFilter.startDate;
       let endDate = excelFilter.endDate;
@@ -297,26 +363,36 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
         endDate = now.toISOString().split('T')[0];
       }
 
-      const params = new URLSearchParams();
-      if (startDate) params.append('startDate', startDate);
-      if (endDate) params.append('endDate', endDate);
-      if (excelFilter.status !== 'ALL') params.append('status', excelFilter.status);
-      if (excelFilter.procedureId !== 'ALL') params.append('procedureId', excelFilter.procedureId);
+      // Lọc danh sách hồ sơ tương ứng
+      let filtered = [...liveQueue];
+      if (startDate) {
+        const from = new Date(startDate);
+        from.setHours(0, 0, 0, 0);
+        filtered = filtered.filter(s => new Date(s.createdAt) >= from);
+      }
+      if (endDate) {
+        const to = new Date(endDate);
+        to.setHours(23, 59, 59, 999);
+        filtered = filtered.filter(s => new Date(s.createdAt) <= to);
+      }
+      if (excelFilter.status && excelFilter.status !== 'ALL') {
+        filtered = filtered.filter(s => s.status === excelFilter.status);
+      }
 
-      const url = `/api/submissions/export-excel?${params.toString()}`;
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Bao_Cao_Ho_So_Hiep_Hoa_AI_Gov.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setActionNotification('Đã xuất file báo cáo Excel (.xlsx) thành công!');
+      await docxExportService.exportOfficialReportDocx(filtered, {
+        range: excelFilter.range,
+        startDate,
+        endDate,
+        status: excelFilter.status
+      }, user);
+
+      setActionNotification('Đã xuất Báo cáo Thống kê Tổng hợp sang file Word (.docx) chuẩn thể thức nhà nước thành công!');
     } catch (e) {
-      alert('Lỗi xuất Excel: ' + e.message);
+      alert('Lỗi xuất báo cáo Word: ' + e.message);
     } finally {
       setIsExporting(false);
     }
-    setTimeout(() => setActionNotification(''), 3500);
+    setTimeout(() => setActionNotification(''), 4000);
   };
 
   // Gọi Loa mời công dân lên quầy (Hạng mục 8.2)
@@ -594,18 +670,18 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                         <span>Xuất Sổ Word (.docx)</span>
                       </button>
 
-                      {/* NÚT MỞ PANEL THỐNG KÊ & XUẤT EXCEL (Hạng mục 5) */}
+                      {/* NÚT MỞ PANEL THỐNG KÊ & XUẤT WORD CHUẨN NHÀ NƯỚC (Hạng mục 5) */}
                       <button
                         type="button"
                         onClick={() => setShowExcelPanel(prev => !prev)}
                         className={`px-2.5 py-1 rounded-lg text-[11px] font-black flex items-center gap-1 shadow-2xs active:scale-95 transition-all
                           ${showExcelPanel
-                            ? 'bg-green-700 text-white'
-                            : 'bg-green-600 hover:bg-green-700 text-white'}`}
-                        title="Thống kê và xuất báo cáo hồ sơ theo mốc thời gian ra Excel"
+                            ? 'bg-blue-800 text-white'
+                            : 'bg-blue-700 hover:bg-blue-800 text-white'}`}
+                        title="Thống kê và xuất báo cáo tổng hợp hồ sơ chuẩn thể thức văn bản nhà nước (.docx)"
                       >
-                        <BarChart2 className="w-3.5 h-3.5 text-lime-300" />
-                        <span>📊 Xuất Excel</span>
+                        <FileText className="w-3.5 h-3.5 text-amber-300" />
+                        <span>📄 Xuất Báo Cáo Word</span>
                       </button>
 
                       {/* NÚT RESET TOÀN BỘ HỒ SƠ (CHỈ HIỂN THỊ VỚI QUẢN TRỊ VIÊN) */}
@@ -648,17 +724,17 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                   </div>
                 </div>
 
-                {/* PANEL THỐNG KÊ & XUẤT EXCEL (Hạng mục 5) */}
+                {/* PANEL THỐNG KÊ & XUẤT BÁO CÁO WORD (.DOCX) CHUẨN NHÀ NƯỚC (Hạng mục 5) */}
                 {showExcelPanel && (
-                  <div className="bg-green-50 border border-green-300 rounded-2xl p-4 space-y-3 animate-fade-in">
-                    <div className="flex items-center gap-2 text-green-900 font-black text-sm">
-                      <BarChart2 className="w-4 h-4 text-green-700" />
-                      <span>Thống Kê & Xuất Báo Cáo Hồ Sơ Ra Excel</span>
+                  <div className="bg-blue-50 border border-blue-300 rounded-2xl p-4 space-y-3 animate-fade-in">
+                    <div className="flex items-center gap-2 text-blue-950 font-black text-sm">
+                      <FileText className="w-4 h-4 text-blue-700" />
+                      <span>Thống Kê & Xuất Báo Cáo Tổng Hợp Ra File Word (.docx) Chuẩn Nhà Nước</span>
                     </div>
 
                     {/* Mốc thời gian nhanh */}
                     <div>
-                      <div className="text-[11px] font-bold text-green-800 mb-1.5 uppercase tracking-wide">Khoảng thời gian:</div>
+                      <div className="text-[11px] font-bold text-blue-900 mb-1.5 uppercase tracking-wide">Khoảng thời gian:</div>
                       <div className="flex flex-wrap gap-1.5">
                         {[
                           { key: 'today', label: 'Hôm nay' },
@@ -673,8 +749,8 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                             onClick={() => setExcelFilter(f => ({ ...f, range: r.key }))}
                             className={`px-3 py-1 rounded-lg text-[11px] font-bold border transition-all
                               ${excelFilter.range === r.key
-                                ? 'bg-green-700 text-white border-green-700'
-                                : 'bg-white text-green-800 border-green-300 hover:bg-green-100'}`}
+                                ? 'bg-blue-700 text-white border-blue-700'
+                                : 'bg-white text-blue-900 border-blue-300 hover:bg-blue-100'}`}
                           >
                             {r.label}
                           </button>
@@ -686,16 +762,16 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                     {excelFilter.range === 'custom' && (
                       <div className="flex items-center gap-2 flex-wrap">
                         <div className="flex items-center gap-1">
-                          <label className="text-[11px] font-bold text-green-800">Từ:</label>
+                          <label className="text-[11px] font-bold text-blue-900">Từ:</label>
                           <input type="date" value={excelFilter.startDate}
                             onChange={e => setExcelFilter(f => ({ ...f, startDate: e.target.value }))}
-                            className="text-xs border border-green-300 rounded-lg px-2 py-1 bg-white text-green-900" />
+                            className="text-xs border border-blue-300 rounded-lg px-2 py-1 bg-white text-blue-900" />
                         </div>
                         <div className="flex items-center gap-1">
-                          <label className="text-[11px] font-bold text-green-800">Đến:</label>
+                          <label className="text-[11px] font-bold text-blue-900">Đến:</label>
                           <input type="date" value={excelFilter.endDate}
                             onChange={e => setExcelFilter(f => ({ ...f, endDate: e.target.value }))}
-                            className="text-xs border border-green-300 rounded-lg px-2 py-1 bg-white text-green-900" />
+                            className="text-xs border border-blue-300 rounded-lg px-2 py-1 bg-white text-blue-900" />
                         </div>
                       </div>
                     )}
@@ -703,16 +779,16 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                     {/* Bộ lọc Trạng thái */}
                     <div className="flex flex-wrap gap-2">
                       <div className="flex items-center gap-1">
-                        <label className="text-[11px] font-bold text-green-800">Trạng thái:</label>
+                        <label className="text-[11px] font-bold text-blue-900">Trạng thái:</label>
                         <select value={excelFilter.status}
                           onChange={e => setExcelFilter(f => ({ ...f, status: e.target.value }))}
-                          className="text-xs border border-green-300 rounded-lg px-2 py-1 bg-white text-green-900"
+                          className="text-xs border border-blue-300 rounded-lg px-2 py-1 bg-white text-blue-900"
                         >
-                          <option value="ALL">Tất cả</option>
+                          <option value="ALL">Tất cả trạng thái</option>
                           <option value="WAITING">Chờ tiếp nhận</option>
-                          <option value="PROCESSING">Đang xử lý</option>
-                          <option value="COMPLETED">Đã hoàn tất</option>
-                          <option value="NEEDS_SUPPLEMENT">Cần bổ sung</option>
+                          <option value="PROCESSING">Đang xử lý tại quầy</option>
+                          <option value="COMPLETED">Đã hoàn tất & Trả KQ</option>
+                          <option value="NEEDS_SUPPLEMENT">Cần bổ sung giấy tờ</option>
                         </select>
                       </div>
                     </div>
@@ -720,12 +796,12 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
                     {/* Nút xuất */}
                     <button
                       type="button"
-                      onClick={handleExportExcel}
+                      onClick={handleExportWordReport}
                       disabled={isExporting}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-green-700 to-emerald-700 hover:from-green-800 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 hover:from-blue-800 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
                     >
-                      <Download className="w-4 h-4 text-lime-300" />
-                      {isExporting ? '⏳ Đang tạo file...' : '📊 Xuất File Excel (.xlsx) — Báo Cáo Hành Chính Chính Thức'}
+                      <Download className="w-4 h-4 text-amber-300" />
+                      {isExporting ? '⏳ Đang tạo file Word OpenXML...' : '📄 Tải File Word Báo Cáo (.docx) Chuẩn Nghị Định 30/2020/NĐ-CP'}
                     </button>
                   </div>
                 )}
@@ -997,21 +1073,126 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
           )}
 
           {/* ======================================================== */}
-          {/* TAB 2: QUÉT MÃ QR CAMERA                                 */}
+          {/* TAB 2: QUÉT MÃ QR ĐA NĂNG (CAMERA + TẢI ẢNH + BẮN MÃ)   */}
           {/* ======================================================== */}
           {activeTab === 'scan_camera' && (
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm max-w-xl mx-auto text-center space-y-4">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm max-w-2xl mx-auto text-center space-y-5 animate-scale-up">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-[#991B1B] text-xs font-black uppercase">
                 <Scan className="w-4 h-4 text-amber-600" />
-                <span>QUÉT MÃ QR BẰNG CAMERA MÁY TÍNH / ĐIỆN THOẠI</span>
+                <span>BỘ TIẾP NHẬN MÃ QR ĐIỆN TỬ CÁN BỘ MỘT CỬA</span>
               </div>
-              <h2 className="text-lg font-black text-slate-900">
-                Đưa Mã QR Trên Điện Thoại Của Người Dân Vào Khung Quét
+
+              <h2 className="text-lg sm:text-xl font-black text-slate-900">
+                Quét Mã QR Hoặc Nhập Mã Tiếp Nhận Hồ Sơ
               </h2>
-              <div id="officer-qr-reader" className="mx-auto rounded-2xl overflow-hidden border-2 border-dashed border-red-400 max-w-sm" />
-              <p className="text-xs text-slate-500">
-                Sau khi quét thành công, hồ sơ sẽ tự động nạp vào màn hình tiếp nhận và đồng bộ trực tuyến.
-              </p>
+
+              {/* KHUNG QUÉT CAMERA */}
+              <div className="space-y-3">
+                <div
+                  id="officer-qr-reader"
+                  className="mx-auto rounded-2xl overflow-hidden border-2 border-dashed border-red-500 max-w-sm bg-slate-950 min-h-[260px] flex items-center justify-center relative text-white"
+                >
+                  {!cameraRunning && (
+                    <div className="p-4 text-slate-400 text-xs space-y-2">
+                      <Camera className="w-10 h-10 mx-auto text-slate-500" />
+                      <div>Camera đang tạm dừng hoặc chưa được mở.</div>
+                      <button
+                        type="button"
+                        onClick={startQrCamera}
+                        className="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs shadow-md active:scale-95 transition-all inline-flex items-center gap-1.5"
+                      >
+                        <Camera className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Bật Máy Quét Camera</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Điều khiển Camera */}
+                <div className="flex items-center justify-center gap-2">
+                  {cameraRunning ? (
+                    <button
+                      type="button"
+                      onClick={stopQrCamera}
+                      className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Tạm Dừng Camera</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={startQrCamera}
+                      className="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <Camera className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Bật Lại Camera</span>
+                    </button>
+                  )}
+                </div>
+
+                {cameraError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold text-left">
+                    ⚠️ {cameraError}
+                  </div>
+                )}
+              </div>
+
+              {/* TÙY CHỌN 2: TẢI ẢNH MÃ QR TỪ MÁY TÍNH */}
+              <div className="pt-3 border-t border-slate-200">
+                <input
+                  type="file"
+                  ref={qrFileInputRef}
+                  onChange={handleScanQrFile}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <div id="officer-qr-file-dummy" className="hidden" />
+
+                <div className="text-xs font-bold text-slate-600 mb-2">
+                  Hoặc nếu người dân gửi ảnh mã QR qua Zalo/điện thoại:
+                </div>
+                <button
+                  type="button"
+                  onClick={() => qrFileInputRef.current?.click()}
+                  className="px-5 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs sm:text-sm inline-flex items-center gap-2 border border-amber-300 transition-all active:scale-95"
+                >
+                  <Upload className="w-4 h-4 text-amber-800" />
+                  <span>Chọn Tệp Ảnh Mã QR Để Giải Mã Ngay</span>
+                </button>
+              </div>
+
+              {/* TÙY CHỌN 3: BẮN SÚNG MÃ VẠCH HOẶC GÕ MÃ HỒ SƠ / CCCD */}
+              <div className="pt-3 border-t border-slate-200">
+                <div className="text-xs font-bold text-slate-600 mb-2">
+                  Dành cho máy quét mã vạch USB cầm tay hoặc gõ mã trực tiếp:
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (quickManualCode.trim()) {
+                      handleProcessQrCode(quickManualCode.trim());
+                      setQuickManualCode('');
+                    }
+                  }}
+                  className="flex items-center gap-2 max-w-md mx-auto"
+                >
+                  <input
+                    type="text"
+                    value={quickManualCode}
+                    onChange={(e) => setQuickManualCode(e.target.value)}
+                    placeholder="Quét mã vạch hoặc nhập HH-1024 / 12 số CCCD..."
+                    className="flex-1 px-3.5 py-2 text-xs sm:text-sm font-bold bg-slate-50 border border-slate-300 rounded-xl outline-none focus:border-red-600"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs sm:text-sm shrink-0 active:scale-95"
+                  >
+                    Tiếp nhận
+                  </button>
+                </form>
+              </div>
+
             </div>
           )}
 

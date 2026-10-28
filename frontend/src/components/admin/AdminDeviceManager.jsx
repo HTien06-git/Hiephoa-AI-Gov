@@ -204,6 +204,27 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
     setTimeout(() => setActionMessage(null), 4000);
   };
 
+  // Xóa vĩnh viễn tài khoản cán bộ
+  const handleDeleteOfficerClick = async (officer) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa tài khoản cán bộ "${officer.name || officer.username}" không?`)) {
+      try {
+        const res = await apiClient.deleteOfficer(officer.username, token);
+        if (res && res.success) {
+          setActionMessage({
+            type: 'success',
+            text: `✅ Đã xóa tài khoản cán bộ "${officer.username}" thành công!`
+          });
+          fetchOfficers();
+        } else {
+          setActionMessage({ type: 'error', text: res.error || 'Không thể xóa tài khoản này.' });
+        }
+      } catch (err) {
+        setActionMessage({ type: 'error', text: 'Lỗi mạng khi xóa tài khoản.' });
+      }
+      setTimeout(() => setActionMessage(null), 4000);
+    }
+  };
+
   // Đổi mật khẩu cán bộ
   const handleUpdatePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -428,28 +449,40 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
 
                           {/* Nút Khóa / Mở khóa (không cho khóa admin) */}
                           {officer.username !== 'admin' && (
-                            <button
-                              type="button"
-                              onClick={() => handleToggleLockOfficer(officer)}
-                              className={`px-2.5 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
-                                isLocked
-                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                  : 'bg-rose-100 hover:bg-rose-200 text-rose-800'
-                              }`}
-                              title={isLocked ? 'Mở khóa tài khoản' : 'Tạm khóa tài khoản'}
-                            >
-                              {isLocked ? (
-                                <>
-                                  <Unlock className="w-3.5 h-3.5" />
-                                  <span>Mở khóa</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Lock className="w-3.5 h-3.5" />
-                                  <span>Tạm khóa</span>
-                                </>
-                              )}
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleToggleLockOfficer(officer)}
+                                className={`px-2.5 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
+                                  isLocked
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    : 'bg-rose-100 hover:bg-rose-200 text-rose-800'
+                                }`}
+                                title={isLocked ? 'Mở khóa tài khoản' : 'Tạm khóa tài khoản'}
+                              >
+                                {isLocked ? (
+                                  <>
+                                    <Unlock className="w-3.5 h-3.5" />
+                                    <span>Mở khóa</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Lock className="w-3.5 h-3.5" />
+                                    <span>Tạm khóa</span>
+                                  </>
+                                )}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteOfficerClick(officer)}
+                                className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center gap-1 transition-all border border-rose-200"
+                                title="Xóa tài khoản này"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                <span className="hidden sm:inline">Xóa</span>
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>

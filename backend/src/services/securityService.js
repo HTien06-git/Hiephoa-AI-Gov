@@ -29,7 +29,7 @@ const DEFAULT_USERS = {
     name: 'Quản Trị Viên Hệ Thống (Admin)',
     status: 'ONLINE',
     isLocked: false,
-    processedCount: 156,
+    processedCount: 0,
     department: 'Ban Quản Trị Trung Tâm',
     createdAt: new Date().toISOString()
   },
@@ -40,30 +40,8 @@ const DEFAULT_USERS = {
     name: 'Trần Văn Hòa (Cán bộ Tư pháp - Hộ tịch)',
     status: 'ONLINE',
     isLocked: false,
-    processedCount: 42,
+    processedCount: 0,
     department: 'Tư pháp - Hộ tịch',
-    createdAt: new Date().toISOString()
-  },
-  canbo2: {
-    username: 'canbo2',
-    password: process.env.OFFICER_PASSWORD || 'MotCua@2026',
-    role: 'OFFICER',
-    name: 'Lê Quốc Hùng (Cán bộ Địa chính - Xây dựng)',
-    status: 'ONLINE',
-    isLocked: false,
-    processedCount: 28,
-    department: 'Địa chính - Xây dựng - Đất đai',
-    createdAt: new Date().toISOString()
-  },
-  canbo3: {
-    username: 'canbo3',
-    password: process.env.OFFICER_PASSWORD || 'MotCua@2026',
-    role: 'OFFICER',
-    name: 'Nguyễn Thị Bích (Cán bộ Văn phòng - Chứng thực)',
-    status: 'OFFLINE',
-    isLocked: false,
-    processedCount: 35,
-    department: 'Văn phòng - Thống kê - Chứng thực',
     createdAt: new Date().toISOString()
   }
 };
@@ -323,6 +301,27 @@ class SecurityService {
       processedCount: officer.processedCount,
       updatedAt: officer.updatedAt
     };
+  }
+
+  // Xóa tài khoản cán bộ (Admin chỉ định)
+  deleteOfficer(username) {
+    this.loadStore();
+    if (!username) return false;
+    const cleanUser = decodeURIComponent(username).trim().toLowerCase();
+    if (cleanUser === 'admin') {
+      throw new Error('Không thể xóa tài khoản Quản Trị Viên tối cao (Admin).');
+    }
+    const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
+    let foundKey = Object.keys(officers).find(k => 
+      k.toLowerCase() === cleanUser || 
+      k.toLowerCase() === username.trim().toLowerCase()
+    );
+    if (!foundKey) return false;
+
+    delete officers[foundKey];
+    globalThis.__HIEPHOA_SECURITY_STORE__.officers = officers;
+    this.saveStore();
+    return true;
   }
 
   // Lấy danh sách toàn bộ cán bộ & admin

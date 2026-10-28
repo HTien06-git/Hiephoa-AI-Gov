@@ -38,7 +38,8 @@ const {
   handleResetAllDevices,
   handleGetAllOfficers,
   handleCreateOfficer,
-  handleUpdateOfficer
+  handleUpdateOfficer,
+  handleDeleteOfficer
 } = require('../controllers/adminController');
 
 const {
@@ -67,6 +68,7 @@ router.post('/admin/devices/reset-all', verifyToken, requireAdmin, handleResetAl
 router.get('/admin/officers', verifyToken, requireAdmin, handleGetAllOfficers);
 router.post('/admin/officers', verifyToken, requireAdmin, handleCreateOfficer);
 router.put('/admin/officers/:username', verifyToken, requireAdmin, handleUpdateOfficer);
+router.delete('/admin/officers/:username', verifyToken, requireAdmin, handleDeleteOfficer);
 
 // 0d. Real-Time Online Submissions & Queue Sync
 router.post('/submissions', handleCreateSubmission);

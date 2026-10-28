@@ -5,7 +5,7 @@
   "description": "HIỆP HÒA AI-GOV - Chuyên viên Hành chính công AI Đa phương thức phục vụ nhân dân xã Hiệp Hòa, tỉnh Tây Ninh",
   "scripts": {
     "postinstall": "npm install --prefix frontend",
-    "build": "cd frontend && npm install && npm run build",
+    "build": "npm run build --prefix frontend",
     "start": "node backend/src/server.js",
     "dev": "npm --prefix backend start"
   },

@@ -31,7 +31,27 @@ export function getDeviceSubmissions() {
   try {
     const KEY = 'hh_device_submissions';
     const raw = localStorage.getItem(KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    let list = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
+
+    // Tự động dọn dẹp các hồ sơ tạm trùng lặp do phiên bản cũ sinh ra (ví dụ: HH-1024 tạm khi đã có hồ sơ chính thức)
+    const hasOfficial = list.some(s => s.submissionCode && s.submissionCode !== 'HH-1024');
+    if (hasOfficial) {
+      const cleaned = list.filter(s => {
+        if (s.submissionCode === 'HH-1024') {
+          // Nếu đã có hồ sơ thật cùng tên công dân hoặc cùng tên thủ tục thì loại bỏ mã tạm HH-1024
+          const matchReal = list.find(o => o.submissionCode !== 'HH-1024' && (o.citizenName === s.citizenName || o.procedureTitle === s.procedureTitle));
+          if (matchReal) return false;
+        }
+        return true;
+      });
+      if (cleaned.length !== list.length) {
+        localStorage.setItem(KEY, JSON.stringify(cleaned));
+        list = cleaned;
+      }
+    }
+    return list;
   } catch (e) {
     return [];
   }

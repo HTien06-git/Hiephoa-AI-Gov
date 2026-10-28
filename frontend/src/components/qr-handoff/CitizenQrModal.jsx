@@ -63,7 +63,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
 
   const { formId, formTitle, formData, submissionCode: initialCode, preCheckResult } = qrPayload;
   const [submission, setSubmission] = useState({
-    submissionCode: initialCode || 'HH-1024',
+    submissionCode: initialCode || null,
     procedureTitle: formTitle || 'Thủ tục hành chính',
     citizenName: formData?.ho_ten_nguoi_yeu_cau || formData?.ho_ten || formData?.ho_ten_nam || 'Bà con nhân dân',
     status: 'WAITING',
@@ -72,7 +72,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
     formData: formData || {}
   });
 
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(!initialCode);
   const previousStatusRef = useRef(submission.status);
   const previousNoteRef = useRef(submission.officerNote || '');
 
@@ -98,26 +98,12 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
   // Tên người nộp thủ tục để thông báo trực tiếp tới bà con
   const citizenDisplayName = submission.citizenName || submission.formData?.ho_ten || submission.formData?.ho_ten_nguoi_yeu_cau || submission.formData?.ho_ten_nam || 'Bà con';
 
-  // Đảm bảo hồ sơ được lưu vào thiết bị ngay lập tức và đồng bộ lên backend
+  // Đảm bảo hồ sơ được lưu vào thiết bị duy nhất 1 lần khi có mã chính thức từ server
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Luôn lưu bản ghi vào thiết bị ngay khi mở Modal (đảm bảo không bao giờ bị mất hồ sơ)
-    const currentCode = initialCode || submission.submissionCode || `HH-${Math.floor(1024 + Math.random() * 50)}`;
-    const provisionalRecord = {
-      submissionCode: currentCode,
-      formId,
-      procedureTitle: formTitle || 'Thủ tục hành chính',
-      citizenName: citizenDisplayName,
-      status: submission.status || 'WAITING',
-      officerNote: submission.officerNote || '',
-      assignedOfficer: submission.assignedOfficer || 'Chờ tiếp nhận',
-      formData: formData || {}
-    };
-    saveSubmissionToDevice(provisionalRecord);
-
     async function registerLiveSubmission() {
-      // Nếu đã có initialCode (mở lại từ lịch sử), chỉ cần tra cứu cập nhật trạng thái mới nhất
+      // 1. Nếu đã có initialCode (mở lại từ lịch sử), chỉ cần tra cứu cập nhật trạng thái mới nhất
       if (initialCode) {
         try {
           const res = await apiClient.getSubmission(initialCode);
@@ -131,7 +117,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
         return;
       }
 
-      // Tạo hồ sơ mới lên server
+      // 2. Tạo hồ sơ mới lên server (duy nhất 1 lần)
       try {
         setIsSyncing(true);
         const res = await apiClient.createSubmission({
@@ -145,11 +131,27 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
           previousStatusRef.current = res.submission.status;
           previousNoteRef.current = res.submission.officerNote || '';
 
-          // Lưu hồ sơ đã xác nhận vào thiết bị
+          // Lưu hồ sơ chính thức đã xác nhận từ server vào thiết bị
           saveSubmissionToDevice(res.submission);
         }
       } catch (e) {
         console.warn('[CitizenQrModal] Error creating live submission:', e);
+        // Fallback lưu ngoại tuyến chỉ khi mất mạng thật sự
+        if (isMounted) {
+          const offlineCode = `HH-${Date.now().toString().slice(-4)}`;
+          const fallbackSub = {
+            submissionCode: offlineCode,
+            formId: formId || 'FORM_CUSTOM',
+            procedureTitle: formTitle || 'Thủ tục hành chính',
+            citizenName: citizenDisplayName,
+            status: 'WAITING',
+            assignedOfficer: 'Chờ tiếp nhận',
+            officerNote: '',
+            formData: formData || {}
+          };
+          setSubmission(fallbackSub);
+          saveSubmissionToDevice(fallbackSub);
+        }
       } finally {
         if (isMounted) setIsSyncing(false);
       }
@@ -280,7 +282,7 @@ export default function CitizenQrModal({ qrPayload, onClose, speakText }) {
         {/* Mã Hồ sơ nổi bật */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#991B1B] text-amber-300 text-xs sm:text-sm font-black uppercase mb-3 shadow-sm ring-2 ring-amber-300">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>MÃ HỒ SƠ: {submission.submissionCode}</span>
+          <span>MÃ HỒ SƠ: {submission.submissionCode || (isSyncing ? 'Đang cấp mã tiếp nhận...' : 'Đang xử lý...')}</span>
         </div>
 
         <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-snug">

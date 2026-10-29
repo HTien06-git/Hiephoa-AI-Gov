@@ -79,10 +79,17 @@ class CloudDatabaseService {
             if (!existing) {
               officers[uname] = off;
             } else {
-              // Cập nhật phiên đăng nhập mới nhất từ thiết bị khác
-              if (off.activeSessionId) existing.activeSessionId = off.activeSessionId;
-              if (off.activeDeviceId) existing.activeDeviceId = off.activeDeviceId;
-              if (off.lastLoginAt) existing.lastLoginAt = off.lastLoginAt;
+              const cloudTime = Number(off.activeSessionTime) || (off.lastLoginAt ? new Date(off.lastLoginAt).getTime() : 0);
+              const localTime = Number(existing.activeSessionTime) || (existing.lastLoginAt ? new Date(existing.lastLoginAt).getTime() : 0);
+              // Chỉ cập nhật phiên session nếu Cloud có session MỚI HƠN session trong bộ nhớ local
+              if (cloudTime >= localTime) {
+                if (off.activeSessionId !== undefined) existing.activeSessionId = off.activeSessionId;
+                if (off.activeSessionTime !== undefined) existing.activeSessionTime = off.activeSessionTime;
+                if (off.activeDeviceId !== undefined) existing.activeDeviceId = off.activeDeviceId;
+              }
+              if (off.lastLoginAt && (!existing.lastLoginAt || new Date(off.lastLoginAt) >= new Date(existing.lastLoginAt))) {
+                existing.lastLoginAt = off.lastLoginAt;
+              }
               if (off.isLocked !== undefined) existing.isLocked = off.isLocked;
             }
           }

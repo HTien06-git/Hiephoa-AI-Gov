@@ -23,6 +23,12 @@ function handleCreateSubmission(req, res) {
 // GET /api/submissions/live: Cán bộ Một cửa & Admin tự động polling mỗi 3 giây
 async function handleGetLiveQueue(req, res) {
   try {
+    // Kéo dữ liệu mới nhất từ cloud database nếu cần
+    try {
+      const cloudDatabaseService = require('../services/cloudDatabaseService');
+      await cloudDatabaseService.pullFromCloud();
+    } catch (e) {}
+
     // Nếu có gửi kèm token cán bộ, kiểm tra trạng thái phiên làm việc (Single active session)
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -30,7 +36,7 @@ async function handleGetLiveQueue(req, res) {
       const token = authHeader.split(' ')[1];
       const decoded = securityService.verifyToken(token);
       if (decoded && decoded.username) {
-        const check = securityService.validateSession(decoded.username, decoded.sessionId, decoded.deviceId);
+        const check = securityService.validateSession(decoded.username, decoded.sessionId, decoded.deviceId, decoded.sessionTime);
         if (!check.valid) {
           return res.status(401).json({
             success: false,

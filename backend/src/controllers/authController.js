@@ -74,19 +74,30 @@ async function handleLogin(req, res) {
     }
 
     // NẾU ĐĂNG NHẬP THÀNH CÔNG VÀ CHƯA BỊ KHÓA
-    // Sinh mã phiên duy nhất: nếu đăng nhập trên thiết bị mới, thiết bị cũ sẽ tự động đăng xuất
-    const sessionId = `SES-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-    securityService.recordSuccessLogin(deviceId, user.username, sessionId);
-    const token = securityService.generateToken(user, deviceId, sessionId);
+    // Sinh mã phiên duy nhất kèm thời gian chính xác: nếu đăng nhập trên thiết bị mới, thiết bị cũ sẽ tự động đăng xuất
+    const sessionTime = Date.now();
+    const sessionId = `SES-${sessionTime}-${Math.random().toString(36).substring(2, 8)}`;
+    securityService.recordSuccessLogin(deviceId, user.username, sessionId, sessionTime);
+    const token = securityService.generateToken(user, deviceId, sessionId, sessionTime);
     const snapshot = buildClientSnapshot();
+
+    // Đồng bộ ngay lên Cloud Database trước khi phản hồi để đảm bảo mọi container đều có session mới nhất
+    try {
+      const cloudDatabaseService = require('../services/cloudDatabaseService');
+      await cloudDatabaseService.pushToCloud();
+    } catch (e) {
+      console.warn('[authController] Push to cloud on login notice:', e.message);
+    }
 
     return res.json({
       success: true,
       token,
       sessionId,
+      sessionTime,
       user: {
         ...user,
         sessionId,
+        sessionTime,
         deviceId
       },
       clientSnapshot: snapshot,
@@ -145,7 +156,7 @@ async function handleVerify(req, res) {
   }
 
   // Kiểm tra phiên đăng nhập đồng thời
-  const check = securityService.validateSession(decoded.username, decoded.sessionId, decoded.deviceId);
+  const check = securityService.validateSession(decoded.username, decoded.sessionId, decoded.deviceId, decoded.sessionTime);
   if (!check.valid) {
     return res.status(401).json({
       success: false,

@@ -19,7 +19,7 @@ function verifyToken(req, res, next) {
   }
 
   // KIỂM SOÁT PHIÊN LÀM VIỆC DUY NHẤT: Nếu đăng nhập thiết bị mới, thiết bị cũ bị đăng xuất
-  const check = securityService.validateSession(decoded.username, decoded.sessionId, decoded.deviceId);
+  const check = securityService.validateSession(decoded.username, decoded.sessionId, decoded.deviceId, decoded.sessionTime);
   if (!check.valid) {
     return res.status(401).json({
       success: false,

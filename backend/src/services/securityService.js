@@ -146,7 +146,7 @@ class SecurityService {
   }
 
   // Đặt lại số lần sai khi đăng nhập đúng và cập nhật phiên làm việc duy nhất
-  recordSuccessLogin(deviceId, username = null, sessionId = null) {
+  recordSuccessLogin(deviceId, username = null, sessionId = null, sessionTime = null) {
     if (!deviceId) return;
     const devices = globalThis.__HIEPHOA_SECURITY_STORE__.devices;
     if (devices[deviceId]) {
@@ -155,14 +155,17 @@ class SecurityService {
       devices[deviceId].updatedAt = new Date().toISOString();
     }
 
+    const sTime = Number(sessionTime) || Date.now();
+
     if (username) {
       const cleanUser = decodeURIComponent(username).trim().toLowerCase();
       const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
       let foundKey = Object.keys(officers).find(k => k.toLowerCase() === cleanUser);
       if (foundKey && officers[foundKey]) {
         officers[foundKey].activeSessionId = sessionId;
+        officers[foundKey].activeSessionTime = sTime;
         officers[foundKey].activeDeviceId = deviceId;
-        officers[foundKey].lastLoginAt = new Date().toISOString();
+        officers[foundKey].lastLoginAt = new Date(sTime).toISOString();
         officers[foundKey].status = 'ONLINE';
       }
     }
@@ -393,15 +396,17 @@ class SecurityService {
   }
 
 
-  // Sinh JWT Token (kèm sessionId để kiểm soát phiên đăng nhập duy nhất)
-  generateToken(user, deviceId, sessionId = null) {
+  // Sinh JWT Token (kèm sessionId & sessionTime để kiểm soát phiên đăng nhập duy nhất)
+  generateToken(user, deviceId, sessionId = null, sessionTime = null) {
+    const sTime = Number(sessionTime) || Date.now();
     return jwt.sign(
       {
         username: user.username,
         role: user.role,
         name: user.name,
         deviceId,
-        sessionId
+        sessionId,
+        sessionTime: sTime
       },
       JWT_SECRET,
       { expiresIn: '8h' }
@@ -409,7 +414,7 @@ class SecurityService {
   }
 
   // Xác thực tính duy nhất của phiên làm việc (Đăng nhập thiết bị mới -> thiết bị cũ tự động đăng xuất)
-  validateSession(username, sessionId, deviceId) {
+  validateSession(username, sessionId, deviceId, sessionTime = 0) {
     if (!username) return { valid: true };
     this.loadStore();
     const cleanUser = decodeURIComponent(username).trim().toLowerCase();
@@ -420,13 +425,42 @@ class SecurityService {
     }
 
     const officer = officers[foundKey];
-    // Nếu tài khoản đã ghi nhận activeSessionId mới và session của token không khớp
-    if (officer.activeSessionId && sessionId && officer.activeSessionId !== sessionId) {
+    
+    // Nếu chưa từng có activeSessionId hoặc session trùng khớp chính xác -> hợp lệ
+    if (!officer.activeSessionId || officer.activeSessionId === sessionId) {
+      return { valid: true };
+    }
+
+    const tokenTime = Number(sessionTime) || 0;
+    const activeTime = Number(officer.activeSessionTime) || 0;
+
+    // 1. Nếu token này mới hơn hoặc bằng session đang lưu trong bộ nhớ serverless:
+    // (Xảy ra khi container này chưa kịp nhận session mới từ container vừa xử lý login)
+    // -> Tự động đồng bộ container hiện tại theo token mới nhất và công nhận phiên hợp lệ!
+    if (tokenTime >= activeTime) {
+      officer.activeSessionId = sessionId;
+      officer.activeSessionTime = tokenTime;
+      if (deviceId) officer.activeDeviceId = deviceId;
+      this.saveStore();
+      return { valid: true };
+    }
+
+    // 2. Nếu cùng trên một thiết bị (người dùng F5, reload trang hoặc mở nhiều tab cùng máy):
+    // -> Không ngắt kết nối
+    if (deviceId && officer.activeDeviceId && officer.activeDeviceId === deviceId) {
+      return { valid: true };
+    }
+
+    // 3. CHỈ KHI: Phiên làm việc trên server là từ một thiết bị KHÁC (activeDeviceId !== deviceId)
+    // VÀ phiên đó được tạo SAU phiên của token này ít nhất 3 giây (activeTime - tokenTime > 3000):
+    // -> Đây là trường hợp thiết bị CŨ bị thiết bị MỚI thay thế!
+    if (activeTime - tokenTime > 3000 && deviceId && officer.activeDeviceId && officer.activeDeviceId !== deviceId) {
       return {
         valid: false,
-        message: 'Tài khoản của bạn vừa đăng nhập trên một thiết bị khác. Phiên làm việc trên thiết bị này đã tự động kết thúc.'
+        message: 'Tài khoản cán bộ của bạn vừa được đăng nhập trên một thiết bị khác! Theo quy định an toàn thông tin hành chính công, mỗi tài khoản cán bộ chỉ được phép đăng nhập trên 01 thiết bị duy nhất tại một thời điểm. Phiên làm việc trên thiết bị này đã tự động kết thúc.'
       };
     }
+
     return { valid: true };
   }
 

@@ -214,6 +214,31 @@
 
 ---
 
+### 13. KHẮC PHỤC TRIỆT ĐỂ LỖI ĐĂNG XUẤT TỨC THÌ (FALSE POSITIVE SESSION TERMINATION)
+* **Vấn đề phát hiện:** Khi người dùng vừa đăng nhập vào trang cán bộ / quản trị thì lập tức bị cảnh báo *"Tài khoản cán bộ của bạn vừa được đăng nhập trên một thiết bị khác!"* và bị đẩy văng ra ngoài không thể đăng nhập.
+* **Nguyên nhân kỹ thuật sâu xa:**
+  1. Trong môi trường Vercel Serverless, yêu cầu `POST /api/auth/login` được xử lý ở container Lambda A và sinh ra mã phiên mới (`SES-new`).
+  2. Yêu cầu tải dữ liệu tiếp theo (`GET /api/submissions/live`) được định tuyến đến container Lambda B hoặc container mới khởi động (Cold Start).
+  3. Bộ nhớ của container B đang lưu mã phiên cũ (`SES-old`) hoặc chưa kịp kéo bản ghi từ Cloud Database về.
+  4. Logic kiểm tra cũ so sánh đơn thuần `officer.activeSessionId !== sessionId` mà không xét đến dấu thời gian (Timestamp) và mã định danh thiết bị (`deviceId`). Container B nhầm tưởng phiên đăng nhập mới (`SES-new`) là phiên cũ bị thay thế nên phát tín hiệu ngắt phiên (`sessionTerminated: true`).
+* **Giải pháp khắc phục toàn diện:**
+  - `backend/src/services/securityService.js`:
+    - Bổ sung trường `sessionTime` gắn chặt vào mã phiên và JWT token khi đăng nhập.
+    - Xây dựng thuật toán xác thực phiên 4 cấp độ thông minh:
+      1. Nếu `activeSessionId === sessionId`: Phiên trùng khớp -> Hợp lệ 100%.
+      2. Nếu `tokenTime >= activeTime`: Token gửi lên có thời gian mới hơn hoặc bằng phiên trong bộ nhớ container -> Container tự động cập nhật phiên mới và chấp thuận phiên hợp lệ (Tự khắc phục tình trạng lệch bộ nhớ giữa các container).
+      3. Nếu `token.deviceId === officer.activeDeviceId`: Cùng một thiết bị vật lý (người dùng làm mới trang F5, mở nhiều tab) -> Luôn hợp lệ, không ngắt kết nối.
+      4. CHỈ KHI: Phiên trên server thuộc về thiết bị KHÁC (`activeDeviceId !== token.deviceId`) VÀ phiên mới đó được tạo sau phiên của token hiện tại ít nhất 3 giây (`activeTime - tokenTime > 3000ms`) -> Mới kích hoạt ngắt phiên làm việc của thiết bị cũ.
+  - `backend/src/controllers/authController.js`:
+    - Áp dụng `await cloudDatabaseService.pushToCloud()` ngay khi đăng nhập thành công trước khi trả về phản hồi cho client, đảm bảo Cloud Database cập nhật dữ liệu phiên ngay lập tức.
+    - Truyền tham số `sessionTime` đầy đủ vào `recordSuccessLogin`, `generateToken` và `handleVerify`.
+  - `backend/src/services/cloudDatabaseService.js`:
+    - Chỉ cho phép Cloud Database ghi đè phiên khi `cloudTime >= localTime`, tránh trường hợp phiên cũ ghi đè phiên mới.
+  - `backend/src/controllers/submissionController.js` & `backend/src/middlewares/authMiddleware.js`:
+    - Đồng bộ `pullFromCloud()` và truyền `sessionTime` vào `validateSession`, đảm bảo vận hành ổn định trên toàn bộ hệ thống.
+
+---
+
 ### 📋 DANH SÁCH CÁC TỆP TIN ĐÃ THAY ĐỔI
 1. `backend/src/services/vectorStore.js`
 2. `backend/src/services/geminiRagService.js`

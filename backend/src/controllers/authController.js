@@ -74,14 +74,21 @@ async function handleLogin(req, res) {
     }
 
     // NẾU ĐĂNG NHẬP THÀNH CÔNG VÀ CHƯA BỊ KHÓA
-    securityService.recordSuccessLogin(deviceId);
-    const token = securityService.generateToken(user, deviceId);
+    // Sinh mã phiên duy nhất: nếu đăng nhập trên thiết bị mới, thiết bị cũ sẽ tự động đăng xuất
+    const sessionId = `SES-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    securityService.recordSuccessLogin(deviceId, user.username, sessionId);
+    const token = securityService.generateToken(user, deviceId, sessionId);
     const snapshot = buildClientSnapshot();
 
     return res.json({
       success: true,
       token,
-      user,
+      sessionId,
+      user: {
+        ...user,
+        sessionId,
+        deviceId
+      },
       clientSnapshot: snapshot,
       message: `Đăng nhập thành công với vai trò ${user.role === 'ADMIN' ? 'Quản Trị Viên' : 'Cán Bộ Một Cửa'}!`
     });
@@ -124,7 +131,7 @@ async function handleDeviceStatus(req, res) {
 }
 
 
-// Xác thực tính hợp lệ của token
+// Xác thực tính hợp lệ của token và kiểm tra phiên làm việc đơn
 async function handleVerify(req, res) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -137,6 +144,18 @@ async function handleVerify(req, res) {
     return res.status(401).json({ success: false, error: 'Token đã hết hạn hoặc không hợp lệ.' });
   }
 
+  // Kiểm tra phiên đăng nhập đồng thời
+  const check = securityService.validateSession(decoded.username, decoded.sessionId, decoded.deviceId);
+  if (!check.valid) {
+    return res.status(401).json({
+      success: false,
+      valid: false,
+      sessionTerminated: true,
+      code: 'SESSION_TERMINATED',
+      error: check.message
+    });
+  }
+
   return res.json({
     success: true,
     valid: true,
@@ -144,10 +163,10 @@ async function handleVerify(req, res) {
       username: decoded.username,
       role: decoded.role,
       name: decoded.name,
-      deviceId: decoded.deviceId
+      deviceId: decoded.deviceId,
+      sessionId: decoded.sessionId
     }
   });
-
 }
 
 module.exports = {

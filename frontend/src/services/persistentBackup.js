@@ -52,7 +52,7 @@ export function getSnapshotHeaders() {
     }
 
     // Giới hạn kích thước header để tránh lỗi HTTP 431 Request Header Fields Too Large
-    if (safeSnapshot.length > 3500) {
+    if (safeSnapshot.length > 5500) {
       return {};
     }
 

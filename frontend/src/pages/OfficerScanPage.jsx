@@ -95,10 +95,27 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
   // Gọi Loa state (Hạng mục 8.2)
   const [callingOutCode, setCallingOutCode] = useState(null);
 
-  // Polling hàng đợi thời gian thực mỗi 3 giây với cơ chế Cache chống chập chờn (lúc mất lúc hiện)
+  // Polling hàng đợi thời gian thực mỗi 3 giây với cơ chế Cache & Kiểm tra phiên làm việc duy nhất
   const fetchLiveQueue = async () => {
     try {
-      const res = await apiClient.getLiveQueue();
+      const currentToken = authToken || localStorage.getItem('hiephoa_auth_token') || sessionStorage.getItem('hiephoa_auth_token');
+      const res = await apiClient.getLiveQueue(currentToken);
+
+      // KIỂM SOÁT ĐĂNG NHẬP DUY NHẤT: Nếu tài khoản vừa đăng nhập trên thiết bị mới -> thiết bị cũ tự động đăng xuất
+      if (res && res.sessionTerminated) {
+        localStorage.removeItem('hiephoa_auth_token');
+        localStorage.removeItem('hiephoa_user');
+        sessionStorage.removeItem('hiephoa_auth_token');
+        sessionStorage.removeItem('hiephoa_user');
+        alert('⚠️ THÔNG BÁO BẢO MẬT HỆ THỐNG:\n\nTài khoản cán bộ của bạn vừa được đăng nhập trên một thiết bị khác!\n\nTheo quy định an toàn thông tin hành chính công, mỗi tài khoản cán bộ chỉ được phép đăng nhập trên 01 thiết bị duy nhất tại một thời điểm. Phiên làm việc trên thiết bị này đã tự động kết thúc.');
+        if (onLogout) {
+          onLogout();
+        } else {
+          window.location.reload();
+        }
+        return;
+      }
+
       if (res && res.success && Array.isArray(res.submissions)) {
         if (res.submissions.length > 0) {
           setLiveQueue(res.submissions);
@@ -154,7 +171,7 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
     }
   };
 
-  // Khởi động máy quét camera trực tiếp
+  // Khởi động máy quét camera trực tiếp (Hỗ trợ toàn diện Webcam Laptop, PC & Camera Điện thoại)
   const startQrCamera = async () => {
     setCameraError('');
     try {
@@ -164,28 +181,65 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
         return;
       }
 
+      // Kiểm tra quyền media thiết bị
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setCameraError('Trình duyệt hoặc kết nối hiện tại chưa cấp quyền truy cập Camera (Yêu cầu HTTPS). Vui lòng dùng "Tải Ảnh Mã QR" hoặc "Nhập Mã Trực Tiếp" bên dưới.');
+        return;
+      }
+
+      if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+        try {
+          await html5QrCodeRef.current.stop();
+        } catch (e) {}
+      }
+
       if (!html5QrCodeRef.current) {
         html5QrCodeRef.current = new Html5Qrcode('officer-qr-reader');
       }
 
       const qr = html5QrCodeRef.current;
-      if (qr.isScanning) {
-        await qr.stop();
+
+      // Dò tìm camera thực tế trên thiết bị
+      let selectedCamera = null;
+      try {
+        const cameras = await Html5Qrcode.getCameras();
+        if (cameras && cameras.length > 0) {
+          const backCam = cameras.find(c => /back|rear|environment|sau|mặt sau/i.test(c.label));
+          selectedCamera = backCam ? backCam.id : cameras[0].id;
+        }
+      } catch (camErr) {
+        console.warn('Camera enumeration notice:', camErr);
       }
 
-      await qr.start(
-        { facingMode: 'environment' },
-        { fps: 15, qrbox: { width: 250, height: 250 } },
-        (decodedText) => {
-          handleProcessQrCode(decodedText);
-          stopQrCamera();
-        },
-        () => {}
-      );
-      setCameraRunning(true);
+      const qrConfig = {
+        fps: 15,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+          const edge = Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.75);
+          return { width: Math.max(200, edge), height: Math.max(200, edge) };
+        }
+      };
+
+      const onScanSuccess = (decodedText) => {
+        handleProcessQrCode(decodedText);
+        stopQrCamera();
+      };
+
+      // Thử mở camera với cấu hình tối ưu
+      try {
+        if (selectedCamera) {
+          await qr.start(selectedCamera, qrConfig, onScanSuccess, () => {});
+        } else {
+          await qr.start({ facingMode: 'environment' }, qrConfig, onScanSuccess, () => {});
+        }
+        setCameraRunning(true);
+      } catch (firstErr) {
+        console.warn('Start camera lần 1 lỗi, thử fallback user/webcam:', firstErr);
+        await qr.start({ facingMode: 'user' }, qrConfig, onScanSuccess, () => {});
+        setCameraRunning(true);
+      }
     } catch (err) {
       console.error('Camera start error:', err);
-      setCameraError('Không thể mở Camera (Có thể do thiết bị không có webcam hoặc trình duyệt chưa được cấp quyền truy cập Camera). Cán bộ có thể dùng tính năng Tải Ảnh Mã QR hoặc Nhập Mã Trực Tiếp bên dưới.');
+      setCameraError('Không thể mở Camera (' + (err.message || 'Chưa cấp quyền') + '). Cán bộ có thể dùng tính năng "Tải Ảnh Mã QR" hoặc "Nhập Mã Trực Tiếp" bên dưới.');
       setCameraRunning(false);
     }
   };
@@ -1248,18 +1302,21 @@ export default function OfficerScanPage({ onSwitchToCitizen, currentUser, authTo
 
               {/* KHUNG QUÉT CAMERA */}
               <div className="space-y-3">
-                <div
-                  id="officer-qr-reader"
-                  className="mx-auto rounded-2xl overflow-hidden border-2 border-dashed border-red-500 max-w-sm bg-slate-950 min-h-[260px] flex items-center justify-center relative text-white"
-                >
+                <div className="relative mx-auto rounded-2xl overflow-hidden border-2 border-dashed border-red-500 max-w-sm bg-slate-950 min-h-[260px] flex items-center justify-center text-white shadow-inner">
+                  {/* Container độc lập dành riêng cho Html5Qrcode (tránh xung đột DOM với React) */}
+                  <div id="officer-qr-reader" className="w-full h-full min-h-[260px]" />
+
+                  {/* Lớp giao diện hiển thị khi chưa bật máy quét */}
                   {!cameraRunning && (
-                    <div className="p-4 text-slate-400 text-xs space-y-2">
-                      <Camera className="w-10 h-10 mx-auto text-slate-500" />
-                      <div>Camera đang tạm dừng hoặc chưa được mở.</div>
+                    <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center p-4 text-slate-300 text-xs space-y-2.5 z-10">
+                      <div className="w-12 h-12 rounded-2xl bg-red-950/80 border border-red-500/50 flex items-center justify-center text-amber-300 shadow-md">
+                        <Camera className="w-6 h-6" />
+                      </div>
+                      <div className="font-semibold text-slate-200">Camera đang tạm dừng hoặc chưa được mở.</div>
                       <button
                         type="button"
                         onClick={startQrCamera}
-                        className="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs shadow-md active:scale-95 transition-all inline-flex items-center gap-1.5"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-700 to-amber-600 hover:from-red-800 hover:to-amber-700 text-white font-bold text-xs shadow-md active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-amber-300"
                       >
                         <Camera className="w-3.5 h-3.5 text-amber-300" />
                         <span>Bật Máy Quét Camera</span>

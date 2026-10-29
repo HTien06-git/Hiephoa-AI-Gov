@@ -195,6 +195,25 @@
 
 ---
 
+### 12. SỬA LỖI MÁY QUÉT CAMERA QR, ĐỒNG BỘ DỮ LIỆU ĐA THIẾT BỊ VÀ THIẾT LẬP CƠ CHẾ ĐĂNG NHẬP 1 PHIÊN DUY NHẤT
+* **Vấn đề phát hiện khi thử nghiệm đa thiết bị:**
+  1. Camera quét QR trên trang cán bộ không mở được hoặc báo lỗi do xung đột DOM với React và cấu hình ràng buộc cứng `{ facingMode: 'environment' }` trên các thiết bị laptop/PC chỉ có webcam trước.
+  2. Dữ liệu hồ sơ mới nộp không đồng bộ giữa các máy cán bộ khác nhau (máy này thấy, máy kia không thấy) do các Serverless container của Vercel chạy độc lập và endpoint Cloudflare cũ trả về 404.
+  3. Cán bộ đăng nhập cùng một tài khoản trên nhiều máy cùng lúc có thể gây sai lệch trạng thái xử lý hồ sơ.
+* **Các cải tiến đã thực hiện:**
+  - `frontend/src/pages/OfficerScanPage.jsx`:
+    - **Tách biệt hoàn toàn container DOM** `#officer-qr-reader` khỏi vòng đời render của React bằng lớp overlay phủ ngoài, chấm dứt triệt để lỗi ghi đè phần tử video/canvas của `Html5Qrcode`.
+    - **Tự động dò tìm camera đa thiết bị**: Dò tìm danh sách camera thực tế (`Html5Qrcode.getCameras()`), ưu tiên camera sau cho điện thoại di động và tự động nhận diện webcam máy tính xách tay/PC, có cơ chế fallback tự động.
+    - **Kiểm soát phiên đăng nhập duy nhất (Single Session Enforcement)**: Mỗi khi polling cập nhật hàng đợi hồ sơ, hệ thống tự động kiểm tra tính hợp lệ của phiên. Nếu phát hiện tài khoản đã đăng nhập trên một thiết bị mới, thiết bị cũ sẽ tự động hiển thị hộp thoại cảnh báo bảo mật và đăng xuất ngay lập tức.
+  - `backend/src/services/cloudDatabaseService.js` & `backend/src/services/realtimeSyncService.js`:
+    - Tái cấu trúc bộ đồng bộ đám mây toàn cầu với Endpoint Cloud Database hoạt động liên tục, tự động kéo (pull) và đẩy (push) danh sách hồ sơ, thống kê và phiên làm việc giữa các máy chủ Vercel với độ trễ thấp.
+    - Mọi hồ sơ do người dân nộp hoặc do cán bộ xử lý trên điện thoại/laptop sẽ được chia sẻ tức thì đến tất cả các thiết bị cán bộ khác.
+  - `backend/src/services/securityService.js`, `backend/src/middlewares/authMiddleware.js` & `backend/src/controllers/authController.js`:
+    - Sinh mã `sessionId` độc nhất gắn liền với JWT Token cho mỗi lần đăng nhập thành công.
+    - Khi đăng nhập trên thiết bị B, `activeSessionId` của tài khoản cán bộ được cập nhật. Mọi yêu cầu tiếp theo từ thiết bị A sẽ bị từ chối với mã phản hồi `401 (sessionTerminated: true)`, đảm bảo tính toàn vẹn dữ liệu hành chính.
+
+---
+
 ### 📋 DANH SÁCH CÁC TỆP TIN ĐÃ THAY ĐỔI
 1. `backend/src/services/vectorStore.js`
 2. `backend/src/services/geminiRagService.js`

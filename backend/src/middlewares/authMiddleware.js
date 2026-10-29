@@ -18,6 +18,17 @@ function verifyToken(req, res, next) {
     });
   }
 
+  // KIỂM SOÁT PHIÊN LÀM VIỆC DUY NHẤT: Nếu đăng nhập thiết bị mới, thiết bị cũ bị đăng xuất
+  const check = securityService.validateSession(decoded.username, decoded.sessionId, decoded.deviceId);
+  if (!check.valid) {
+    return res.status(401).json({
+      success: false,
+      sessionTerminated: true,
+      code: 'SESSION_TERMINATED',
+      error: check.message
+    });
+  }
+
   req.user = decoded;
   next();
 }

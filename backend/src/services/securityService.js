@@ -145,16 +145,33 @@ class SecurityService {
     };
   }
 
-  // Đặt lại số lần sai khi đăng nhập đúng (nếu chưa bị khóa)
-  recordSuccessLogin(deviceId) {
+  // Đặt lại số lần sai khi đăng nhập đúng và cập nhật phiên làm việc duy nhất
+  recordSuccessLogin(deviceId, username = null, sessionId = null) {
     if (!deviceId) return;
     const devices = globalThis.__HIEPHOA_SECURITY_STORE__.devices;
     if (devices[deviceId]) {
       devices[deviceId].failedCount = 0;
       devices[deviceId].isLocked = false;
       devices[deviceId].updatedAt = new Date().toISOString();
-      this.saveStore();
     }
+
+    if (username) {
+      const cleanUser = decodeURIComponent(username).trim().toLowerCase();
+      const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
+      let foundKey = Object.keys(officers).find(k => k.toLowerCase() === cleanUser);
+      if (foundKey && officers[foundKey]) {
+        officers[foundKey].activeSessionId = sessionId;
+        officers[foundKey].activeDeviceId = deviceId;
+        officers[foundKey].lastLoginAt = new Date().toISOString();
+        officers[foundKey].status = 'ONLINE';
+      }
+    }
+
+    this.saveStore();
+    try {
+      const cloudDatabaseService = require('./cloudDatabaseService');
+      cloudDatabaseService.pushToCloud().catch(() => {});
+    } catch (e) {}
   }
 
   // Admin Reset lượt đăng nhập của 1 thiết bị về 0/5 (Mở khóa)
@@ -376,18 +393,41 @@ class SecurityService {
   }
 
 
-  // Sinh JWT Token
-  generateToken(user, deviceId) {
+  // Sinh JWT Token (kèm sessionId để kiểm soát phiên đăng nhập duy nhất)
+  generateToken(user, deviceId, sessionId = null) {
     return jwt.sign(
       {
         username: user.username,
         role: user.role,
         name: user.name,
-        deviceId
+        deviceId,
+        sessionId
       },
       JWT_SECRET,
       { expiresIn: '8h' }
     );
+  }
+
+  // Xác thực tính duy nhất của phiên làm việc (Đăng nhập thiết bị mới -> thiết bị cũ tự động đăng xuất)
+  validateSession(username, sessionId, deviceId) {
+    if (!username) return { valid: true };
+    this.loadStore();
+    const cleanUser = decodeURIComponent(username).trim().toLowerCase();
+    const officers = globalThis.__HIEPHOA_SECURITY_STORE__.officers || {};
+    let foundKey = Object.keys(officers).find(k => k.toLowerCase() === cleanUser);
+    if (!foundKey || !officers[foundKey]) {
+      return { valid: true };
+    }
+
+    const officer = officers[foundKey];
+    // Nếu tài khoản đã ghi nhận activeSessionId mới và session của token không khớp
+    if (officer.activeSessionId && sessionId && officer.activeSessionId !== sessionId) {
+      return {
+        valid: false,
+        message: 'Tài khoản của bạn vừa đăng nhập trên một thiết bị khác. Phiên làm việc trên thiết bị này đã tự động kết thúc.'
+      };
+    }
+    return { valid: true };
   }
 
   // Giải mã JWT Token

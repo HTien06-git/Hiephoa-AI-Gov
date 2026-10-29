@@ -80,8 +80,17 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
           'Authorization': `Bearer ${token}`
         }
       });
+      const data = await res.json();
+      if (data && data.sessionTerminated) {
+        localStorage.removeItem('hiephoa_auth_token');
+        localStorage.removeItem('hiephoa_user');
+        sessionStorage.removeItem('hiephoa_auth_token');
+        sessionStorage.removeItem('hiephoa_user');
+        alert('⚠️ THÔNG BÁO BẢO MẬT:\nTài khoản Quản trị của bạn vừa đăng nhập trên một thiết bị khác!\nPhiên làm việc trên thiết bị này đã tự động kết thúc.');
+        window.location.reload();
+        return;
+      }
       if (res.ok) {
-        const data = await res.json();
         const list = data.devices || data.data || [];
         setDevices(list);
       }
@@ -96,6 +105,15 @@ export default function AdminDeviceManager({ authToken, initialSubTab = 'DEVICES
   const fetchOfficers = async () => {
     try {
       const res = await apiClient.getOfficers(token);
+      if (res && res.sessionTerminated) {
+        localStorage.removeItem('hiephoa_auth_token');
+        localStorage.removeItem('hiephoa_user');
+        sessionStorage.removeItem('hiephoa_auth_token');
+        sessionStorage.removeItem('hiephoa_user');
+        alert('⚠️ THÔNG BÁO BẢO MẬT:\nTài khoản Quản trị của bạn vừa đăng nhập trên một thiết bị khác!\nPhiên làm việc trên thiết bị này đã tự động kết thúc.');
+        window.location.reload();
+        return;
+      }
       if (res && res.success) {
         const serverList = (res.officers || res.data || []).filter(o => o && o.username !== 'canbo1');
         

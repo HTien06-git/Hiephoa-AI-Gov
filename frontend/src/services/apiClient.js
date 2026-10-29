@@ -269,11 +269,13 @@ export const apiClient = {
   /**
    * Lấy danh sách hàng đợi hồ sơ trực tuyến (Live Queue Polling 3s)
    */
-  async getLiveQueue() {
+  async getLiveQueue(token = null) {
     try {
-      const res = await fetch(`${API_BASE}/submissions/live`);
-      if (!res.ok) throw new Error('Queue error');
-      return await res.json();
+      const authToken = token || localStorage.getItem('hiephoa_auth_token') || sessionStorage.getItem('hiephoa_auth_token');
+      const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+      const res = await fetch(`${API_BASE}/submissions/live`, { headers });
+      const data = await res.json();
+      return data;
     } catch (err) {
       return { success: false, submissions: [], stats: {}, activityFeed: [] };
     }
@@ -344,7 +346,6 @@ export const apiClient = {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
       });
-      if (!res.ok) throw new Error('Không thể tải danh sách cán bộ');
       const data = await res.json();
       if (data && data.clientSnapshot) {
         saveClientSnapshot(data.clientSnapshot);

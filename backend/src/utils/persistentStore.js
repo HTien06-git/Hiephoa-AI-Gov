@@ -203,7 +203,7 @@ function buildClientSnapshot() {
     const data = {
       officers: cleanOfficers,
       devices: secStore.devices || {},
-      submissions: (rtStore.submissions || []).slice(0, 100), // Tối đa 100 hồ sơ gần nhất
+      submissions: (rtStore.submissions || []).slice(0, 20), // Tối đa 20 hồ sơ gần nhất để đảm bảo header nhỏ gọn an toàn
       stats: rtStore.stats || {},
       activityFeed: (rtStore.activityFeed || []).slice(0, 20),
       counter: rtStore.counter || 1000
